@@ -147,7 +147,7 @@
     /* HOME HERO */
     .hero {
       background: linear-gradient(135deg, var(--lavender) 0%, var(--blush) 50%, var(--beige) 100%);
-      padding: 2rem 2rem 4rem;
+      padding: 0.2rem 2rem 4rem;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -179,7 +179,7 @@
       font-weight: 600;
       padding: 6px 16px;
       border-radius: 50px;
-      margin-bottom: 1.2rem;
+      margin-bottom: 0.2rem;
       border: 1px solid var(--blush-mid);
       letter-spacing: 0.5px;
     }
@@ -1572,7 +1572,8 @@
     <div class="nav-right">
       <button class="nav-icon-btn" onclick="showPage('cart')" title="Cart" style="position:relative;">🛒<span
           class="cart-badge" id="cartBadge">0</span></button>
-      <button class="nav-icon-btn" id="wishBtn" title="Wishlist">🤍</button>
+      <button class="nav-icon-btn" id="wishBtn" title="Wishlist" style="position:relative;" onclick="showPage('wishlist')">🤍<span
+          class="cart-badge" id="wishBadge">0</span></button>
     </div>
   </nav>
 
@@ -1607,7 +1608,8 @@
     <div class="hero">
       <div class="hero-yarn">🧶</div>
       <div class="hero-yarn2">🧶</div>
-      <img src="logo.png" alt="Crochet by Sha Logo" style="width: 350px; max-width: 90%; display: block; margin: 0 auto 0.5rem; object-fit: contain;" />
+      <img src="logo.png" alt="Crochet by Sha Logo"
+        style="width: 350px; max-width: 90%; display: block; margin: 0 auto -2rem; object-fit: contain;" />
       <div class="hero-badge">✨ Handmade in India</div>
       <h1>Handmade with love 🧶</h1>
       <p>Every piece is crafted with care, one stitch at a time. Discover crochet items that are as unique as you are.
@@ -1751,6 +1753,14 @@
     <div class="cart-container">
       <h2 style="font-size:1.8rem;font-weight:800;color:var(--text);margin-bottom:1.5rem;">Your Cart 🛒</h2>
       <div id="cartContent"></div>
+    </div>
+  </div>
+
+  <!-- ============ WISHLIST PAGE ============ -->
+  <div class="page" id="page-wishlist">
+    <div class="cart-container">
+      <h2 style="font-size:1.8rem;font-weight:800;color:var(--text);margin-bottom:1.5rem;">Your Wishlist ❤️</h2>
+      <div id="wishlistContent"></div>
     </div>
   </div>
 
@@ -1996,42 +2006,42 @@
       },
       {
         id: 2, name: 'Barbie Shoulder Bag', desc: 'A stunning handmade crochet Barbie themed shoulder bag. Perfect for everyday use!',
-        short: 'Handwoven with cotton yarn', price: 1000, oldPrice: null, category: 'bags',
+        short: 'Handwoven with cotton yarn', price: 750, oldPrice: null, category: 'bags',
         color: '#f0c8d8', img: '👜', imgBg: 2, badge: 'new',
         imageUrl: 'Bags/Barbie Shoulder Bag.jpeg',
         emojis: ['👜', '🎀', '💕'], tags: ['bag', 'barbie', 'pink'], rating: 5, reviews: 10, isNew: true
       },
       {
         id: 3, name: 'Gajra', desc: 'Beautiful handmade crochet gajra for your hair.',
-        short: 'Hair accessory', price: 1000, oldPrice: null, category: 'accessories',
-        color: '#f0c8d8', img: '🌸', imgBg: 2, badge: 'hot',
+        short: 'Hair accessory', price: 500, oldPrice: null, category: 'accessories',
+        color: '#f0c8d8', img: '🌸', imgBg: 2, badge: '',
         imageUrl: 'Accessories/Gajra.jpeg',
         emojis: ['🌸', '✨', '💕'], tags: ['hair', 'gajra', 'gift'], rating: 5, reviews: 89, isNew: false
       },
       {
         id: 4, name: 'Handwarmers (Pink)', desc: 'Cozy and cute handmade crochet pink handwarmers.',
-        short: 'Winter essential', price: 1000, oldPrice: null, category: 'accessories',
-        color: '#fcd5e5', img: '🧤', imgBg: 6, badge: 'sale',
+        short: 'Winter essential', price: 550, oldPrice: null, category: 'accessories',
+        color: '#fcd5e5', img: '🧤', imgBg: 6, badge: '',
         imageUrl: 'Accessories/Handwarmers (Pink).jpeg',
         emojis: ['🧤', '🌸', '✨'], tags: ['handwarmers', 'winter', 'pink'], rating: 4, reviews: 31, isNew: false
       },
       {
         id: 5, name: 'Bunny Plushie (Overalls)', desc: 'An adorable handmade crochet bunny plushie wearing tiny overalls.',
-        short: 'Handmade amigurumi doll', price: 1000, oldPrice: null, category: 'plushies',
+        short: 'Handmade amigurumi doll', price: 1150, oldPrice: null, category: 'plushies',
         color: '#d0ebe3', img: '🐰', imgBg: 4, badge: 'new',
         imageUrl: 'Plushies/Bunny Plushie (Overalls).jpeg',
         emojis: ['🐰', '👖', '🧶'], tags: ['plushie', 'bunny', 'gift'], rating: 5, reviews: 57, isNew: true
       },
       {
         id: 6, name: 'Handwarmers (Star)', desc: 'Trendy handmade crochet handwarmers with star details.',
-        short: 'Winter essential', price: 1000, oldPrice: null, category: 'accessories',
+        short: 'Winter essential', price: 550, oldPrice: null, category: 'accessories',
         color: '#c9bfee', img: '🧤', imgBg: 1, badge: 'new',
         imageUrl: 'Accessories/Handwarmers (Star).jpeg',
         emojis: ['🧤', '⭐', '✨'], tags: ['handwarmers', 'star', 'winter'], rating: 5, reviews: 45, isNew: true
       },
       {
         id: 7, name: 'Chicken Plushie (Large)', desc: 'A large, fluffy and round handmade crochet chicken plushie.',
-        short: 'Handmade amigurumi doll', price: 1000, oldPrice: null, category: 'plushies',
+        short: 'Handmade amigurumi doll', price: 500, oldPrice: null, category: 'plushies',
         color: '#fde5c0', img: '🐔', imgBg: 3, badge: 'new',
         imageUrl: 'Plushies/Chicken Plushie (Large).jpeg',
         emojis: ['🐔', '💛', '🎁'], tags: ['plushie', 'chicken', 'large'], rating: 5, reviews: 45, isNew: true
@@ -2108,42 +2118,42 @@
       },
       {
         id: 29, name: 'Penguin Keychain (Overalls)', desc: 'Adorable handmade crochet penguin keychain wearing tiny overalls!',
-        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
         color: '#f0c8d8', img: '🐧', imgBg: 2, badge: 'new',
         imageUrl: 'Keychains/Penguin Keychain (Overalls).jpeg',
         emojis: ['🐧', '👖', '✨'], tags: ['keychain', 'penguin', 'overalls', 'gift'], rating: 5, reviews: 3, isNew: true
       },
       {
         id: 18, name: 'Dreamiest Bouquet', desc: 'A dreamy handmade crochet bouquet that lasts forever.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 1500, oldPrice: null, category: 'bouquets',
         color: '#f0c8d8', img: '💐', imgBg: 2, badge: 'new',
         imageUrl: 'Bouquets/Dreamiest Bouquet.jpeg',
         emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'flower', 'gift'], rating: 5, reviews: 3, isNew: true
       },
       {
         id: 19, name: 'Forever Bouquet', desc: 'A gorgeous crochet bouquet designed to stay beautiful forever.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 1900, oldPrice: null, category: 'bouquets',
         color: '#c9bfee', img: '💐', imgBg: 1, badge: 'new',
         imageUrl: 'Bouquets/Forever Bouquet.jpeg',
         emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'flower', 'gift'], rating: 5, reviews: 2, isNew: true
       },
       {
         id: 20, name: 'Lily Bouquet (Large)', desc: 'Large handmade crochet lily bouquet, elegant and stunning.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 1400, oldPrice: null, category: 'bouquets',
         color: '#fde5c0', img: '💐', imgBg: 3, badge: 'new',
         imageUrl: 'Bouquets/Lily Bouquet (Large).jpeg',
         emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'lily', 'gift'], rating: 5, reviews: 4, isNew: true
       },
       {
         id: 21, name: 'Lily Bouquet (Lavender)', desc: 'Lavender themed crochet lily bouquet. A peaceful and beautiful arrangement.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 1200, oldPrice: null, category: 'bouquets',
         color: '#c9bfee', img: '💐', imgBg: 5, badge: 'new',
         imageUrl: 'Bouquets/Lily Bouquet (Lavender).jpeg',
         emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'lily', 'gift'], rating: 5, reviews: 5, isNew: true
       },
       {
         id: 22, name: 'Rose Bouquet', desc: 'Classic handmade crochet rose bouquet. Perfect for anniversaries or Valentine\'s day.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 1080, oldPrice: null, category: 'bouquets',
         color: '#f0c8d8', img: '🌹', imgBg: 2, badge: 'new',
         imageUrl: 'Bouquets/Rose Bouquet.jpeg',
         emojis: ['🌹', '💐', '💕'], tags: ['bouquet', 'rose', 'gift'], rating: 5, reviews: 7, isNew: true
@@ -2157,14 +2167,14 @@
       },
       {
         id: 24, name: 'Rose and Sunflower Bouquet', desc: 'A bright mix of crochet roses and sunflowers to bring sunshine to any room.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 550, oldPrice: null, category: 'bouquets',
         color: '#fde5c0', img: '🌻', imgBg: 3, badge: 'new',
         imageUrl: 'Bouquets/Rose and Sunflower Bouquet.jpeg',
         emojis: ['🌻', '🌹', '✨'], tags: ['bouquet', 'sunflower', 'rose'], rating: 5, reviews: 6, isNew: true
       },
       {
         id: 25, name: 'Sunflower Bouquet (2 Flowers Incl)', desc: 'A pair of vibrant handmade crochet sunflowers.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 500, oldPrice: null, category: 'bouquets',
         color: '#fef3e2', img: '🌻', imgBg: 3, badge: 'new',
         imageUrl: 'Bouquets/Sunflower Bouquet (2 Flowers Incl).jpeg',
         emojis: ['🌻', '✨', '💛'], tags: ['bouquet', 'sunflower', 'gift'], rating: 5, reviews: 3, isNew: true
@@ -2178,70 +2188,70 @@
       },
       {
         id: 27, name: 'Tulip Bouquet (Special)', desc: 'A special arrangement of lovely handmade crochet tulips.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 950, oldPrice: null, category: 'bouquets',
         color: '#f0c8d8', img: '🌷', imgBg: 2, badge: 'new',
         imageUrl: 'Bouquets/Tulip Bouquet (Special).jpeg',
         emojis: ['🌷', '✨', '💕'], tags: ['bouquet', 'tulip', 'gift'], rating: 5, reviews: 4, isNew: true
       },
       {
         id: 28, name: 'Tulip Bouquet', desc: 'Classic handmade crochet tulip bouquet. Sweet and simple.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 450, oldPrice: null, category: 'bouquets',
         color: '#f0eaff', img: '🌷', imgBg: 1, badge: 'new',
         imageUrl: 'Bouquets/Tulip Bouquet.jpeg',
         emojis: ['🌷', '✨', '💕'], tags: ['bouquet', 'tulip', 'gift'], rating: 5, reviews: 5, isNew: true
       },
       {
         id: 30, name: 'Anniversary Bouquet (Red)', desc: 'A stunning handmade crochet red anniversary bouquet.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 1250, oldPrice: null, category: 'bouquets',
         color: '#fce8f0', img: '🌹', imgBg: 6, badge: 'new',
         imageUrl: 'Bouquets/Anniversary Bouquet (Red).jpeg',
         emojis: ['🌹', '💐', '💕'], tags: ['bouquet', 'anniversary', 'red', 'gift'], rating: 5, reviews: 3, isNew: true
       },
       {
         id: 31, name: 'Anniversary Bouquet (Blue)', desc: 'A beautiful handmade crochet blue anniversary bouquet.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
+        short: 'Forever flowers', price: 1250, oldPrice: null, category: 'bouquets',
         color: '#e8f5f0', img: '💐', imgBg: 4, badge: 'new',
         imageUrl: 'Bouquets/Anniversary Bouquet (Blue).jpeg',
         emojis: ['💐', '✨', '💙'], tags: ['bouquet', 'anniversary', 'blue', 'gift'], rating: 5, reviews: 2, isNew: true
       },
       {
         id: 32, name: 'Plush Bow Shoulder Bag', desc: 'A cute and fluffy handmade crochet plush bow shoulder bag.',
-        short: 'Handwoven with cotton yarn', price: 1000, oldPrice: null, category: 'bags',
+        short: 'Handwoven with cotton yarn', price: 8000, oldPrice: null, category: 'bags',
         color: '#f0eaff', img: '👜', imgBg: 1, badge: 'new',
         imageUrl: 'Bags/Plush Bow Shoulder Bag.jpeg',
         emojis: ['👜', '🎀', '✨'], tags: ['bag', 'plush', 'bow'], rating: 5, reviews: 7, isNew: true
       },
       {
         id: 33, name: 'Plush Pink Shoulder Bag', desc: 'An adorable pink plush crochet shoulder bag.',
-        short: 'Handwoven with cotton yarn', price: 1000, oldPrice: null, category: 'bags',
+        short: 'Handwoven with cotton yarn', price: 750, oldPrice: null, category: 'bags',
         color: '#fce8f0', img: '👜', imgBg: 6, badge: 'new',
         imageUrl: 'Bags/Plush Pink Shoulder Bag.jpeg',
         emojis: ['👜', '🎀', '💕'], tags: ['bag', 'plush', 'pink'], rating: 5, reviews: 4, isNew: true
       },
       {
         id: 34, name: 'Tulip Tote Bag', desc: 'A spacious and beautiful handmade crochet tulip tote bag.',
-        short: 'Handwoven with cotton yarn', price: 1000, oldPrice: null, category: 'bags',
+        short: 'Handwoven with cotton yarn', price: 1500, oldPrice: null, category: 'bags',
         color: '#fde5c0', img: '👜', imgBg: 3, badge: 'new',
         imageUrl: 'Bags/Tulip Tote Bag.jpeg',
         emojis: ['👜', '🌷', '✨'], tags: ['bag', 'tote', 'tulip'], rating: 5, reviews: 6, isNew: true
       },
       {
         id: 35, name: 'Chicken Plushie (Small)', desc: 'A cute, small handmade crochet chicken plushie.',
-        short: 'Handmade amigurumi doll', price: 1000, oldPrice: null, category: 'plushies',
+        short: 'Handmade amigurumi doll', price: 450, oldPrice: null, category: 'plushies',
         color: '#fef3e2', img: '🐔', imgBg: 3, badge: 'new',
         imageUrl: 'Plushies/Chicken Plushie (Small).jpeg',
         emojis: ['🐔', '✨', '💛'], tags: ['plushie', 'chicken', 'small'], rating: 5, reviews: 8, isNew: true
       },
       {
         id: 36, name: 'Teddy Plushie (Brown)', desc: 'A classic brown handmade crochet teddy bear plushie.',
-        short: 'Handmade amigurumi doll', price: 1000, oldPrice: null, category: 'plushies',
+        short: 'Handmade amigurumi doll', price: 600, oldPrice: null, category: 'plushies',
         color: '#f0c8d8', img: '🧸', imgBg: 2, badge: 'new',
         imageUrl: 'Plushies/Teddy Plushie (Brown).jpeg',
         emojis: ['🧸', '🤎', '🎁'], tags: ['plushie', 'teddy', 'brown'], rating: 5, reviews: 15, isNew: true
       },
       {
         id: 37, name: 'Teddy Plushie (White)', desc: 'A soft white handmade crochet teddy bear plushie.',
-        short: 'Handmade amigurumi doll', price: 1000, oldPrice: null, category: 'plushies',
+        short: 'Handmade amigurumi doll', price: 600, oldPrice: null, category: 'plushies',
         color: '#f0eaff', img: '🧸', imgBg: 1, badge: 'new',
         imageUrl: 'Plushies/Teddy Plushie (White).jpeg',
         emojis: ['🧸', '🤍', '🎁'], tags: ['plushie', 'teddy', 'white'], rating: 5, reviews: 12, isNew: true
@@ -2255,7 +2265,7 @@
       },
       {
         id: 39, name: 'Sunflower Keychain', desc: 'A bright and beautiful handmade crochet sunflower keychain.',
-        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
         color: '#fef3e2', img: '🌻', imgBg: 3, badge: 'new',
         imageUrl: 'Keychains/Sunflower Keychain.jpeg',
         emojis: ['🌻', '✨', '💛'], tags: ['keychain', 'sunflower', 'gift'], rating: 5, reviews: 10, isNew: true
@@ -2269,56 +2279,56 @@
       },
       {
         id: 41, name: 'Hello Kitty Keychain', desc: 'A super cute handmade crochet Hello Kitty keychain.',
-        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        short: 'Cute bag charm', price: 220, oldPrice: null, category: 'keychains',
         color: '#f0c8d8', img: '🎀', imgBg: 2, badge: 'new',
         imageUrl: 'Keychains/Hello Kitty Keychain.jpeg',
         emojis: ['🎀', '✨', '💕'], tags: ['keychain', 'hellokitty', 'gift'], rating: 5, reviews: 15, isNew: true
       },
       {
         id: 42, name: 'Duck Holding Daisy Keychain', desc: 'A lovely handmade crochet duck holding a little daisy keychain.',
-        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        short: 'Cute bag charm', price: 350, oldPrice: null, category: 'keychains',
         color: '#fde5c0', img: '🦆', imgBg: 3, badge: 'new',
         imageUrl: 'Keychains/Duck Holding Daisy Keychain.jpeg',
         emojis: ['🦆', '🌼', '✨'], tags: ['keychain', 'duck', 'daisy'], rating: 5, reviews: 8, isNew: true
       },
       {
         id: 43, name: 'Mikasa Scarf', desc: 'A warm and stylish handmade crochet Mikasa scarf.',
-        short: 'Winter essential', price: 1000, oldPrice: null, category: 'accessories',
+        short: 'Winter essential', price: 1100, oldPrice: null, category: 'accessories',
         color: '#f0c8d8', img: '🧣', imgBg: 2, badge: 'new',
         imageUrl: 'Accessories/Mikasa Sacarf.jpeg',
         emojis: ['🧣', '❄️', '✨'], tags: ['scarf', 'winter', 'mikasa'], rating: 5, reviews: 12, isNew: true
       },
       {
         id: 44, name: 'Pillow', desc: 'A soft and comfortable handmade crochet pillow.',
-        short: 'Cozy home decor', price: 1000, oldPrice: null, category: 'accessories',
+        short: 'Cozy home decor', price: 1150, oldPrice: null, category: 'accessories',
         color: '#d0ebe3', img: '🛏️', imgBg: 4, badge: 'new',
         imageUrl: 'Accessories/Pillow.jpeg',
         emojis: ['🛏️', '✨', '💤'], tags: ['pillow', 'decor', 'cozy'], rating: 5, reviews: 8, isNew: true
       },
       {
         id: 45, name: 'Scarf (Mini)', desc: 'A cute mini handmade crochet scarf.',
-        short: 'Winter essential', price: 1000, oldPrice: null, category: 'accessories',
+        short: 'Winter essential', price: 750, oldPrice: null, category: 'accessories',
         color: '#f0eaff', img: '🧣', imgBg: 1, badge: 'new',
         imageUrl: 'Accessories/Scarf (Mini).jpeg',
         emojis: ['🧣', '❄️', '✨'], tags: ['scarf', 'mini', 'winter'], rating: 5, reviews: 10, isNew: true
       },
       {
         id: 46, name: 'Volleyball Keychain', desc: 'A fun handmade crochet volleyball keychain.',
-        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
         color: '#fef3e2', img: '🏐', imgBg: 3, badge: 'new',
         imageUrl: 'Keychains/Volleyball Keychain (1 piece).jpeg',
         emojis: ['🏐', '✨', '💛'], tags: ['keychain', 'volleyball', 'sports'], rating: 5, reviews: 8, isNew: true
       },
       {
         id: 47, name: 'Frog Keychain', desc: 'An adorable tiny handmade crochet frog keychain.',
-        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
         color: '#d0ebe3', img: '🐸', imgBg: 4, badge: 'new',
         imageUrl: 'Keychains/Frog Keychain.jpeg',
         emojis: ['🐸', '✨', '💚'], tags: ['keychain', 'frog', 'cute'], rating: 5, reviews: 14, isNew: true
       },
       {
         id: 48, name: 'Tooth Keychain', desc: 'A cute handmade crochet tooth keychain. Perfect for dentists!',
-        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
         color: '#f0eaff', img: '🦷', imgBg: 1, badge: 'new',
         imageUrl: 'Keychains/Tooth Keychain.jpeg',
         emojis: ['🦷', '✨', '🤍'], tags: ['keychain', 'tooth', 'dentist'], rating: 5, reviews: 6, isNew: true
@@ -2345,8 +2355,9 @@
     let activeCategory = 'All';
 
     function saveCart() { localStorage.setItem('sha_cart', JSON.stringify(cart)); updateCartBadge(); }
-    function saveWish() { localStorage.setItem('sha_wish', JSON.stringify(wishlist)); }
+    function saveWish() { localStorage.setItem('sha_wish', JSON.stringify(wishlist)); updateWishBadge(); }
     function updateCartBadge() { const total = cart.reduce((a, i) => a + i.qty, 0); document.getElementById('cartBadge').textContent = total || '0'; }
+    function updateWishBadge() { const total = wishlist.length; document.getElementById('wishBadge').textContent = total || '0'; }
 
     function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
 
@@ -2358,6 +2369,7 @@
       if (navEl) navEl.classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       if (page === 'cart') renderCart();
+      if (page === 'wishlist') renderWishlist();
       if (page === 'shop') renderShop();
       if (page === 'checkout') renderCheckoutSummary();
       setupFadeIns();
@@ -2394,7 +2406,6 @@
       return `<div class="product-card${extraClass}" onclick="openProduct(${p.id})">
     <div class="product-img ${IMG_BG_CLASSES[p.imgBg]}">
       ${imgContent}
-      ${p.badge ? `<span class="badge badge-${p.badge}">${p.badge === 'new' ? '✨ New Drop' : p.badge === 'hot' ? '🔥 Hot' : '🏷️ Sale'}</span>` : ''}
       <button class="wish-btn${inWish ? ' active' : ''}" onclick="toggleWish(event,${p.id})">${inWish ? '❤️' : '🤍'}</button>
     </div>
     <div class="product-info">
@@ -2594,6 +2605,18 @@
     }
     function removeFromCart(id) { cart = cart.filter(i => i.id !== id); saveCart(); renderCart(); showToast('Item removed'); }
     function clearCart() { cart = []; saveCart(); }
+
+    function renderWishlist() {
+      if (wishlist.length === 0) {
+        document.getElementById('wishlistContent').innerHTML = `<div class="empty-cart"><span class="empty-cart-emoji">❤️</span><h3 style="font-weight:800;color:var(--text);margin-bottom:0.5rem;">Your wishlist is empty</h3><p style="color:var(--text-mid);margin-bottom:1.5rem;">Save items you love here!</p><button class="btn-primary" onclick="showPage('shop')">Browse Products</button></div>`;
+        return;
+      }
+      const wishItems = PRODUCTS.filter(p => wishlist.includes(p.id));
+      document.getElementById('wishlistContent').innerHTML = `
+    <div class="product-grid">
+      ${wishItems.map(p => productCardHTML(p)).join('')}
+    </div>`;
+    }
 
     // CHECKOUT
     function renderCheckoutSummary() {
@@ -2835,5 +2858,6 @@
     // INIT
     initHome();
     updateCartBadge();
+    updateWishBadge();
     setupFadeIns();
   </script>
