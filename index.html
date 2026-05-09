@@ -2810,8 +2810,25 @@
     }
 
     function renderFilterChips() {
-      document.getElementById('filterChips').innerHTML = CATEGORIES.map(c => `
-    <span class="chip${activeCategory === c ? ' active' : ''}" onclick="filterCategory('${c}')">${c === 'All' ? '🧶 All' : c === 'bags' ? '👜 Bags' : c === 'accessories' ? '🎀 Accessories' : c === 'keychains' ? '🔑 Keychains' : c === 'bouquets' ? '💐 Bouquets' : '🧸 Plushies'}</span>`).join('');
+      // Get all unique categories currently in the product list
+      const cats = Array.from(new Set(PRODUCTS.map(p => p.category).filter(Boolean))).sort();
+      const dynamicCategories = ['All', ...cats];
+      
+      const icons = {
+        'All': '🧶',
+        'bags': '👜',
+        'accessories': '🎀',
+        'keychains': '🔑',
+        'bouquets': '💐',
+        'plushies': '🧸',
+        'other': '✨'
+      };
+
+      document.getElementById('filterChips').innerHTML = dynamicCategories.map(c => {
+        const icon = icons[c] || '✨';
+        const label = c === 'All' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1);
+        return `<span class="chip${activeCategory === c ? ' active' : ''}" onclick="filterCategory('${c}')">${icon} ${label}</span>`;
+      }).join('');
     }
 
     function filterCategory(cat) {
