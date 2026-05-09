@@ -369,18 +369,7 @@
     <p>Handmade with love &amp; yarn</p>
   </div>
 
-  <!-- Order Summary -->
-  <div class="card">
-    <div class="card-title">
-      <div class="icon">🧾</div>
-      Order Summary
-    </div>
-    <div id="order-summary">
-      <div class="line"><span>Item(s)</span><span id="item-total">₹0.00</span></div>
-      <div class="line"><span>Shipping</span><span>₹0.00</span></div>
-      <div class="line"><span>Total Payable</span><span id="grand-total">₹0.00</span></div>
-    </div>
-  </div>
+
 
   <!-- Payment Card -->
   <div class="card">
@@ -489,16 +478,9 @@
     amtInput.readOnly = true;
     amtInput.style.opacity = '0.7';
     amtInput.style.cursor = 'not-allowed';
-    document.getElementById('item-total').textContent  = '₹' + parseFloat(preAmount).toFixed(2);
-    document.getElementById('grand-total').textContent = '₹' + parseFloat(preAmount).toFixed(2);
   }
   if (preNote) document.getElementById('note-input').value = preNote;
 
-  document.getElementById('amount-input').addEventListener('input', function () {
-    const v = parseFloat(this.value) || 0;
-    document.getElementById('item-total').textContent  = '₹' + v.toFixed(2);
-    document.getElementById('grand-total').textContent = '₹' + v.toFixed(2);
-  });
 
   function getAmount()  { return parseFloat(document.getElementById('amount-input').value) || 0; }
   function getNote()    { return document.getElementById('note-input').value.trim() || 'CrochetBySha Order'; }
