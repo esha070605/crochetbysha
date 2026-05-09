@@ -508,7 +508,11 @@
   const preAmount = params.get('amount') || '';
   const preNote   = params.get('note')   || '';
   if (preAmount) {
-    document.getElementById('amount-input').value = preAmount;
+    const amtInput = document.getElementById('amount-input');
+    amtInput.value = preAmount;
+    amtInput.readOnly = true;
+    amtInput.style.opacity = '0.7';
+    amtInput.style.cursor = 'not-allowed';
     document.getElementById('item-total').textContent  = '₹' + parseFloat(preAmount).toFixed(2);
     document.getElementById('grand-total').textContent = '₹' + parseFloat(preAmount).toFixed(2);
   }
