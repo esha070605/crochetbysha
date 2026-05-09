@@ -792,6 +792,7 @@
       </div>
       <div class="form-row">
         <label>Category</label>
+        <select id="prod-cat">
           <option value="bags">Bags</option>
           <option value="accessories">Accessories</option>
           <option value="plushies">Plushies</option>
@@ -1011,6 +1012,7 @@ function deleteProduct(id) {
 function saveProduct() {
   const name  = document.getElementById('prod-name').value.trim();
   const price = parseFloat(document.getElementById('prod-price').value);
+  console.log('Saving product:', { name, price, editingProductId });
   if (!name)        { toast('Please enter a product name.'); return; }
   if (isNaN(price)) { toast('Please enter a valid price.'); return; }
 
