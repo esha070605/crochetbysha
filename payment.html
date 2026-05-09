@@ -355,18 +355,7 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* ── instructions ── */
-    .instructions {
-      background: var(--lilac);
-      border-radius: 16px;
-      padding: 20px 24px;
-      font-size: 0.85rem;
-      line-height: 1.7;
-      color: var(--text);
-    }
-    .instructions ol { padding-left: 18px; }
-    .instructions li { margin-bottom: 4px; }
-    .instructions strong { color: #7a5a9e; }
+
   </style>
 </head>
 <body>
@@ -431,31 +420,16 @@
     <div class="qr-wrap">
       <img src="upi-qr.jpeg" alt="UPI QR Code for Esha Satvase"/>
       <div>
-        <div class="upi-chip">
+        <a href="upi://pay?pa=esha19691@okaxis&pn=Esha%20Satvase&cu=INR" class="upi-chip" style="text-decoration:none;">
           🔗 esha19691@okaxis
-          <button class="copy-btn" onclick="copyUPI()" title="Copy UPI ID">📋</button>
-        </div>
+        </a>
+        <button class="copy-btn" onclick="copyUPI()" title="Copy UPI ID">📋</button>
       </div>
       <p class="qr-note">Scan with any UPI app — GPay, PhonePe, Paytm, BHIM</p>
     </div>
   </div>
 
-  <!-- Instructions -->
-  <div class="card">
-    <div class="card-title">
-      <div class="icon">📌</div>
-      How to Pay
-    </div>
-    <div class="instructions">
-      <ol>
-        <li>Enter the exact <strong>order amount</strong> above.</li>
-        <li>Add your <strong>name &amp; order number</strong> in the note.</li>
-        <li>Click <strong>Pay via UPI</strong> or scan the QR code.</li>
-        <li>After payment, <strong>screenshot your confirmation</strong> and WhatsApp it to us.</li>
-        <li>Your order will be confirmed within <strong>24 hours</strong> ✨</li>
-      </ol>
-    </div>
-  </div>
+
 
 </div>
 
@@ -465,7 +439,9 @@
     <div style="font-size:2.5rem;margin-bottom:10px">💝</div>
     <h2>Pay via UPI</h2>
     <p>Copy the UPI ID or open your preferred app to pay</p>
-    <div class="upi-big">esha19691@okaxis</div>
+    <a href="upi://pay?pa=esha19691@okaxis&pn=Esha%20Satvase&cu=INR" style="text-decoration:none;">
+      <div class="upi-big">esha19691@okaxis</div>
+    </a>
     <div class="app-grid">
       <button class="app-btn" onclick="launchApp('gpay')">
         <span class="app-icon">G</span>
