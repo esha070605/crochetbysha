@@ -901,6 +901,30 @@
 <div class="toast" id="toast"></div>
 
 <script>
+/* ══════════════════════════ UTILS ══════════════════════════ */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function loadData(key, def) {
+  const prefix = key === 'products' ? 'sha_' : 'cbs_';
+  try { return JSON.parse(localStorage.getItem(prefix + key)) || def; } catch { return def; }
+}
+
+function saveData(key, val) {
+  const prefix = key === 'products' ? 'sha_' : 'cbs_';
+  try {
+    localStorage.setItem(prefix + key, JSON.stringify(val));
+  } catch (e) {
+    console.error('Storage Error:', e);
+    toast('⚠️ Error: Storage quota exceeded. Try using fewer or smaller images.');
+  }
+}
+
 /* ══════════════════════════ AUTH ══════════════════════════ */
 const CREDENTIALS = { username: 'sha_admin', password: 'Crochet@2024!' };
 
@@ -917,7 +941,6 @@ function doLogin() {
     document.getElementById('login-err').style.display = 'block';
   }
 }
-document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
 
 function doLogout() {
   document.getElementById('admin-shell').style.display  = 'none';
@@ -929,53 +952,34 @@ function doLogout() {
 
 /* ══════════════════════════ TABS ══════════════════════════ */
 function switchTab(name) {
+  console.log('Switching to tab:', name);
   document.querySelectorAll('.tab').forEach((t,i) => {
     const names = ['dashboard','products','payments'];
     t.classList.toggle('active', names[i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-}
-
-/* ══════════════════════════ DATA STORE ══════════════════════════ */
-// Uses localStorage so data persists between sessions on the same browser
-function loadData(key, def) {
-  // Use the same prefix as index.html
-  const prefix = key === 'products' ? 'sha_' : 'cbs_';
-  try { return JSON.parse(localStorage.getItem(prefix + key)) || def; } catch { return def; }
-}
-function saveData(key, val) {
-  const prefix = key === 'products' ? 'sha_' : 'cbs_';
-  try {
-    localStorage.setItem(prefix + key, JSON.stringify(val));
-  } catch (e) {
-    console.error('Storage Error:', e);
-    toast('⚠️ Error: Storage quota exceeded. Try using fewer or smaller images.');
-  }
-}
-
-let products = loadData('products', []);
-let payments = loadData('payments', []);
-
-/* ══════════════════════════ STATS ══════════════════════════ */
-function refreshStats() {
-  document.getElementById('stat-products').textContent = products.length;
-  document.getElementById('stat-payments').textContent = payments.length;
-  document.getElementById('stat-pending').textContent  = payments.filter(p => p.status === 'pending').length;
-  document.getElementById('stat-verified').textContent = payments.filter(p => p.status === 'verified').length;
+  const target = document.getElementById('panel-' + name);
+  if (target) target.classList.add('active');
 }
 
 /* ══════════════════════════ PRODUCTS ══════════════════════════ */
 let editingProductId = null;
-let currentImages = []; // array of base64 strings
+let currentImages = []; 
 
 function openAddModal() {
+  console.log('Opening Add Product Modal');
   editingProductId = null;
   currentImages    = [];
   document.getElementById('prod-modal-title').textContent = 'Add New Product';
-  ['prod-name','prod-price','prod-desc'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('prod-cat').value   = 'plushies';
-  document.getElementById('prod-stock').value = 'in';
+  ['prod-name','prod-price','prod-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const cat = document.getElementById('prod-cat');
+  if (cat) cat.value = 'plushies';
+  const stock = document.getElementById('prod-stock');
+  if (stock) stock.value = 'in';
+  
   document.getElementById('img-previews').innerHTML = '';
   document.getElementById('img-count-info').textContent = '';
   document.getElementById('product-modal').classList.add('show');
@@ -986,6 +990,7 @@ function closeProductModal() {
 }
 
 function editProduct(id) {
+  console.log('Editing product:', id);
   const p = products.find(x => String(x.id) === String(id));
   if (!p) { toast('Product not found.'); return; }
   editingProductId = id;
@@ -994,7 +999,7 @@ function editProduct(id) {
   document.getElementById('prod-name').value  = p.name;
   document.getElementById('prod-price').value = p.price;
   document.getElementById('prod-desc').value  = p.desc || '';
-  document.getElementById('prod-cat').value   = p.category || 'Other';
+  document.getElementById('prod-cat').value   = p.category || 'other';
   document.getElementById('prod-stock').value = p.stock || 'in';
   renderPreviews();
   document.getElementById('product-modal').classList.add('show');
@@ -1010,16 +1015,16 @@ function deleteProduct(id) {
 }
 
 function saveProduct() {
+  console.log('Saving product... ID:', editingProductId);
   const name  = document.getElementById('prod-name').value.trim();
   const price = parseFloat(document.getElementById('prod-price').value);
-  console.log('Saving product:', { name, price, editingProductId });
+  
   if (!name)        { toast('Please enter a product name.'); return; }
   if (isNaN(price)) { toast('Please enter a valid price.'); return; }
 
   const existing = editingProductId ? products.find(x => String(x.id) === String(editingProductId)) : null;
 
   const data = {
-    // Preserve existing fields like emojis, img, imgBg, tags, etc.
     ...(existing || {
       short:    'Handmade with love',
       img:      '🧶',
@@ -1047,6 +1052,7 @@ function saveProduct() {
   } else {
     products.push(data);
   }
+  
   saveData('products', products);
   closeProductModal();
   renderProducts();
@@ -1057,6 +1063,8 @@ function saveProduct() {
 function renderProducts() {
   const grid  = document.getElementById('product-grid');
   const empty = document.getElementById('prod-empty');
+  if (!grid || !empty) return;
+  
   grid.innerHTML = '';
   if (products.length === 0) { empty.style.display = 'block'; return; }
   empty.style.display = 'none';
@@ -1087,6 +1095,21 @@ function renderProducts() {
       </div>`;
     grid.appendChild(card);
   });
+}
+
+/* ══════════════════════════ DATA INIT ══════════════════════════ */
+let products = loadData('products', []);
+let payments = loadData('payments', []);
+
+function refreshStats() {
+  const sp = document.getElementById('stat-products');
+  const sy = document.getElementById('stat-payments');
+  const sn = document.getElementById('stat-pending');
+  const sv = document.getElementById('stat-verified');
+  if (sp) sp.textContent = products.length;
+  if (sy) sy.textContent = payments.length;
+  if (sn) sn.textContent = payments.filter(p => p.status === 'pending').length;
+  if (sv) sv.textContent = payments.filter(p => p.status === 'verified').length;
 }
 
 /* ── multi-image handling ── */
@@ -1274,11 +1297,22 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// Close modals on backdrop click
-['product-modal','payment-modal'].forEach(id => {
-  document.getElementById(id).addEventListener('click', function(e) {
-    if (e.target === this) {
-      this.classList.remove('show');
+// Final Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+  const passInput = document.getElementById('login-pass');
+  if (passInput) {
+    passInput.addEventListener('keydown', e => { 
+      if (e.key === 'Enter') doLogin(); 
+    });
+  }
+  
+  // Close modals on backdrop click
+  ['product-modal','payment-modal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('show');
+      });
     }
   });
 });
