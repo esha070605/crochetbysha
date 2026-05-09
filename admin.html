@@ -792,14 +792,12 @@
       </div>
       <div class="form-row">
         <label>Category</label>
-        <select id="prod-cat">
-          <option>Amigurumi</option>
-          <option>Home Decor</option>
-          <option>Accessories</option>
-          <option>Bags & Pouches</option>
-          <option>Baby Items</option>
-          <option>Keychains</option>
-          <option>Other</option>
+          <option value="bags">Bags</option>
+          <option value="accessories">Accessories</option>
+          <option value="plushies">Plushies</option>
+          <option value="keychains">Keychains</option>
+          <option value="bouquets">Bouquets</option>
+          <option value="other">Other</option>
         </select>
       </div>
     </div>
@@ -940,15 +938,18 @@ function switchTab(name) {
 
 /* ══════════════════════════ DATA STORE ══════════════════════════ */
 // Uses localStorage so data persists between sessions on the same browser
+let products = loadData('products', []); // Initialized from localStorage
+let payments = loadData('payments', []);
+
 function loadData(key, def) {
-  try { return JSON.parse(localStorage.getItem('cbs_' + key)) || def; } catch { return def; }
+  // Use the same prefix as index.html
+  const prefix = key === 'products' ? 'sha_' : 'cbs_';
+  try { return JSON.parse(localStorage.getItem(prefix + key)) || def; } catch { return def; }
 }
 function saveData(key, val) {
-  localStorage.setItem('cbs_' + key, JSON.stringify(val));
+  const prefix = key === 'products' ? 'sha_' : 'cbs_';
+  localStorage.setItem(prefix + key, JSON.stringify(val));
 }
-
-let products = loadData('products', []);
-let payments = loadData('payments', []);
 
 /* ══════════════════════════ STATS ══════════════════════════ */
 function refreshStats() {
@@ -967,7 +968,7 @@ function openAddModal() {
   currentImages    = [];
   document.getElementById('prod-modal-title').textContent = 'Add New Product';
   ['prod-name','prod-price','prod-desc'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('prod-cat').value   = 'Amigurumi';
+  document.getElementById('prod-cat').value   = 'plushies';
   document.getElementById('prod-stock').value = 'in';
   document.getElementById('img-previews').innerHTML = '';
   document.getElementById('img-count-info').textContent = '';
@@ -1015,7 +1016,17 @@ function saveProduct() {
     category: document.getElementById('prod-cat').value,
     stock:    document.getElementById('prod-stock').value,
     desc:     document.getElementById('prod-desc').value.trim(),
+    short:    'Handmade with love', // Default short desc
     images:   [...currentImages],
+    imageUrl: currentImages.length > 0 ? currentImages[0] : null,
+    img:      '🧶', // Default emoji
+    imgBg:    Math.floor(Math.random() * 6) + 1, // Random background 1-6
+    badge:    'new',
+    emojis:   ['🧶', '✨', '💖'],
+    tags:     [document.getElementById('prod-cat').value, 'handmade'],
+    rating:   5,
+    reviews:  0,
+    isNew:    true,
     updatedAt: new Date().toISOString(),
   };
 

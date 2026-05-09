@@ -2324,12 +2324,9 @@
     const WA_NUMBER = '919502283533';
 
     // =====================================================================
-    // ✏️ EDIT YOUR PRODUCTS HERE — Add images, prices, names freely!
-    // For imageUrl: use a direct image link (Google Drive: share file > copy
-    // link, change /file/d/ID/view to https://lh3.googleusercontent.com/d/ID)
-    // Set imageUrl to '' to show an emoji icon instead.
+    // ✏️ INITIAL PRODUCTS — fall back here if localStorage is empty
     // =====================================================================
-    const PRODUCTS = [
+    const INITIAL_PRODUCTS = [
       {
         id: 1, name: 'Batman Keychain', desc: 'Handmade crochet Batman keychain. A perfect gift or bag charm!',
         short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
@@ -2668,6 +2665,12 @@
       }
     ];
 
+    let PRODUCTS = JSON.parse(localStorage.getItem('sha_products')) || [];
+    if (PRODUCTS.length === 0) {
+      PRODUCTS = INITIAL_PRODUCTS;
+      localStorage.setItem('sha_products', JSON.stringify(PRODUCTS));
+    }
+
     const CATEGORIES = ['All', 'bags', 'accessories', 'plushies', 'keychains', 'bouquets'];
     const TESTIMONIALS = [
       { text: "Ordered a tote bag and it arrived beautifully packaged. The quality is insane for the price. Already ordered two more as gifts!", name: "Zara A.", loc: "Mumbai", avatar: "ZA", color: "#7c6bbf" },
@@ -2761,17 +2764,17 @@
       const imgContent = p.imageUrl
         ? `<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><span style="font-size:4rem;display:none;">${p.img}</span>`
         : `<span style="font-size:4rem;">${p.img}</span>`;
-      return `<div class="product-card${extraClass}" onclick="openProduct(${p.id})">
+      return `<div class="product-card${extraClass}" onclick="openProduct('${p.id}')">
     <div class="product-img ${IMG_BG_CLASSES[p.imgBg]}">
       ${imgContent}
-      <button class="wish-btn${inWish ? ' active' : ''}" onclick="toggleWish(event,${p.id})">${inWish ? '❤️' : '🤍'}</button>
+      <button class="wish-btn${inWish ? ' active' : ''}" onclick="toggleWish(event,'${p.id}')">${inWish ? '❤️' : '🤍'}</button>
     </div>
     <div class="product-info">
       <div class="product-name">${p.name}</div>
       <div class="product-desc-short">${p.short}</div>
       <div class="product-footer">
         <div><span class="product-price">₹${p.price.toLocaleString()}</span>${p.oldPrice ? `<span class="product-old-price">₹${p.oldPrice.toLocaleString()}</span>` : ''}</div>
-        <button class="add-cart-btn${inCart ? ' added' : ''}" onclick="quickAddCart(event,${p.id})">${inCart ? '✓ Added' : '+ Cart'}</button>
+        <button class="add-cart-btn${inCart ? ' added' : ''}" onclick="quickAddCart(event,'${p.id}')">${inCart ? '✓ Added' : '+ Cart'}</button>
       </div>
     </div>
   </div>`;
@@ -2787,8 +2790,8 @@
 
     function quickAddCart(e, id) {
       e.stopPropagation();
-      const p = PRODUCTS.find(x => x.id === id);
-      const existing = cart.find(i => i.id === id);
+      const p = PRODUCTS.find(x => String(x.id) === String(id));
+      const existing = cart.find(i => String(i.id) === String(id));
       if (existing) { existing.qty++; showToast('Quantity updated 🛒'); }
       else {
         const imgHTML = p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />` : p.img;
@@ -2835,7 +2838,7 @@
     // PRODUCT DETAIL
     function openProduct(id) {
       prevPage = document.querySelector('.page.active')?.id?.replace('page-', '') || 'shop';
-      currentProduct = PRODUCTS.find(p => p.id === id);
+      currentProduct = PRODUCTS.find(p => String(p.id) === String(id));
       const p = currentProduct;
       const inWish = wishlist.includes(p.id);
       document.getElementById('pdLayout').innerHTML = `
@@ -2902,14 +2905,14 @@
       if (existing) { existing.qty += pdQty; }
       else {
         const imgHTML = p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />` : p.img;
-        cart.push({ id: p.id, name: p.name, price: p.price, img: imgHTML, imgBg: p.imgBg, qty: pdQty, color: colorName });
+        cart.push({ id: String(p.id), name: p.name, price: p.price, img: imgHTML, imgBg: p.imgBg, qty: pdQty, color: colorName });
       }
       saveCart(); showToast(`${p.name} added to cart 🛒`);
     }
     function toggleWishDetail(id) {
       const btn = document.getElementById('pdWishBtn');
-      if (wishlist.includes(id)) { wishlist = wishlist.filter(i => i !== id); btn.textContent = '🤍'; btn.classList.remove('active'); showToast('Removed from wishlist'); }
-      else { wishlist.push(id); btn.textContent = '❤️'; btn.classList.add('active'); showToast('Added to wishlist ❤️'); }
+      if (wishlist.includes(String(id))) { wishlist = wishlist.filter(i => String(i) !== String(id)); btn.textContent = '🤍'; btn.classList.remove('active'); showToast('Removed from wishlist'); }
+      else { wishlist.push(String(id)); btn.textContent = '❤️'; btn.classList.add('active'); showToast('Added to wishlist ❤️'); }
       saveWish();
     }
 
@@ -2955,13 +2958,13 @@
     }
 
     function updateCartQty(id, d) {
-      const item = cart.find(i => i.id === id);
+      const item = cart.find(i => String(i.id) === String(id));
       if (!item) return;
       item.qty += d;
-      if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+      if (item.qty <= 0) cart = cart.filter(i => String(i.id) !== String(id));
       saveCart(); renderCart();
     }
-    function removeFromCart(id) { cart = cart.filter(i => i.id !== id); saveCart(); renderCart(); showToast('Item removed'); }
+    function removeFromCart(id) { cart = cart.filter(i => String(i.id) !== String(id)); saveCart(); renderCart(); showToast('Item removed'); }
     function clearCart() { cart = []; saveCart(); }
 
     function renderWishlist() {
@@ -2969,7 +2972,7 @@
         document.getElementById('wishlistContent').innerHTML = `<div class="empty-cart"><span class="empty-cart-emoji">❤️</span><h3 style="font-weight:800;color:var(--text);margin-bottom:0.5rem;">Your wishlist is empty</h3><p style="color:var(--text-mid);margin-bottom:1.5rem;">Save items you love here!</p><button class="btn-primary" onclick="showPage('shop')">Browse Products</button></div>`;
         return;
       }
-      const wishItems = PRODUCTS.filter(p => wishlist.includes(p.id));
+      const wishItems = PRODUCTS.filter(p => wishlist.includes(String(p.id)));
       document.getElementById('wishlistContent').innerHTML = `
     <div class="product-grid">
       ${wishItems.map(p => productCardHTML(p)).join('')}
