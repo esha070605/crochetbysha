@@ -820,6 +820,65 @@
       align-items: start;
     }
 
+    .pd-image-container {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      height: 420px;
+      background: var(--cream);
+    }
+
+    .pd-image-slider {
+      display: flex;
+      height: 100%;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pd-slide {
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8rem;
+    }
+
+    .pd-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .slider-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s;
+      z-index: 10;
+      color: var(--text);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .slider-nav:hover {
+      background: white;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .slider-nav.prev { left: 15px; }
+    .slider-nav.next { right: 15px; }
+
     .pd-image {
       border-radius: var(--radius-lg);
       height: 420px;
@@ -2857,15 +2916,32 @@
       prevPage = document.querySelector('.page.active')?.id?.replace('page-', '') || 'shop';
       currentProduct = PRODUCTS.find(p => String(p.id) === String(id));
       const p = currentProduct;
-      const inWish = wishlist.includes(p.id);
+      const inWish = wishlist.includes(String(p.id));
+      
+      const allImages = p.images && p.images.length > 0 ? p.images : (p.imageUrl ? [p.imageUrl] : []);
+      currentSlide = 0; // Reset slider position
+
       document.getElementById('pdLayout').innerHTML = `
     <div>
-      <div class="pd-image ${IMG_BG_CLASSES[p.imgBg]}">
-        ${p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" /><span id="pdEmoji" style="font-size:7rem;display:none;">${p.img}</span>` : `<span id="pdEmoji" style="font-size:7rem;">${p.img}</span>`}
+      <div class="pd-image-container ${IMG_BG_CLASSES[p.imgBg]}">
+        <div class="pd-image-slider" id="pdSlider">
+          ${allImages.length > 0 
+            ? allImages.map(src => `<div class="pd-slide"><img src="${src}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><div style="display:none;align-items:center;justify-content:center;height:100%;font-size:7rem;">${p.img}</div></div>`).join('')
+            : `<div class="pd-slide"><span id="pdEmoji" style="font-size:7rem;">${p.img}</span></div>`
+          }
+        </div>
         ${p.badge ? `<span class="badge badge-${p.badge} pd-badge">${p.badge === 'new' ? '✨ New Drop' : p.badge === 'hot' ? '🔥 Hot' : '🏷️ Sale'}</span>` : ''}
+        
+        ${allImages.length > 1 ? `
+          <button class="slider-nav prev" onclick="moveSlider(-1)">❮</button>
+          <button class="slider-nav next" onclick="moveSlider(1)">❯</button>
+        ` : ''}
       </div>
       <div class="pd-thumbnails">
-        ${p.imageUrl ? `<div class="pd-thumb active"><img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" /></div>` : p.emojis.map((e, i) => `<div class="pd-thumb ${i === 0 ? 'active' : ''} ${IMG_BG_CLASSES[p.imgBg]}" onclick="changePdEmoji('${e}',this)">${e}</div>`).join('')}
+        ${allImages.length > 0 
+          ? allImages.map((src, i) => `<div class="pd-thumb ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i},this)"><img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" /></div>`).join('')
+          : p.emojis.map((e, i) => `<div class="pd-thumb ${i === 0 ? 'active' : ''} ${IMG_BG_CLASSES[p.imgBg]}" onclick="changePdEmoji('${e}',this)">${e}</div>`).join('')
+        }
       </div>
     </div>
     <div>
@@ -2908,7 +2984,40 @@
 
     let pdQty = 1;
     function changeQty(d) { pdQty = Math.max(1, pdQty + d); document.getElementById('pdQty').textContent = pdQty; }
-    function changePdEmoji(e, el) { document.getElementById('pdEmoji').textContent = e; document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active')); el.classList.add('active'); }
+
+    let currentSlide = 0;
+    function moveSlider(dir) {
+      const slider = document.getElementById('pdSlider');
+      if (!slider) return;
+      const total = slider.children.length;
+      currentSlide = (currentSlide + dir + total) % total;
+      updateSlider();
+    }
+
+    function goToSlide(idx, thumb) {
+      currentSlide = idx;
+      updateSlider();
+    }
+
+    function updateSlider() {
+      const slider = document.getElementById('pdSlider');
+      if (slider) {
+        slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+      }
+      document.querySelectorAll('.pd-thumb').forEach((t, i) => {
+        t.classList.toggle('active', i === currentSlide);
+      });
+    }
+
+    function changePdEmoji(e, thumb) {
+      const emoji = document.getElementById('pdEmoji');
+      if (emoji) {
+        emoji.textContent = e;
+        emoji.style.display = 'inline';
+      }
+      document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+    }
     function selectColor(el) { document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); el.classList.add('active'); }
     function addToCartFromDetail() {
       const p = currentProduct;
