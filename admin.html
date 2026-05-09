@@ -938,9 +938,6 @@ function switchTab(name) {
 
 /* ══════════════════════════ DATA STORE ══════════════════════════ */
 // Uses localStorage so data persists between sessions on the same browser
-let products = loadData('products', []); // Initialized from localStorage
-let payments = loadData('payments', []);
-
 function loadData(key, def) {
   // Use the same prefix as index.html
   const prefix = key === 'products' ? 'sha_' : 'cbs_';
@@ -950,6 +947,9 @@ function saveData(key, val) {
   const prefix = key === 'products' ? 'sha_' : 'cbs_';
   localStorage.setItem(prefix + key, JSON.stringify(val));
 }
+
+let products = loadData('products', []);
+let payments = loadData('payments', []);
 
 /* ══════════════════════════ STATS ══════════════════════════ */
 function refreshStats() {
@@ -980,8 +980,8 @@ function closeProductModal() {
 }
 
 function editProduct(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
+  const p = products.find(x => String(x.id) === String(id));
+  if (!p) { toast('Product not found.'); return; }
   editingProductId = id;
   currentImages    = [...(p.images || [])];
   document.getElementById('prod-modal-title').textContent = 'Edit Product';
@@ -996,7 +996,7 @@ function editProduct(id) {
 
 function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
-  products = products.filter(p => p.id !== id);
+  products = products.filter(p => String(p.id) !== String(id));
   saveData('products', products);
   renderProducts();
   refreshStats();
@@ -1031,7 +1031,7 @@ function saveProduct() {
   };
 
   if (editingProductId) {
-    products = products.map(p => p.id === editingProductId ? data : p);
+    products = products.map(p => String(p.id) === String(editingProductId) ? data : p);
   } else {
     products.push(data);
   }
@@ -1050,14 +1050,15 @@ function renderProducts() {
   empty.style.display = 'none';
 
   products.forEach(p => {
-    const firstImg = p.images && p.images.length > 0 ? p.images[0] : null;
+    const firstImg = p.images && p.images.length > 0 ? p.images[0] : (p.imageUrl || null);
     const card = document.createElement('div');
     card.className = 'product-card';
     card.innerHTML = `
       <div class="product-img-wrap">
         ${firstImg
-          ? `<img src="${firstImg}" alt="${p.name}" style="cursor:pointer" onclick="openViewer('${p.id}',0)"/>`
-          : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:2.5rem;">🧶</div>`}
+          ? `<img src="${firstImg}" alt="${p.name}" style="cursor:pointer" onclick="openViewer('${p.id}',0)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>`
+          : ''}
+        <div style="display:${firstImg ? 'none' : 'flex'};align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:2.5rem;background:var(--cream);">${p.img || '🧶'}</div>
         ${p.images && p.images.length > 1 ? `<div class="img-count-badge">📷 ${p.images.length}</div>` : ''}
       </div>
       <div class="product-info">
