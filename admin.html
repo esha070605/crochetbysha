@@ -945,7 +945,12 @@ function loadData(key, def) {
 }
 function saveData(key, val) {
   const prefix = key === 'products' ? 'sha_' : 'cbs_';
-  localStorage.setItem(prefix + key, JSON.stringify(val));
+  try {
+    localStorage.setItem(prefix + key, JSON.stringify(val));
+  } catch (e) {
+    console.error('Storage Error:', e);
+    toast('⚠️ Error: Storage quota exceeded. Try using fewer or smaller images.');
+  }
 }
 
 let products = loadData('products', []);
@@ -1009,24 +1014,29 @@ function saveProduct() {
   if (!name)        { toast('Please enter a product name.'); return; }
   if (isNaN(price)) { toast('Please enter a valid price.'); return; }
 
+  const existing = editingProductId ? products.find(x => String(x.id) === String(editingProductId)) : null;
+
   const data = {
+    // Preserve existing fields like emojis, img, imgBg, tags, etc.
+    ...(existing || {
+      short:    'Handmade with love',
+      img:      '🧶',
+      imgBg:    Math.floor(Math.random() * 6) + 1,
+      badge:    'new',
+      emojis:   ['🧶', '✨', '💖'],
+      tags:     [document.getElementById('prod-cat').value, 'handmade'],
+      rating:   5,
+      reviews:  0,
+      isNew:    true,
+    }),
     id:       editingProductId || Date.now().toString(),
     name,
     price,
     category: document.getElementById('prod-cat').value,
     stock:    document.getElementById('prod-stock').value,
     desc:     document.getElementById('prod-desc').value.trim(),
-    short:    'Handmade with love', // Default short desc
     images:   [...currentImages],
-    imageUrl: currentImages.length > 0 ? currentImages[0] : null,
-    img:      '🧶', // Default emoji
-    imgBg:    Math.floor(Math.random() * 6) + 1, // Random background 1-6
-    badge:    'new',
-    emojis:   ['🧶', '✨', '💖'],
-    tags:     [document.getElementById('prod-cat').value, 'handmade'],
-    rating:   5,
-    reviews:  0,
-    isNew:    true,
+    imageUrl: currentImages.length > 0 ? currentImages[0] : (existing ? existing.imageUrl : null),
     updatedAt: new Date().toISOString(),
   };
 
