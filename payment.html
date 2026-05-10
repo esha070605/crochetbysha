@@ -394,11 +394,11 @@
         Pay via UPI
       </button>
       <button class="btn btn-gpay" onclick="launchApp('gpay')">
-        <span style="font-size:1.4rem">G</span>
+        <span style="font-size:1.4rem; font-weight: 800; color: #4285F4;">G</span>
         <span class="btn-label">Google Pay</span>
       </button>
       <button class="btn btn-phone" onclick="launchApp('phonepe')">
-        <span style="font-size:1.4rem">☎</span>
+        <span style="font-size:1.4rem; color: #5f259f;">🟣</span>
         <span class="btn-label">PhonePe</span>
       </button>
     </div>
@@ -433,15 +433,15 @@
     </a>
     <div class="app-grid">
       <button class="app-btn" onclick="launchApp('gpay')">
-        <span class="app-icon">G</span>
-        Google Pay
+        <span class="app-icon" style="color: #4285F4;">G</span>
+        G-Pay
       </button>
       <button class="app-btn" onclick="launchApp('phonepe')">
-        <span class="app-icon">☎</span>
+        <span class="app-icon" style="color: #5f259f;">🟣</span>
         PhonePe
       </button>
       <button class="app-btn" onclick="launchApp('paytm')">
-        <span class="app-icon">💙</span>
+        <span class="app-icon" style="color: #00BAF2;">🔵</span>
         Paytm
       </button>
       <button class="app-btn" onclick="launchApp('bhim')">
@@ -453,8 +453,8 @@
         Copy ID
       </button>
       <button class="app-btn" onclick="launchApp('generic')">
-        <span class="app-icon">🔗</span>
-        Other App
+        <span class="app-icon">📲</span>
+        Other
       </button>
     </div>
     <button class="modal-close" onclick="closeUPIModal()">Done</button>
@@ -489,19 +489,58 @@
     const amt  = getAmount();
     const note = encodeURIComponent(getNote());
     const tr   = 'CBS' + Date.now(); // Transaction Ref
-    // Standard UPI URI - Most reliable across all apps
-    const base = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt.toFixed(2) : ''}&tr=${tr}&cu=INR`;
     
-    // We use the base URI for all to ensure maximum compatibility. 
-    // Most mobile OSs will offer the app selection menu or open the default UPI app.
-    return base;
+    // Standard parameters for UPI deep links
+    const params = `pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt.toFixed(2) : ''}&tr=${tr}&cu=INR`;
+    
+    // App-specific schemes can help direct the user more accurately
+    // though upi://pay is the universal standard.
+    switch(app) {
+      case 'gpay':
+        // GPay specific intent for Android/iOS
+        return `tez://upi/pay?${params}`;
+      case 'phonepe':
+        return `phonepe://pay?${params}`;
+      case 'paytm':
+        return `paytmmp://pay?${params}`;
+      default:
+        return `upi://pay?${params}`;
+    }
   }
 
   function launchApp(app) {
-    if (getAmount() <= 0) { showToast('Please enter an amount first ✨'); return; }
+    if (getAmount() <= 0) {
+      showToast('Please enter an amount first ✨');
+      return;
+    }
+
+    // Check if likely mobile (UPI deep links don't work on desktop)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isMobile && app !== 'generic') {
+      showToast('Please scan the QR code to pay from your computer 📱');
+      return;
+    }
+
     const link = buildUPILink(app);
+    
+    // Track if the page loses focus (meaning an app likely opened)
+    let appOpened = false;
+    window.onblur = () => { appOpened = true; };
+
+    // Try to launch the app
     window.location.href = link;
-    setTimeout(() => showToast('Opening ' + app + '… if nothing happens, use QR code'), 800);
+
+    // Fallback message if the app doesn't open after a short delay
+    setTimeout(() => {
+      if (!appOpened) {
+        if (app === 'generic') {
+          showToast('Opening UPI apps... if nothing happens, use QR code');
+        } else {
+          showToast('Could not open ' + app + '. Try "Other" or scan the QR code.');
+        }
+      }
+      window.onblur = null;
+    }, 2500);
   }
 
   function openUPIModal()  { document.getElementById('upi-modal').classList.add('show'); }
