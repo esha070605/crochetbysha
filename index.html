@@ -1526,29 +1526,7 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* WHATSAPP */
-    .wa-btn {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      z-index: 90;
-      width: 56px;
-      height: 56px;
-      background: #25d366;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
-      border: none;
-      transition: all 0.2s;
-    }
 
-    .wa-btn:hover {
-      transform: scale(1.1);
-    }
 
     /* MODAL */
     .modal-overlay {
@@ -1970,8 +1948,7 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <!-- WHATSAPP -->
-  <button class="wa-btn" onclick="openWhatsApp()" title="Chat on WhatsApp">💬</button>
+
 
   <!-- ORDER MODAL -->
   <div class="modal-overlay" id="orderModal">
@@ -2356,7 +2333,7 @@
   </div>
 
   <script>
-    const WA_NUMBER = '919502283533';
+
 
     // =====================================================================
     // ✏️ INITIAL PRODUCTS — fall back here if localStorage is empty
@@ -3177,7 +3154,7 @@
     }
 
     function closeModal() { document.getElementById('orderModal').classList.remove('open'); }
-    function openWhatsApp() { window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent('Hi Sha! I found your shop and wanted to ask...')}`); }
+
 
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEMxXp66GUj2biODCvesLs43p6dM1yk4oOs4aTtpNidp6vPQnyZtxcQPpU5BsoevH1FA/exec";
 
@@ -3316,15 +3293,7 @@
       finally { btn.innerHTML = '🔄 Refresh'; btn.disabled = false; }
     }
 
-    function sendContactMessage() {
-      const name = document.getElementById('cname').value.trim();
-      const phone = document.getElementById('cphone').value.trim();
-      const msg = document.getElementById('cmessage').value.trim();
-      if (!name || !msg) { showToast('⚠️ Please fill in your name and message'); return; }
-      const waMsg = `Hi Sha!\n\n👤 Name: ${name}\n📞 Contact: ${phone || 'Not provided'}\n\n💬 Message:\n${msg}`;
-      window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMsg)}`, '_blank');
-      showToast('Opening WhatsApp... 💬');
-    }
+
 
     // FADE IN
     function setupFadeIns() {
