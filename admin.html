@@ -1037,7 +1037,24 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDocs, collection, onSnapshot, deleteDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+/* ══════════════════════════ FIREBASE INIT ══════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDrIp_t3pZ1xQ8Egf6NxBXZQzv8iVvuHBY",
+  authDomain: "crochetbysha-9e3b1.firebaseapp.com",
+  projectId: "crochetbysha-9e3b1",
+  storageBucket: "crochetbysha-9e3b1.firebasestorage.app",
+  messagingSenderId: "372180218462",
+  appId: "1:372180218462:web:bb1bf32cca86fdbb9bbacf",
+  measurementId: "G-X0MVEDXB5D"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 /* ══════════════════════════ UTILS ══════════════════════════ */
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -1047,23 +1064,72 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function loadData(key, def) {
-  const prefix = key === 'products' ? 'sha_' : 'cbs_';
-  try { return JSON.parse(localStorage.getItem(prefix + key)) || def; } catch { return def; }
-}
+// Data cache
+let products = [];
+let payments = [];
+let allOrders = [];
 
-function saveData(key, val) {
-  const prefix = key === 'products' ? 'sha_' : 'cbs_';
-  try {
-    localStorage.setItem(prefix + key, JSON.stringify(val));
-  } catch (e) {
-    console.error('Storage Error:', e);
-    toast('⚠️ Error: Storage quota exceeded. Try using fewer or smaller images.');
+async function syncToFirebase() {
+  const localProducts = JSON.parse(localStorage.getItem('sha_products')) || [];
+  const localPayments = JSON.parse(localStorage.getItem('cbs_payments')) || [];
+  const localOrders   = JSON.parse(localStorage.getItem('cbs_orders')) || [];
+
+  const prodSnap = await getDocs(collection(db, "products"));
+  if (prodSnap.empty && localProducts.length > 0) {
+    console.log("Migrating products to Firebase...");
+    for (const p of localProducts) {
+      await setDoc(doc(db, "products", String(p.id)), p);
+    }
+  }
+
+  const paySnap = await getDocs(collection(db, "payments"));
+  if (paySnap.empty && localPayments.length > 0) {
+    console.log("Migrating payments to Firebase...");
+    for (const p of localPayments) {
+      await setDoc(doc(db, "payments", String(p.id)), p);
+    }
+  }
+
+  const ordSnap = await getDocs(collection(db, "orders"));
+  if (ordSnap.empty && localOrders.length > 0) {
+    console.log("Migrating orders to Firebase...");
+    for (const o of localOrders) {
+      await setDoc(doc(db, "orders", String(o.id)), o);
+    }
   }
 }
 
+// Listeners
+onSnapshot(collection(db, "products"), (snap) => {
+  products = snap.docs.map(doc => doc.data());
+  renderProducts();
+  refreshStats();
+});
+
+onSnapshot(collection(db, "payments"), (snap) => {
+  payments = snap.docs.map(doc => doc.data());
+  renderPayments();
+  refreshStats();
+});
+
+onSnapshot(collection(db, "orders"), (snap) => {
+  allOrders = snap.docs.map(doc => doc.data());
+  renderAdminOrders();
+  refreshStats();
+});
+
+async function saveData(key, val) {
+  // val is usually the whole array in the old code, but for Firebase we save individual docs
+  // However, the old code calls saveData(key, products) after modifying the array.
+  // We'll adapt by saving the specific item if possible, or just updating the collection.
+}
+
+
 /* ══════════════════════════ AUTH ══════════════════════════ */
 const CREDENTIALS = { username: 'sha_admin', password: 'Crochet@2024!' };
+
+syncToFirebase();
+
 
 function doLogin() {
   const u = document.getElementById('login-user').value.trim();
@@ -1079,6 +1145,8 @@ function doLogin() {
     document.getElementById('login-err').style.display = 'block';
   }
 }
+window.doLogin = doLogin;
+
 
 function doLogout() {
   document.getElementById('admin-shell').style.display  = 'none';
@@ -1087,6 +1155,8 @@ function doLogout() {
   document.getElementById('login-pass').value = '';
   document.getElementById('login-err').style.display = 'none';
 }
+window.doLogout = doLogout;
+
 
 /* ══════════════════════════ TABS ══════════════════════════ */
 function switchTab(name) {
@@ -1100,6 +1170,8 @@ function switchTab(name) {
   if (target) target.classList.add('active');
   if (name === 'orders') renderAdminOrders();
 }
+window.switchTab = switchTab;
+
 
 /* ══════════════════════════ PRODUCTS ══════════════════════════ */
 let editingProductId = null;
@@ -1128,7 +1200,7 @@ function closeProductModal() {
   document.getElementById('product-modal').classList.remove('show');
 }
 
-function editProduct(id) {
+async function editProduct(id) {
   console.log('Editing product:', id);
   const p = products.find(x => String(x.id) === String(id));
   if (!p) { toast('Product not found.'); return; }
@@ -1143,17 +1215,22 @@ function editProduct(id) {
   renderPreviews();
   document.getElementById('product-modal').classList.add('show');
 }
+window.editProduct = editProduct;
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
-  products = products.filter(p => String(p.id) !== String(id));
-  saveData('products', products);
-  renderProducts();
-  refreshStats();
-  toast('Product deleted.');
+  try {
+    await deleteDoc(doc(db, "products", String(id)));
+    toast('Product deleted.');
+  } catch (e) {
+    console.error(e);
+    toast('Error deleting product.');
+  }
 }
+window.deleteProduct = deleteProduct;
 
-function saveProduct() {
+
+async function saveProduct() {
   console.log('Saving product... ID:', editingProductId);
   const name  = document.getElementById('prod-name').value.trim();
   const price = parseFloat(document.getElementById('prod-price').value);
@@ -1186,18 +1263,19 @@ function saveProduct() {
     updatedAt: new Date().toISOString(),
   };
 
-  if (editingProductId) {
-    products = products.map(p => String(p.id) === String(editingProductId) ? data : p);
-  } else {
-    products.push(data);
+  try {
+    await setDoc(doc(db, "products", String(data.id)), data);
+    closeProductModal();
+    toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
+  } catch (e) {
+    console.error(e);
+    toast('Error saving product. Check console.');
   }
-  
-  saveData('products', products);
-  closeProductModal();
-  renderProducts();
-  refreshStats();
-  toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
 }
+window.saveProduct = saveProduct;
+window.openAddModal = openAddModal;
+window.closeProductModal = closeProductModal;
+
 
 function renderProducts() {
   const grid  = document.getElementById('product-grid');
@@ -1236,23 +1314,25 @@ function renderProducts() {
   });
 }
 
-/* ══════════════════════════ DATA INIT ══════════════════════════ */
-let products = loadData('products', []);
-let payments = loadData('payments', []);
-
 function refreshStats() {
   const sp = document.getElementById('stat-products');
   const sy = document.getElementById('stat-payments');
   const sn = document.getElementById('stat-pending');
   const sv = document.getElementById('stat-verified');
   
-  const allOrders = loadData('orders', []);
-  
   if (sp) sp.textContent = products.length;
   if (sy) sy.textContent = payments.length;
   if (sn) sn.textContent = payments.filter(p => p.status === 'pending').length;
   if (sv) sv.textContent = payments.filter(p => p.status === 'verified').length;
 }
+window.openViewer = openViewer;
+window.viewerNav = viewerNav;
+window.closeViewer = closeViewer;
+window.handleFiles = handleFiles;
+window.handleDrag = handleDrag;
+window.handleDrop = handleDrop;
+window.removeImg = removeImg;
+
 
 /* ── multi-image handling ── */
 function handleFiles(files) {
@@ -1329,22 +1409,7 @@ function closeViewer(e) {
 }
 
 /* ══════════════════════════ PAYMENTS ══════════════════════════ */
-let payFilterText   = '';
-let payFilterStatus = 'all';
-
-function openAddPaymentModal() {
-  ['pay-name','pay-ref','pay-note'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('pay-amount').value = '';
-  document.getElementById('pay-date').value   = new Date().toISOString().split('T')[0];
-  document.getElementById('pay-status').value = 'pending';
-  document.getElementById('payment-modal').classList.add('show');
-}
-
-function closePaymentModal() {
-  document.getElementById('payment-modal').classList.remove('show');
-}
-
-function savePayment() {
+async function savePayment() {
   const name   = document.getElementById('pay-name').value.trim();
   const amount = parseFloat(document.getElementById('pay-amount').value);
   const date   = document.getElementById('pay-date').value;
@@ -1361,30 +1426,45 @@ function savePayment() {
     note:   document.getElementById('pay-note').value.trim(),
     status: document.getElementById('pay-status').value,
   };
-  payments.push(entry);
-  saveData('payments', payments);
-  closePaymentModal();
-  renderPayments();
-  refreshStats();
-  toast('Payment logged! ✅');
+  
+  try {
+    await setDoc(doc(db, "payments", String(entry.id)), entry);
+    closePaymentModal();
+    toast('Payment logged! ✅');
+  } catch (e) {
+    console.error(e);
+    toast('Error logging payment.');
+  }
 }
+window.savePayment = savePayment;
+window.openAddPaymentModal = openAddPaymentModal;
+window.closePaymentModal = closePaymentModal;
 
-function updatePaymentStatus(id, status) {
-  payments = payments.map(p => p.id === id ? {...p, status} : p);
-  saveData('payments', payments);
-  renderPayments();
-  refreshStats();
-  toast(`Payment marked as ${status} ✅`);
+async function updatePaymentStatus(id, status) {
+  try {
+    await updateDoc(doc(db, "payments", String(id)), { status });
+    toast(`Payment marked as ${status} ✅`);
+  } catch (e) {
+    console.error(e);
+    toast('Error updating status.');
+  }
 }
+window.updatePaymentStatus = updatePaymentStatus;
 
-function deletePayment(id) {
+async function deletePayment(id) {
   if (!confirm('Delete this payment record?')) return;
-  payments = payments.filter(p => p.id !== id);
-  saveData('payments', payments);
-  renderPayments();
-  refreshStats();
-  toast('Record deleted.');
+  try {
+    await deleteDoc(doc(db, "payments", String(id)));
+    toast('Record deleted.');
+  } catch (e) {
+    console.error(e);
+    toast('Error deleting record.');
+  }
 }
+window.deletePayment = deletePayment;
+window.filterPayments = filterPayments;
+window.filterPaymentStatus = filterPaymentStatus;
+
 
 function filterPayments(val)       { payFilterText   = val.toLowerCase(); renderPayments(); }
 function filterPaymentStatus(val)  { payFilterStatus = val;               renderPayments(); }
@@ -1431,13 +1511,8 @@ function renderPayments() {
   });
 }
 
-/* ══════════════════════════ UTILS ══════════════════════════ */
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
+// Duplicate toast removed
+
 
 /* ══════════════════════════ ORDERS ══════════════════════════ */
 let allOrders = [];
@@ -1505,7 +1580,7 @@ function nextOrderId() {
   return 'SHA-' + num.toString().padStart(6, '0');
 }
 
-function saveOrder() {
+async function saveOrder() {
   const email = document.getElementById('ord-customer').value.trim().toLowerCase();
   const date  = document.getElementById('ord-date').value;
   if (!email) { toast('Please enter customer email.'); return; }
@@ -1515,8 +1590,9 @@ function saveOrder() {
   const now = new Date().toISOString().split('T')[0];
   const status = document.getElementById('ord-status').value;
 
+  const orderId = editingOrderId || nextOrderId();
   const order = {
-    id:            editingOrderId || nextOrderId(),
+    id:            orderId,
     customerId:    email,
     date,
     items:         orderItems.map(i=>({...i})),
@@ -1539,17 +1615,21 @@ function saveOrder() {
     }
   };
 
-  if (editingOrderId) {
-    allOrders = allOrders.map(o => o.id === editingOrderId ? order : o);
-  } else {
-    allOrders.push(order);
+  try {
+    await setDoc(doc(db, "orders", String(order.id)), order);
+    closeOrderModal();
+    toast(editingOrderId ? `Order ${order.id} updated ✅` : `Order ${order.id} created ✅`);
+  } catch (e) {
+    console.error(e);
+    toast('Error saving order.');
   }
-  saveData('orders', allOrders);
-  closeOrderModal();
-  renderAdminOrders();
-  refreshStats();
-  toast(editingOrderId ? `Order ${order.id} updated ✅` : `Order ${order.id} created ✅`);
 }
+window.saveOrder = saveOrder;
+window.openAddOrderModal = openAddOrderModal;
+window.closeOrderModal = closeOrderModal;
+window.addOrderItem = addOrderItem;
+window.removeOrderItem = removeOrderItem;
+
 
 function editOrder(id) {
   const o = allOrders.find(x=>x.id===id);
@@ -1573,30 +1653,42 @@ function editOrder(id) {
   document.getElementById('order-modal').classList.add('show');
 }
 
-function deleteOrder(id) {
+async function deleteOrder(id) {
   if (!confirm('Delete order ' + id + '?')) return;
-  allOrders = allOrders.filter(o => o.id !== id);
-  saveData('orders', allOrders);
-  renderAdminOrders();
-  refreshStats();
-  toast('Order deleted.');
+  try {
+    await deleteDoc(doc(db, "orders", String(id)));
+    toast('Order deleted.');
+  } catch (e) {
+    console.error(e);
+    toast('Error deleting order.');
+  }
 }
+window.deleteOrder = deleteOrder;
+window.editOrder = editOrder;
 
-function updateOrderStatus(id, status) {
+
+async function updateOrderStatus(id, status) {
   const now = new Date().toISOString().split('T')[0];
-  allOrders = allOrders.map(o => {
-    if (o.id !== id) return o;
-    const tl = {...(o.timeline||{})};
-    if (['confirmed','shipped','delivered'].includes(status) && !tl.confirmed) tl.confirmed = now;
-    if (['shipped','delivered'].includes(status)             && !tl.shipped)   tl.shipped   = now;
-    if (status === 'delivered'                               && !tl.delivered) tl.delivered = now;
-    return {...o, status, timeline: tl};
-  });
-  saveData('orders', allOrders);
-  renderAdminOrders();
-  refreshStats();
-  toast('Order status updated ✅');
+  const o = allOrders.find(x => x.id === id);
+  if (!o) return;
+  
+  const tl = {...(o.timeline||{})};
+  if (['confirmed','shipped','delivered'].includes(status) && !tl.confirmed) tl.confirmed = now;
+  if (['shipped','delivered'].includes(status)             && !tl.shipped)   tl.shipped   = now;
+  if (status === 'delivered'                               && !tl.delivered) tl.delivered = now;
+
+  try {
+    await updateDoc(doc(db, "orders", String(id)), { status, timeline: tl });
+    toast('Order status updated ✅');
+  } catch (e) {
+    console.error(e);
+    toast('Error updating status.');
+  }
 }
+window.updateOrderStatus = updateOrderStatus;
+window.filterOrders = filterOrders;
+window.filterOrderStatus = filterOrderStatus;
+
 
 function filterOrders(val) { orderFilter = val.toLowerCase(); renderAdminOrders(); }
 function filterOrderStatus(val) { orderStatusFilter = val; renderAdminOrders(); }
@@ -1610,7 +1702,7 @@ const ORD_PILL = {
 };
 
 function renderAdminOrders() {
-  allOrders = loadData('orders', []);
+
   const tbody = document.getElementById('orders-tbody');
   const empty = document.getElementById('orders-empty-admin');
   if (!tbody) return;
@@ -1654,25 +1746,32 @@ function renderAdminOrders() {
   });
 }
 
-// Final Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-  const passInput = document.getElementById('login-pass');
-  if (passInput) {
-    passInput.addEventListener('keydown', e => { 
-      if (e.key === 'Enter') doLogin(); 
-    });
-  }
-  
-  // Close modals on backdrop click
-  ['product-modal','payment-modal','order-modal'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('show');
+  // EXPOSE TO WINDOW
+  window.renderAdminOrders = renderAdminOrders;
+  window.renderPayments = renderPayments;
+  window.renderProducts = renderProducts;
+  window.refreshStats = refreshStats;
+
+  // Final Event Listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    const passInput = document.getElementById('login-pass');
+    if (passInput) {
+      passInput.addEventListener('keydown', e => { 
+        if (e.key === 'Enter') doLogin(); 
       });
     }
+    
+    // Close modals on backdrop click
+    ['product-modal','payment-modal','order-modal'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('click', function(e) {
+          if (e.target === this) this.classList.remove('show');
+        });
+      }
+    });
   });
-});
 </script>
+
 </body>
 </html>
