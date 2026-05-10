@@ -1114,6 +1114,31 @@ const CREDENTIALS = { username: 'sha_admin', password: 'Crochet@2024!' };
 
 
 
+// Real-time listeners (outside doLogin to ensure they start immediately)
+onSnapshot(collection(db, "products"), (snapshot) => {
+  products = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+  if (document.getElementById('admin-shell').style.display === 'block') {
+    renderProducts();
+    refreshStats();
+  }
+});
+
+onSnapshot(collection(db, "payments"), (snapshot) => {
+  payments = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+  if (document.getElementById('admin-shell').style.display === 'block') {
+    renderPayments();
+    refreshStats();
+  }
+});
+
+onSnapshot(collection(db, "orders"), (snapshot) => {
+  allOrders = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+  if (document.getElementById('admin-shell').style.display === 'block') {
+    renderAdminOrders();
+    refreshStats();
+  }
+});
+
 function doLogin() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
@@ -1121,25 +1146,11 @@ function doLogin() {
     document.getElementById('login-screen').style.display  = 'none';
     document.getElementById('admin-shell').style.display   = 'block';
     
-    // Set up Real-time listeners
-    onSnapshot(collection(db, "products"), (snapshot) => {
-      products = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-      renderProducts();
-      refreshStats();
-    });
-
-    onSnapshot(collection(db, "payments"), (snapshot) => {
-      payments = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-      renderPayments();
-      refreshStats();
-    });
-
-    onSnapshot(collection(db, "orders"), (snapshot) => {
-      allOrders = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-      renderAdminOrders();
-      refreshStats();
-    });
-
+    // Initial render
+    renderProducts();
+    renderPayments();
+    renderAdminOrders();
+    refreshStats();
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
