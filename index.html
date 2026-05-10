@@ -2056,11 +2056,9 @@
     <!-- Instagram Section -->
     <div class="insta-section">
       <div class="section-tag">Follow Along</div>
-      <div class="section-title" style="font-size:1.8rem;font-weight:800;color:var(--text);">See Us on Instagram</div>
-      <p style="color:var(--text-mid);margin-top:0.5rem;">@_crochetbysha_</p>
-      <div class="insta-grid" id="instaGrid"></div>
-      <button class="insta-follow-btn" onclick="window.open('https://www.instagram.com/_crochetbysha_','_blank')">📸
-        Follow @_crochetbysha_</button>
+      <div class="section-title">See Us on Instagram</div>
+      <p style="color:var(--text-mid);margin-top:0.5rem;margin-bottom:1.5rem;">@_crochetbysha_</p>
+      <button class="insta-follow-btn" onclick="window.open('https://www.instagram.com/_crochetbysha_','_blank')">Follow @_crochetbysha_</button>
     </div>
 
     <!-- Footer -->
@@ -2817,10 +2815,6 @@
         <div class="t-avatar" style="background:${t.color};">${t.avatar}</div>
         <div><div class="t-name">${t.name}</div><div class="t-location">${t.loc}</div></div>
       </div>
-    </div>`).join('');
-      document.getElementById('instaGrid').innerHTML = INSTA_TILES.map(e => `
-    <div class="insta-tile" style="background:linear-gradient(135deg,var(--lavender),var(--blush));font-size:2.8rem;" onclick="window.open('https://www.instagram.com/_crochetbysha_','_blank')">
-      ${e}<div class="insta-overlay">View ↗</div>
     </div>`).join('');
     }
 
