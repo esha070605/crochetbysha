@@ -488,15 +488,13 @@
   function buildUPILink(app) {
     const amt  = getAmount();
     const note = encodeURIComponent(getNote());
-    const base = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`;
-    const links = {
-      gpay:    `tez://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`,
-      phonepe: `phonepe://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`,
-      paytm:   `paytmmp://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`,
-      bhim:    base,
-      generic: base,
-    };
-    return links[app] || base;
+    const tr   = 'CBS' + Date.now(); // Transaction Ref
+    // Standard UPI URI - Most reliable across all apps
+    const base = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt.toFixed(2) : ''}&tr=${tr}&cu=INR`;
+    
+    // We use the base URI for all to ensure maximum compatibility. 
+    // Most mobile OSs will offer the app selection menu or open the default UPI app.
+    return base;
   }
 
   function launchApp(app) {
