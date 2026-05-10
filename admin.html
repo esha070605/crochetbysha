@@ -901,408 +901,476 @@
 <div class="toast" id="toast"></div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCzNO48K54ccnmiTIaDZ6ptPDhoWRhH72o",
-    authDomain: "crochetbysha-fc8f3.firebaseapp.com",
-    projectId: "crochetbysha-fc8f3",
-    storageBucket: "crochetbysha-fc8f3.firebasestorage.app",
-    messagingSenderId: "48661408149",
-    appId: "1:48661408149:web:8fe52aba525f539059ee9c",
-    measurementId: "G-FQK4TXTG9H"
+const firebaseConfig = {
+  apiKey: "AIzaSyCzNO48K54ccnmiTIaDZ6ptPDhoWRhH72o",
+  authDomain: "crochetbysha-fc8f3.firebaseapp.com",
+  projectId: "crochetbysha-fc8f3",
+  storageBucket: "crochetbysha-fc8f3.firebasestorage.app",
+  messagingSenderId: "48661408149",
+  appId: "1:48661408149:web:8fe52aba525f539059ee9c",
+  measurementId: "G-FQK4TXTG9H",
+  databaseURL: "https://crochetbysha-fc8f3-default-rtdb.firebaseio.com/"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const productsRef = ref(db, 'products');
+const paymentsRef = ref(db, 'payments');
+
+let products = [];
+let payments = [];
+
+// Real-time sync from Firebase
+onValue(productsRef, (snapshot) => {
+  const data = snapshot.val();
+  products = data ? Object.values(data) : [];
+  renderProducts();
+  refreshStats();
+});
+
+onValue(paymentsRef, (snapshot) => {
+  const data = snapshot.val();
+  payments = data ? Object.values(data) : [];
+  renderPayments();
+  refreshStats();
+});
+
+/* ══════════════════════════ UTILS ══════════════════════════ */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function loadData(key, def) {
+  const prefix = key === 'products' ? 'sha_' : 'cbs_';
+  try { return JSON.parse(localStorage.getItem(prefix + key)) || def; } catch { return def; }
+}
+
+function saveData(key, val) {
+  const prefix = key === 'products' ? 'sha_' : 'cbs_';
+  try {
+    localStorage.setItem(prefix + key, JSON.stringify(val));
+  } catch (e) {
+    console.error('Storage Error:', e);
+    toast('⚠️ Error: Storage quota exceeded. Try using fewer or smaller images.');
+  }
+}
+
+/* ══════════════════════════ AUTH ══════════════════════════ */
+const CREDENTIALS = { username: 'sha_admin', password: 'Crochet@2024!' };
+
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  if (u === CREDENTIALS.username && p === CREDENTIALS.password) {
+    document.getElementById('login-screen').style.display  = 'none';
+    document.getElementById('admin-shell').style.display   = 'block';
+    refreshStats();
+    renderProducts();
+    renderPayments();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('admin-shell').style.display  = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-err').style.display = 'none';
+}
+
+/* ══════════════════════════ TABS ══════════════════════════ */
+function switchTab(name) {
+  console.log('Switching to tab:', name);
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['dashboard','products','payments'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('panel-' + name);
+  if (target) target.classList.add('active');
+}
+
+/* ══════════════════════════ PRODUCTS ══════════════════════════ */
+let editingProductId = null;
+let currentImages = []; 
+
+function openAddModal() {
+  console.log('Opening Add Product Modal');
+  editingProductId = null;
+  currentImages    = [];
+  document.getElementById('prod-modal-title').textContent = 'Add New Product';
+  ['prod-name','prod-price','prod-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const cat = document.getElementById('prod-cat');
+  if (cat) cat.value = 'plushies';
+  const stock = document.getElementById('prod-stock');
+  if (stock) stock.value = 'in';
+  
+  document.getElementById('img-previews').innerHTML = '';
+  document.getElementById('img-count-info').textContent = '';
+  document.getElementById('product-modal').classList.add('show');
+}
+
+function closeProductModal() {
+  document.getElementById('product-modal').classList.remove('show');
+}
+
+function editProduct(id) {
+  console.log('Editing product:', id);
+  const p = products.find(x => String(x.id) === String(id));
+  if (!p) { toast('Product not found.'); return; }
+  editingProductId = id;
+  currentImages    = [...(p.images || [])];
+  document.getElementById('prod-modal-title').textContent = 'Edit Product';
+  document.getElementById('prod-name').value  = p.name;
+  document.getElementById('prod-price').value = p.price;
+  document.getElementById('prod-desc').value  = p.desc || '';
+  document.getElementById('prod-cat').value   = p.category || 'other';
+  document.getElementById('prod-stock').value = p.stock || 'in';
+  renderPreviews();
+  document.getElementById('product-modal').classList.add('show');
+}
+
+function deleteProduct(id) {
+  if (!confirm('Delete this product?')) return;
+  remove(ref(db, 'products/' + id));
+  toast('Product deleted.');
+}
+
+function saveProduct() {
+  console.log('Saving product... ID:', editingProductId);
+  const name  = document.getElementById('prod-name').value.trim();
+  const price = parseFloat(document.getElementById('prod-price').value);
+  
+  if (!name)        { toast('Please enter a product name.'); return; }
+  if (isNaN(price)) { toast('Please enter a valid price.'); return; }
+
+  const existing = editingProductId ? products.find(x => String(x.id) === String(editingProductId)) : null;
+
+  const data = {
+    ...(existing || {
+      short:    'Handmade with love',
+      img:      '🧶',
+      imgBg:    Math.floor(Math.random() * 6) + 1,
+      badge:    'new',
+      emojis:   ['🧶', '✨', '💖'],
+      tags:     [document.getElementById('prod-cat').value, 'handmade'],
+      rating:   5,
+      reviews:  0,
+      isNew:    true,
+    }),
+    id:       editingProductId || Date.now().toString(),
+    name,
+    price,
+    category: document.getElementById('prod-cat').value,
+    stock:    document.getElementById('prod-stock').value,
+    desc:     document.getElementById('prod-desc').value.trim(),
+    images:   [...currentImages],
+    imageUrl: currentImages.length > 0 ? currentImages[0] : (existing ? existing.imageUrl : null),
+    updatedAt: new Date().toISOString(),
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
-
-  /* ══════════════════════════ UTILS ══════════════════════════ */
-  function toast(msg) {
-    const t = document.getElementById('toast');
-    if (!t) return;
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+  if (editingProductId) {
+    update(ref(db, 'products/' + editingProductId), data);
+  } else {
+    const newId = data.id;
+    set(ref(db, 'products/' + newId), data);
   }
+  
+  closeProductModal();
+  toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
+}
 
-  /* ══════════════════════════ AUTH ══════════════════════════ */
-  const CREDENTIALS = { username: 'sha_admin', password: 'Crochet@2024!' };
+function renderProducts() {
+  const grid  = document.getElementById('product-grid');
+  const empty = document.getElementById('prod-empty');
+  if (!grid || !empty) return;
+  
+  grid.innerHTML = '';
+  if (products.length === 0) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
 
-  function doLogin() {
-    const u = document.getElementById('login-user').value.trim();
-    const p = document.getElementById('login-pass').value;
-    if (u === CREDENTIALS.username && p === CREDENTIALS.password) {
-      document.getElementById('login-screen').style.display  = 'none';
-      document.getElementById('admin-shell').style.display   = 'block';
-      refreshStats();
-      renderProducts();
-      renderPayments();
-    } else {
-      document.getElementById('login-err').style.display = 'block';
-    }
-  }
-
-  function doLogout() {
-    document.getElementById('admin-shell').style.display  = 'none';
-    document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('login-user').value = '';
-    document.getElementById('login-pass').value = '';
-    document.getElementById('login-err').style.display = 'none';
-  }
-
-  /* ══════════════════════════ TABS ══════════════════════════ */
-  function switchTab(name) {
-    document.querySelectorAll('.tab').forEach((t,i) => {
-      const names = ['dashboard','products','payments'];
-      t.classList.toggle('active', names[i] === name);
-    });
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    const target = document.getElementById('panel-' + name);
-    if (target) target.classList.add('active');
-  }
-
-  /* ══════════════════════════ DATA SYNC ══════════════════════════ */
-  window.products = [];
-  window.payments = [];
-
-  // Listen for Products
-  onValue(ref(db, 'sha_products'), (snapshot) => {
-    window.products = snapshot.val() || [];
-    renderProducts();
-    refreshStats();
-  });
-
-  // Listen for Payments
-  onValue(ref(db, 'sha_payments'), (snapshot) => {
-    window.payments = snapshot.val() || [];
-    renderPayments();
-    refreshStats();
-  });
-
-  function refreshStats() {
-    const sp = document.getElementById('stat-products');
-    const sy = document.getElementById('stat-payments');
-    const sn = document.getElementById('stat-pending');
-    const sv = document.getElementById('stat-verified');
-    if (sp) sp.textContent = window.products.length;
-    if (sy) sy.textContent = window.payments.length;
-    if (sn) sn.textContent = window.payments.filter(p => p.status === 'pending').length;
-    if (sv) sv.textContent = window.payments.filter(p => p.status === 'verified').length;
-  }
-
-  /* ══════════════════════════ PRODUCTS ══════════════════════════ */
-  let editingProductId = null;
-  let currentImages = []; 
-
-  function openAddModal() {
-    editingProductId = null;
-    currentImages    = [];
-    document.getElementById('prod-modal-title').textContent = 'Add New Product';
-    ['prod-name','prod-price','prod-desc'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-    const cat = document.getElementById('prod-cat');
-    if (cat) cat.value = 'plushies';
-    const stock = document.getElementById('prod-stock');
-    if (stock) stock.value = 'in';
-    
-    document.getElementById('img-previews').innerHTML = '';
-    document.getElementById('img-count-info').textContent = '';
-    document.getElementById('product-modal').classList.add('show');
-  }
-
-  function closeProductModal() {
-    document.getElementById('product-modal').classList.remove('show');
-  }
-
-  function editProduct(id) {
-    const p = window.products.find(x => String(x.id) === String(id));
-    if (!p) { toast('Product not found.'); return; }
-    editingProductId = id;
-    currentImages    = [...(p.images || [])];
-    document.getElementById('prod-modal-title').textContent = 'Edit Product';
-    document.getElementById('prod-name').value  = p.name;
-    document.getElementById('prod-price').value = p.price;
-    document.getElementById('prod-desc').value  = p.desc || '';
-    document.getElementById('prod-cat').value   = p.category || 'other';
-    document.getElementById('prod-stock').value = p.stock || 'in';
-    renderPreviews();
-    document.getElementById('product-modal').classList.add('show');
-  }
-
-  function deleteProduct(id) {
-    if (!confirm('Delete this product?')) return;
-    const newProducts = window.products.filter(p => String(p.id) !== String(id));
-    set(ref(db, 'sha_products'), newProducts).then(() => {
-      toast('Product deleted.');
-    });
-  }
-
-  function saveProduct() {
-    const name  = document.getElementById('prod-name').value.trim();
-    const price = parseFloat(document.getElementById('prod-price').value);
-    
-    if (!name)        { toast('Please enter a product name.'); return; }
-    if (isNaN(price)) { toast('Please enter a valid price.'); return; }
-
-    const existing = editingProductId ? window.products.find(x => String(x.id) === String(editingProductId)) : null;
-
-    const data = {
-      ...(existing || {
-        short:    'Handmade with love',
-        img:      '🧶',
-        imgBg:    Math.floor(Math.random() * 6) + 1,
-        badge:    'new',
-        emojis:   ['🧶', '✨', '💖'],
-        tags:     [document.getElementById('prod-cat').value, 'handmade'],
-        rating:   5,
-        reviews:  0,
-        isNew:    true,
-      }),
-      id:       editingProductId || Date.now().toString(),
-      name,
-      price,
-      category: document.getElementById('prod-cat').value,
-      stock:    document.getElementById('prod-stock').value,
-      desc:     document.getElementById('prod-desc').value.trim(),
-      images:   [...currentImages],
-      imageUrl: currentImages.length > 0 ? currentImages[0] : (existing ? existing.imageUrl : null),
-      updatedAt: new Date().toISOString(),
-    };
-
-    let newProducts = [...window.products];
-    if (editingProductId) {
-      newProducts = newProducts.map(p => String(p.id) === String(editingProductId) ? data : p);
-    } else {
-      newProducts.push(data);
-    }
-    
-    set(ref(db, 'sha_products'), newProducts).then(() => {
-      closeProductModal();
-      toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
-    }).catch(err => {
-      console.error(err);
-      toast('Error saving to Firebase. Check console.');
-    });
-  }
-
-  function renderProducts() {
-    const grid  = document.getElementById('product-grid');
-    const empty = document.getElementById('prod-empty');
-    if (!grid || !empty) return;
-    
-    grid.innerHTML = '';
-    if (window.products.length === 0) { empty.style.display = 'block'; return; }
-    empty.style.display = 'none';
-
-    window.products.forEach(p => {
-      const firstImg = p.images && p.images.length > 0 ? p.images[0] : (p.imageUrl || null);
-      const card = document.createElement('div');
-      card.className = 'product-card';
-      card.innerHTML = `
-        <div class="product-img-wrap">
-          ${firstImg
-            ? `<img src="${firstImg}" alt="${p.name}" style="cursor:pointer" onclick="openViewer('${p.id}',0)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>`
-            : ''}
-          <div style="display:${firstImg ? 'none' : 'flex'};align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:2.5rem;background:var(--cream);">${p.img || '🧶'}</div>
-          ${p.images && p.images.length > 1 ? `<div class="img-count-badge">📷 ${p.images.length}</div>` : ''}
+  products.forEach(p => {
+    const firstImg = p.images && p.images.length > 0 ? p.images[0] : (p.imageUrl || null);
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `
+      <div class="product-img-wrap">
+        ${firstImg
+          ? `<img src="${firstImg}" alt="${p.name}" style="cursor:pointer" onclick="openViewer('${p.id}',0)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>`
+          : ''}
+        <div style="display:${firstImg ? 'none' : 'flex'};align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:2.5rem;background:var(--cream);">${p.img || '🧶'}</div>
+        ${p.images && p.images.length > 1 ? `<div class="img-count-badge">📷 ${p.images.length}</div>` : ''}
+      </div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-cat">${p.category || ''}</div>
+        <div class="product-row">
+          <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
+          <div class="stock-badge ${p.stock === 'in' ? 'stock-in' : 'stock-out'}">${p.stock === 'in' ? 'In Stock' : 'Out of Stock'}</div>
         </div>
-        <div class="product-info">
-          <div class="product-name">${p.name}</div>
-          <div class="product-cat">${p.category || ''}</div>
-          <div class="product-row">
-            <div class="product-price">₹${p.price.toLocaleString('en-IN')}</div>
-            <div class="stock-badge ${p.stock === 'in' ? 'stock-in' : 'stock-out'}">${p.stock === 'in' ? 'In Stock' : 'Out of Stock'}</div>
-          </div>
-          <div class="product-actions">
-            <button class="act-btn" onclick="editProduct('${p.id}')">✏️ Edit</button>
-            <button class="act-btn danger" onclick="deleteProduct('${p.id}')">🗑️ Delete</button>
-          </div>
-        </div>`;
-      grid.appendChild(card);
-    });
-  }
-
-  /* ── multi-image handling ── */
-  function handleFiles(files) {
-    const remaining = 10 - currentImages.length;
-    const toAdd = Array.from(files).slice(0, remaining);
-    toAdd.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        currentImages.push(e.target.result);
-        renderPreviews();
-      };
-      reader.readAsDataURL(file);
-    });
-    document.getElementById('img-input').value = '';
-  }
-
-  function renderPreviews() {
-    const wrap = document.getElementById('img-previews');
-    const info = document.getElementById('img-count-info');
-    wrap.innerHTML = '';
-    currentImages.forEach((src, i) => {
-      const thumb = document.createElement('div');
-      thumb.className = 'img-thumb';
-      thumb.innerHTML = `<img src="${src}" alt="Preview ${i+1}"/>
-        <button class="rm" onclick="removeImg(${i})">✕</button>`;
-      wrap.appendChild(thumb);
-    });
-    info.textContent = currentImages.length > 0
-      ? `${currentImages.length}/10 image${currentImages.length > 1 ? 's' : ''} uploaded`
-      : '';
-  }
-
-  function removeImg(i) {
-    currentImages.splice(i, 1);
-    renderPreviews();
-  }
-
-  function openViewer(productId, startIdx) {
-    const p = window.products.find(x => x.id === productId);
-    if (!p || !p.images || !p.images.length) return;
-    window.viewerImages = p.images;
-    window.viewerIndex  = startIdx || 0;
-    updateViewer();
-    document.getElementById('img-viewer').classList.add('show');
-  }
-
-  function updateViewer() {
-    document.getElementById('viewer-img').src   = window.viewerImages[window.viewerIndex];
-    document.getElementById('viewer-counter').textContent = `${window.viewerIndex + 1} / ${window.viewerImages.length}`;
-  }
-
-  /* ══════════════════════════ PAYMENTS ══════════════════════════ */
-  window.payFilterText   = '';
-  window.payFilterStatus = 'all';
-
-  function openAddPaymentModal() {
-    ['pay-name','pay-ref','pay-note'].forEach(id => document.getElementById(id).value = '');
-    document.getElementById('pay-amount').value = '';
-    document.getElementById('pay-date').value   = new Date().toISOString().split('T')[0];
-    document.getElementById('pay-status').value = 'pending';
-    document.getElementById('payment-modal').classList.add('show');
-  }
-
-  function closePaymentModal() {
-    document.getElementById('payment-modal').classList.remove('show');
-  }
-
-  function savePayment() {
-    const name   = document.getElementById('pay-name').value.trim();
-    const amount = parseFloat(document.getElementById('pay-amount').value);
-    const date   = document.getElementById('pay-date').value;
-    if (!name)        { toast('Please enter a customer name.'); return; }
-    if (isNaN(amount)){ toast('Please enter the amount.'); return; }
-    if (!date)        { toast('Please select a date.'); return; }
-
-    const entry = {
-      id:     Date.now().toString(),
-      name,
-      amount,
-      date,
-      ref:    document.getElementById('pay-ref').value.trim(),
-      note:   document.getElementById('pay-note').value.trim(),
-      status: document.getElementById('pay-status').value,
-    };
-    const newPayments = [...window.payments, entry];
-    set(ref(db, 'sha_payments'), newPayments).then(() => {
-      closePaymentModal();
-      toast('Payment logged! ✅');
-    });
-  }
-
-  function updatePaymentStatus(id, status) {
-    const newPayments = window.payments.map(p => p.id === id ? {...p, status} : p);
-    set(ref(db, 'sha_payments'), newPayments).then(() => {
-      toast(`Payment marked as ${status} ✅`);
-    });
-  }
-
-  function deletePayment(id) {
-    if (!confirm('Delete this payment record?')) return;
-    const newPayments = window.payments.filter(p => p.id !== id);
-    set(ref(db, 'sha_payments'), newPayments).then(() => {
-      toast('Record deleted.');
-    });
-  }
-
-  function renderPayments() {
-    const tbody = document.getElementById('payments-tbody');
-    const empty = document.getElementById('pay-empty');
-    if (!tbody || !empty) return;
-    tbody.innerHTML = '';
-
-    let filtered = window.payments.filter(p => {
-      const matchStatus = window.payFilterStatus === 'all' || p.status === window.payFilterStatus;
-      const matchText   = !window.payFilterText ||
-        p.name.toLowerCase().includes(window.payFilterText) ||
-        (p.ref  || '').toLowerCase().includes(window.payFilterText) ||
-        (p.note || '').toLowerCase().includes(window.payFilterText);
-      return matchStatus && matchText;
-    });
-
-    filtered = filtered.slice().reverse(); 
-
-    if (filtered.length === 0) { empty.style.display = 'block'; return; }
-    empty.style.display = 'none';
-
-    filtered.forEach((p, idx) => {
-      const statusClass = { pending: 'status-pending', verified: 'status-verified', rejected: 'status-rejected' }[p.status] || '';
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td style="color:var(--muted)">${filtered.length - idx}</td>
-        <td>${p.date}</td>
-        <td><strong>${p.name}</strong></td>
-        <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.note || '—'}</td>
-        <td><strong>₹${parseFloat(p.amount).toLocaleString('en-IN')}</strong></td>
-        <td style="font-family:monospace;font-size:0.8rem">${p.ref || '—'}</td>
-        <td><span class="status-pill ${statusClass}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span></td>
-        <td>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            ${p.status !== 'verified' ? `<button class="tbl-btn approve" onclick="updatePaymentStatus('${p.id}','verified')">✅ Verify</button>` : ''}
-            ${p.status !== 'rejected' ? `<button class="tbl-btn reject"  onclick="updatePaymentStatus('${p.id}','rejected')">❌ Reject</button>` : ''}
-            ${p.status !== 'pending'  ? `<button class="tbl-btn"         onclick="updatePaymentStatus('${p.id}','pending')">⏳ Reset</button>` : ''}
-            <button class="tbl-btn danger" onclick="deletePayment('${p.id}')">🗑️</button>
-          </div>
-        </td>`;
-      tbody.appendChild(row);
-    });
-  }
-
-  // Global Exports
-  window.doLogin = doLogin;
-  window.doLogout = doLogout;
-  window.switchTab = switchTab;
-  window.openAddModal = openAddModal;
-  window.closeProductModal = closeProductModal;
-  window.editProduct = editProduct;
-  window.deleteProduct = deleteProduct;
-  window.saveProduct = saveProduct;
-  window.handleFiles = handleFiles;
-  window.removeImg = removeImg;
-  window.openViewer = openViewer;
-  window.viewerNav = (dir) => { window.viewerIndex = (window.viewerIndex + dir + window.viewerImages.length) % window.viewerImages.length; updateViewer(); };
-  window.closeViewer = (e) => { if (!e || e.target === document.getElementById('img-viewer')) document.getElementById('img-viewer').classList.remove('show'); };
-  window.openAddPaymentModal = openAddPaymentModal;
-  window.closePaymentModal = closePaymentModal;
-  window.savePayment = savePayment;
-  window.updatePaymentStatus = updatePaymentStatus;
-  window.deletePayment = deletePayment;
-  window.filterPayments = (val) => { window.payFilterText = val.toLowerCase(); renderPayments(); };
-  window.filterPaymentStatus = (val) => { window.payFilterStatus = val; renderPayments(); };
-
-  document.addEventListener('DOMContentLoaded', () => {
-    const passInput = document.getElementById('login-pass');
-    if (passInput) passInput.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-    ['product-modal','payment-modal'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
-    });
+        <div class="product-actions">
+          <button class="act-btn" onclick="editProduct('${p.id}')">✏️ Edit</button>
+          <button class="act-btn danger" onclick="deleteProduct('${p.id}')">🗑️ Delete</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
   });
+}
+
+/* ══════════════════════════ DATA INIT ══════════════════════════ */
+// Now handled by Firebase onValue listeners above
+
+function refreshStats() {
+  const sp = document.getElementById('stat-products');
+  const sy = document.getElementById('stat-payments');
+  const sn = document.getElementById('stat-pending');
+  const sv = document.getElementById('stat-verified');
+  if (sp) sp.textContent = products.length;
+  if (sy) sy.textContent = payments.length;
+  if (sn) sn.textContent = payments.filter(p => p.status === 'pending').length;
+  if (sv) sv.textContent = payments.filter(p => p.status === 'verified').length;
+}
+
+/* ══════════════════════════ CLOUD SYNC ══════════════════════════ */
+function saveDataToFirebase(key, val) {
+  // Key is 'products' or 'payments'
+  // Realtime database uses 'set' on a specific reference
+  const targetRef = ref(db, key);
+  
+  // Convert array to object mapping to avoid array-index issues in Firebase
+  const dataMap = {};
+  val.forEach(item => {
+    if (item.id) dataMap[item.id] = item;
+  });
+
+  set(targetRef, dataMap).catch(e => {
+    console.error('Firebase Sync Error:', e);
+    toast('⚠️ Cloud Sync Failed! Check internet.');
+  });
+}
+
+
+/* ── multi-image handling ── */
+function handleFiles(files) {
+  const remaining = 10 - currentImages.length;
+  const toAdd = Array.from(files).slice(0, remaining);
+  toAdd.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      currentImages.push(e.target.result);
+      renderPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('img-input').value = '';
+}
+
+function handleDrag(e, over) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.toggle('drag', over);
+}
+function handleDrop(e) {
+  e.preventDefault();
+  handleDrag(e, false);
+  handleFiles(e.dataTransfer.files);
+}
+
+function renderPreviews() {
+  const wrap = document.getElementById('img-previews');
+  const info = document.getElementById('img-count-info');
+  wrap.innerHTML = '';
+  currentImages.forEach((src, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'img-thumb';
+    thumb.innerHTML = `<img src="${src}" alt="Preview ${i+1}"/>
+      <button class="rm" onclick="removeImg(${i})">✕</button>`;
+    wrap.appendChild(thumb);
+  });
+  info.textContent = currentImages.length > 0
+    ? `${currentImages.length}/10 image${currentImages.length > 1 ? 's' : ''} uploaded`
+    : '';
+}
+
+function removeImg(i) {
+  currentImages.splice(i, 1);
+  renderPreviews();
+}
+
+/* ── image viewer ── */
+let viewerImages = [], viewerIndex = 0;
+
+function openViewer(productId, startIdx) {
+  const p = products.find(x => x.id === productId);
+  if (!p || !p.images || !p.images.length) return;
+  viewerImages = p.images;
+  viewerIndex  = startIdx || 0;
+  updateViewer();
+  document.getElementById('img-viewer').classList.add('show');
+}
+
+function updateViewer() {
+  document.getElementById('viewer-img').src   = viewerImages[viewerIndex];
+  document.getElementById('viewer-counter').textContent = `${viewerIndex + 1} / ${viewerImages.length}`;
+}
+
+function viewerNav(dir) {
+  viewerIndex = (viewerIndex + dir + viewerImages.length) % viewerImages.length;
+  updateViewer();
+}
+
+function closeViewer(e) {
+  if (!e || e.target === document.getElementById('img-viewer')) {
+    document.getElementById('img-viewer').classList.remove('show');
+  }
+}
+
+/* ══════════════════════════ PAYMENTS ══════════════════════════ */
+let payFilterText   = '';
+let payFilterStatus = 'all';
+
+function openAddPaymentModal() {
+  ['pay-name','pay-ref','pay-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-date').value   = new Date().toISOString().split('T')[0];
+  document.getElementById('pay-status').value = 'pending';
+  document.getElementById('payment-modal').classList.add('show');
+}
+
+function closePaymentModal() {
+  document.getElementById('payment-modal').classList.remove('show');
+}
+
+function savePayment() {
+  const name   = document.getElementById('pay-name').value.trim();
+  const amount = parseFloat(document.getElementById('pay-amount').value);
+  const date   = document.getElementById('pay-date').value;
+  if (!name)        { toast('Please enter a customer name.'); return; }
+  if (isNaN(amount)){ toast('Please enter the amount.'); return; }
+  if (!date)        { toast('Please select a date.'); return; }
+
+  const id = Date.now().toString();
+  const entry = {
+    id,
+    name,
+    amount,
+    date,
+    ref:    document.getElementById('pay-ref').value.trim(),
+    note:   document.getElementById('pay-note').value.trim(),
+    status: document.getElementById('pay-status').value,
+  };
+  
+  set(ref(db, 'payments/' + id), entry);
+  closePaymentModal();
+  toast('Payment logged! ✅');
+}
+
+function updatePaymentStatus(id, status) {
+  update(ref(db, 'payments/' + id), { status });
+  toast(`Payment marked as ${status} ✅`);
+}
+
+function deletePayment(id) {
+  if (!confirm('Delete this payment record?')) return;
+  remove(ref(db, 'payments/' + id));
+  toast('Record deleted.');
+}
+
+
+function filterPayments(val)       { payFilterText   = val.toLowerCase(); renderPayments(); }
+function filterPaymentStatus(val)  { payFilterStatus = val;               renderPayments(); }
+
+function renderPayments() {
+  const tbody = document.getElementById('payments-tbody');
+  const empty = document.getElementById('pay-empty');
+  tbody.innerHTML = '';
+
+  let filtered = payments.filter(p => {
+    const matchStatus = payFilterStatus === 'all' || p.status === payFilterStatus;
+    const matchText   = !payFilterText ||
+      p.name.toLowerCase().includes(payFilterText) ||
+      (p.ref  || '').toLowerCase().includes(payFilterText) ||
+      (p.note || '').toLowerCase().includes(payFilterText);
+    return matchStatus && matchText;
+  });
+
+  filtered = filtered.slice().reverse(); // newest first
+
+  if (filtered.length === 0) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  filtered.forEach((p, idx) => {
+    const statusClass = { pending: 'status-pending', verified: 'status-verified', rejected: 'status-rejected' }[p.status] || '';
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td style="color:var(--muted)">${filtered.length - idx}</td>
+      <td>${p.date}</td>
+      <td><strong>${p.name}</strong></td>
+      <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.note || '—'}</td>
+      <td><strong>₹${parseFloat(p.amount).toLocaleString('en-IN')}</strong></td>
+      <td style="font-family:monospace;font-size:0.8rem">${p.ref || '—'}</td>
+      <td><span class="status-pill ${statusClass}">${p.status.charAt(0).toUpperCase()+p.status.slice(1)}</span></td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${p.status !== 'verified' ? `<button class="tbl-btn approve" onclick="updatePaymentStatus('${p.id}','verified')">✅ Verify</button>` : ''}
+          ${p.status !== 'rejected' ? `<button class="tbl-btn reject"  onclick="updatePaymentStatus('${p.id}','rejected')">❌ Reject</button>` : ''}
+          ${p.status !== 'pending'  ? `<button class="tbl-btn"         onclick="updatePaymentStatus('${p.id}','pending')">⏳ Reset</button>` : ''}
+          <button class="tbl-btn danger" onclick="deletePayment('${p.id}')">🗑️</button>
+        </div>
+      </td>`;
+    tbody.appendChild(row);
+  });
+}
+
+/* ══════════════════════════ UTILS ══════════════════════════ */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Export functions to window for HTML onclick attributes
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.switchTab = switchTab;
+window.openAddModal = openAddModal;
+window.closeProductModal = closeProductModal;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+window.saveProduct = saveProduct;
+window.handleFiles = handleFiles;
+window.handleDrag = handleDrag;
+window.handleDrop = handleDrop;
+window.removeImg = removeImg;
+window.openViewer = openViewer;
+window.viewerNav = viewerNav;
+window.closeViewer = closeViewer;
+window.openAddPaymentModal = openAddPaymentModal;
+window.closePaymentModal = closePaymentModal;
+window.savePayment = savePayment;
+window.updatePaymentStatus = updatePaymentStatus;
+window.deletePayment = deletePayment;
+window.filterPayments = filterPayments;
+window.filterPaymentStatus = filterPaymentStatus;
+window.goToSlide = goToSlide;
+window.moveSlider = moveSlider;
+
+// Final Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+...
 </script>
 </body>
 </html>
