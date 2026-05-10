@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -1905,6 +1906,209 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* =====================================================================
+       📦 PORTAL STYLES (Integrated from customer-portal.html)
+       ===================================================================== */
+    :root {
+      /* Re-declaring some specific portal vars to avoid conflicts */
+      --amber: #fef3e2;
+      --amber-deep: #b87a00;
+      --sky: #e1f5fe;
+      --sky-deep: #0288d1;
+      --sage-deep: #2e7d32;
+    }
+
+    .portal-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      min-height: 60vh;
+    }
+
+    .login-box {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow-lg);
+      max-width: 450px;
+      margin: 2rem auto;
+    }
+
+    .login-tabs {
+      display: flex;
+      background: var(--cream);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 2rem;
+      gap: 4px;
+    }
+    .login-tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .login-tab.active {
+      background: var(--white);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .portal-field-group { margin-bottom: 1.2rem; text-align: left; }
+    .portal-field-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-mid);
+      margin-bottom: 6px;
+    }
+    .portal-field-group input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .portal-field-group input:focus { border-color: var(--lavender-deep); }
+
+    .btn-portal {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--lavender-deep);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-portal:hover { opacity: 0.9; }
+
+    .portal-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 1.5rem 0;
+      color: var(--text-mid);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+    .portal-divider::before, .portal-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Guest lookup */
+    .portal-lookup {
+      background: var(--blush);
+      border-radius: 16px;
+      padding: 1.2rem;
+    }
+    .lookup-row { display: flex; gap: 8px; margin-top: 10px; }
+    .lookup-row input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+    }
+
+    /* Portal Content */
+    .portal-welcome {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .portal-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-pill {
+      background: var(--white);
+      padding: 1.2rem;
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .stat-pill .icon { font-size: 1.5rem; }
+    .stat-pill .val { font-size: 1.2rem; font-weight: 700; display: block; }
+    .stat-pill .lbl { font-size: 0.7rem; color: var(--text-mid); text-transform: uppercase; }
+
+    .order-card {
+      background: var(--white);
+      border-radius: 18px;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .order-card-header {
+      padding: 1rem 1.5rem;
+      background: var(--cream);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .order-card-body { padding: 1.2rem 1.5rem; }
+    
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .s-pending   { background: var(--amber);  color: var(--amber-deep); }
+    .s-confirmed { background: var(--lavender);  color: var(--lavender-deep); }
+    .s-shipped   { background: var(--sky);    color: var(--sky-deep); }
+    .s-delivered { background: var(--sage);   color: var(--sage-deep); }
+    .s-cancelled { background: #ffeaea;       color: var(--red); }
+
+    .track-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 1.5rem 0;
+      padding: 0 10px;
+    }
+    .track-steps::before {
+      content: ''; position: absolute; top: 12px; left: 20px; right: 20px; height: 2px; background: var(--border); z-index: 0;
+    }
+    .track-step {
+      position: relative; z-index: 1; text-align: center; flex: 1;
+    }
+    .step-dot {
+      width: 24px; height: 24px; border-radius: 50%; background: var(--white); border: 2px solid var(--border);
+      margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem;
+    }
+    .track-step.done .step-dot { background: var(--lavender-deep); border-color: var(--lavender-deep); color: white; }
+    .step-label { font-size: 0.6rem; font-weight: 600; color: var(--text-mid); }
   </style>
 
   <nav id="mainNav">
@@ -1914,7 +2118,7 @@
       <a onclick="showPage('shop')" id="nav-shop">Shop</a>
       <a onclick="showPage('about')" id="nav-about">About</a>
       <a onclick="showPage('contact')" id="nav-contact">Contact</a>
-      <a onclick="showPage('track')" id="nav-track">Track Order</a>
+      <a onclick="showPage('portal')" id="nav-portal">My Portal</a>
     </div>
     <div class="nav-right">
       <button class="nav-icon-btn" onclick="showPage('cart')" title="Cart" style="position:relative;">🛒<span
@@ -1937,7 +2141,7 @@
       <div class="mobile-menu-item" onclick="showPage('shop');toggleMobileMenu()">Shop</div>
       <div class="mobile-menu-item" onclick="showPage('about');toggleMobileMenu()">About</div>
       <div class="mobile-menu-item" onclick="showPage('contact');toggleMobileMenu()">Contact</div>
-      <div class="mobile-menu-item" onclick="showPage('track');toggleMobileMenu()">Track Order</div>
+      <div class="mobile-menu-item" onclick="showPage('portal');toggleMobileMenu()">My Portal</div>
     </div>
     <div class="mobile-menu-buttons">
       <button class="btn-primary" style="width:100%;text-align:center;" onclick="showPage('shop');toggleMobileMenu()">Start Shopping</button>
@@ -2278,24 +2482,111 @@
     </div>
   </div>
 
-  <!-- ============ TRACK ORDER PAGE ============ -->
-  <div class="page" id="page-track">
+  <!-- ============ CUSTOMER PORTAL PAGE ============ -->
+  <div class="page" id="page-portal">
     <div style="background:linear-gradient(135deg,var(--lavender),var(--blush));padding:3rem 2rem;text-align:center;">
-      <div class="section-tag">Where is my order?</div>
-      <h2 style="font-size:2rem;font-weight:800;color:var(--text);margin-bottom:0.5rem;">Track Your Order 📦</h2>
-      <p style="color:var(--text-mid);">Enter your Order ID below</p>
+      <div class="section-tag">Manage Orders</div>
+      <h2 style="font-size:2rem;font-weight:800;color:var(--text);margin-bottom:0.5rem;">Customer Portal 🧶</h2>
+      <p style="color:var(--text-mid);">Track orders, view history, and manage your account</p>
     </div>
-    <div class="contact-container" style="max-width:500px;text-align:center;">
-      <div class="contact-form-card" style="margin-top:2rem;">
-        <div class="form-group" style="text-align:left;">
-          <label>Order ID (e.g. ORD123...)</label>
-          <input class="form-input" id="trackId" placeholder="Enter Order ID" style="margin-bottom:1rem;" />
-        </div>
-        <button class="btn-primary" id="trackBtn" style="width:100%;" onclick="trackOrder()">🔍 Track Order</button>
-        <div id="trackResult"
-          style="margin-top:1.5rem;text-align:left;display:none;background:var(--cream);padding:1.5rem;border-radius:var(--radius-sm);border:1px solid var(--border);">
+
+    <div class="portal-container">
+      <!-- LOGIN / REGISTER SCREEN -->
+      <div id="portal-login-view">
+        <div class="login-box">
+          <div class="login-tabs">
+            <button class="login-tab active" id="tab-btn-login" onclick="switchPortalTab('login')">Sign In</button>
+            <button class="login-tab" id="tab-btn-register" onclick="switchPortalTab('register')">New Account</button>
+          </div>
+
+          <!-- Sign In Panel -->
+          <div id="panel-login" class="tab-panel active">
+            <div class="portal-field-group">
+              <label>Email Address</label>
+              <input type="email" id="portal-email" placeholder="you@example.com">
+            </div>
+            <div class="portal-field-group">
+              <label>Password</label>
+              <input type="password" id="portal-pass" placeholder="••••••••">
+            </div>
+            <button class="btn-portal" onclick="portalSignIn()">Sign In</button>
+            <div id="login-err" class="err-msg">Invalid email or password</div>
+          </div>
+
+          <!-- Register Panel -->
+          <div id="panel-register" class="tab-panel">
+            <div class="portal-field-group">
+              <label>Full Name</label>
+              <input type="text" id="reg-name" placeholder="Esha">
+            </div>
+            <div class="portal-field-group">
+              <label>Email Address</label>
+              <input type="email" id="reg-email" placeholder="you@example.com">
+            </div>
+            <div class="portal-field-group">
+              <label>Password</label>
+              <input type="password" id="reg-pass" placeholder="••••••••">
+            </div>
+            <button class="btn-portal" onclick="portalRegister()">Create Account</button>
+            <div id="reg-err" class="err-msg">Email already registered</div>
+          </div>
+
+          <div class="portal-divider">OR</div>
+
+          <!-- Guest Lookup -->
+          <div class="portal-lookup">
+            <p style="font-size:0.8rem;color:var(--text-mid);margin-bottom:8px;"><strong>Guest Tracking:</strong> Just enter your Order ID</p>
+            <div class="lookup-row">
+              <input type="text" id="guest-order-id" placeholder="SHA-000000">
+              <button class="btn-portal" style="width:auto;padding:10px 18px;" onclick="portalGuestLookup()">Track</button>
+            </div>
+            <div id="guest-err" class="err-msg">Order ID not found</div>
+          </div>
         </div>
       </div>
+
+      <!-- LOGGED IN VIEW -->
+      <div id="portal-main-view" style="display:none;">
+        <div class="portal-welcome">
+          <div>
+            <h3 style="font-size:1.5rem;font-weight:800;">Welcome back, <span id="portal-user-name">User</span>! ✨</h3>
+            <p style="color:var(--text-mid);font-size:0.9rem;">Here's what's happening with your orders.</p>
+          </div>
+          <button class="btn-secondary" onclick="portalSignOut()" style="padding:8px 16px;font-size:0.8rem;">Sign Out</button>
+        </div>
+
+        <div class="portal-stats">
+          <div class="stat-pill">
+            <span class="icon">📦</span>
+            <div><span class="val" id="stat-total-orders">0</span><span class="lbl">Total Orders</span></div>
+          </div>
+          <div class="stat-pill">
+            <span class="icon">🚚</span>
+            <div><span class="val" id="stat-active-orders">0</span><span class="lbl">Active</span></div>
+          </div>
+          <div class="stat-pill">
+            <span class="icon">✨</span>
+            <div><span class="val" id="stat-completed-orders">0</span><span class="lbl">Completed</span></div>
+          </div>
+        </div>
+
+        <h4 style="margin-bottom:1rem;font-weight:700;">Order History</h4>
+        <div id="portal-orders-list">
+          <!-- filled by JS -->
+        </div>
+        <div id="portal-empty-orders" style="display:none;text-align:center;padding:3rem;color:var(--text-mid);">
+          <div style="font-size:3rem;margin-bottom:1rem;">🧶</div>
+          <p>No orders found. Start shopping to see them here!</p>
+          <button class="btn-primary" style="margin-top:1rem;" onclick="showPage('shop')">Browse Shop</button>
+        </div>
+      </div>
+
+      <!-- GUEST TRACKING RESULT VIEW -->
+      <div id="portal-guest-result" style="display:none;">
+        <button class="btn-secondary" onclick="backToPortalLogin()" style="margin-bottom:1rem;">← Back</button>
+        <div id="guest-result-content"></div>
+      </div>
+
     </div>
   </div>
 
@@ -2747,6 +3038,7 @@
       if (page === 'wishlist') renderWishlist();
       if (page === 'shop') renderShop();
       if (page === 'home') initHome();
+      if (page === 'portal') initPortal();
       if (page === 'checkout') renderCheckoutSummary();
       setupFadeIns();
     }
@@ -3138,9 +3430,26 @@
 
         const data = await response.json();
         if (data.status === "success") {
+          // Save to local orders for portal
+          const localOrders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
+          const newId = data.orderId || ('SHA-' + Math.floor(100000 + Math.random() * 900000));
+          const newOrder = {
+            id: newId,
+            customerId: portalUser ? portalUser.email : (fn + ' ' + ln), // using name as id if not logged in
+            date: new Date().toISOString().split('T')[0],
+            items: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+            status: 'pending',
+            paymentStatus: 'pending',
+            paymentRef: '',
+            trackingNo: '',
+            shipping: { name: fn + ' ' + ln, address: addr, city: city, state: '', pin: '', phone: ph }
+          };
+          localOrders.push(newOrder);
+          localStorage.setItem('cbs_orders', JSON.stringify(localOrders));
+          
           showToast('Order placed! Redirecting... 🧶');
-          window.location.href = `payment.html?amount=${total}&note=${encodeURIComponent('Order by ' + fn + ' ' + ln)}`;
-          return; // Stop further execution in success block
+          window.location.href = `payment.html?amount=${total}&note=${encodeURIComponent(newId)}`;
+          return;
         } else {
           showToast('⚠️ Error: ' + (data.message || 'Could not place order.'));
         }
@@ -3155,61 +3464,163 @@
 
     function closeModal() { document.getElementById('orderModal').classList.remove('open'); }
 
-
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEMxXp66GUj2biODCvesLs43p6dM1yk4oOs4aTtpNidp6vPQnyZtxcQPpU5BsoevH1FA/exec";
 
-    async function trackOrder() {
-      const id = document.getElementById('trackId').value.trim();
-      if (!id) { showToast('Please enter an Order ID'); return; }
-      const btn = document.getElementById('trackBtn');
-      const resDiv = document.getElementById('trackResult');
-      btn.innerHTML = '⏳ Searching...'; btn.disabled = true; resDiv.style.display = 'none';
+/* =====================================================================
+   📦 CUSTOMER PORTAL LOGIC (Integrated from customer-portal.html)
+   ===================================================================== */
+let portalUser = null;
+const PORTAL_STATUS_STEPS = ['pending', 'confirmed', 'shipped', 'delivered'];
+const PORTAL_STEP_NAMES = ['Ordered', 'Confirmed', 'Shipped', 'Delivered'];
 
-      function showMockResult(orderId) {
-        resDiv.style.display = 'block';
-        if (orderId.toUpperCase() === 'ORD123') {
-          resDiv.innerHTML = `
-        <div style="font-size:0.85rem;color:var(--text-mid);margin-bottom:0.5rem;">Order <strong>ORD123</strong></div>
-        <div style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;color:var(--text);">Current Status: <span class="status-badge status-Shipped">Shipped</span></div>
-        <div style="font-size:0.9rem;margin-bottom:0.4rem;"><strong>Product:</strong> Camera Keychain x 1</div>
-        <div style="font-size:0.9rem;"><strong>Total:</strong> ₹250</div>
-      `;
-        } else if (orderId.toUpperCase() === 'ORD124') {
-          resDiv.innerHTML = `
-        <div style="font-size:0.85rem;color:var(--text-mid);margin-bottom:0.5rem;">Order <strong>ORD124</strong></div>
-        <div style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;color:var(--text);">Current Status: <span class="status-badge status-Pending">Pending</span></div>
-        <div style="font-size:0.9rem;margin-bottom:0.4rem;"><strong>Product:</strong> Boho Tote Bag x 1</div>
-        <div style="font-size:0.9rem;"><strong>Total:</strong> ₹2800</div>
-      `;
-        } else {
-          resDiv.innerHTML = `<div style="color:#d32f2f;font-weight:600;">⚠️ Order not found. Please check your Order ID and try again.</div>`;
-        }
-      }
+function initPortal() {
+  if (portalUser) {
+    document.getElementById('portal-login-view').style.display = 'none';
+    document.getElementById('portal-guest-result').style.display = 'none';
+    document.getElementById('portal-main-view').style.display = 'block';
+    renderPortalDashboard();
+  } else {
+    document.getElementById('portal-main-view').style.display = 'none';
+    document.getElementById('portal-guest-result').style.display = 'none';
+    document.getElementById('portal-login-view').style.display = 'block';
+  }
+}
 
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=track&orderId=${encodeURIComponent(id)}`);
-        const text = await res.text();
-        let data;
-        try { data = JSON.parse(text); } catch (e) {
-          showMockResult(id); return;
-        }
-        resDiv.style.display = 'block';
-        if (data.status === 'success') {
-          resDiv.innerHTML = `
-        <div style="font-size:0.85rem;color:var(--text-mid);margin-bottom:0.5rem;">Order <strong>${data.order.id}</strong></div>
-        <div style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;color:var(--text);">Current Status: <span class="status-badge status-${data.order.status || 'Pending'}">${data.order.status || 'Pending'}</span></div>
-        <div style="font-size:0.9rem;margin-bottom:0.4rem;"><strong>Product:</strong> ${data.order.product}</div>
-        <div style="font-size:0.9rem;"><strong>Total:</strong> ₹${Number(data.order.price).toLocaleString()}</div>
-      `;
-        } else {
-          resDiv.innerHTML = `<div style="color:#d32f2f;font-weight:600;">⚠️ ${data.message || 'Order not found.'}</div>`;
-        }
-      } catch (e) {
-        // fetch itself failed (file:// CORS block or no internet) — use mock
-        showMockResult(id);
-      }
-      finally { btn.innerHTML = '🔍 Track Order'; btn.disabled = false; }
-    }
+function switchPortalTab(tab) {
+  document.getElementById('tab-btn-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-btn-register').classList.toggle('active', tab === 'register');
+  document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+  document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+}
+
+function portalSignIn() {
+  const email = document.getElementById('portal-email').value.trim().toLowerCase();
+  const pass = document.getElementById('portal-pass').value;
+  const customers = JSON.parse(localStorage.getItem('cbs_customers') || '[]');
+  const user = customers.find(u => u.email === email && u.password === pass);
+
+  if (user) {
+    portalUser = user;
+    document.getElementById('login-err').style.display = 'none';
+    initPortal();
+    showToast(`Welcome back, ${user.name}! 👋`);
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function portalRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const pass = document.getElementById('reg-pass').value;
+
+  if (!name || !email || !pass) { showToast('Please fill all fields'); return; }
+
+  const customers = JSON.parse(localStorage.getItem('cbs_customers') || '[]');
+  if (customers.find(u => u.email === email)) {
+    document.getElementById('reg-err').style.display = 'block';
+    return;
+  }
+
+  const newUser = { name, email, password: pass };
+  customers.push(newUser);
+  localStorage.setItem('cbs_customers', JSON.stringify(customers));
+  portalUser = newUser;
+  document.getElementById('reg-err').style.display = 'none';
+  initPortal();
+  showToast('Account created successfully! 🎉');
+}
+
+function portalSignOut() {
+  portalUser = null;
+  initPortal();
+}
+
+function renderPortalDashboard() {
+  const orders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
+  const userOrders = orders.filter(o => o.customerId === portalUser.email);
+  
+  document.getElementById('portal-user-name').textContent = portalUser.name.split(' ')[0];
+  document.getElementById('stat-total-orders').textContent = userOrders.length;
+  document.getElementById('stat-active-orders').textContent = userOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
+  document.getElementById('stat-completed-orders').textContent = userOrders.filter(o => o.status === 'delivered').length;
+
+  const list = document.getElementById('portal-orders-list');
+  const empty = document.getElementById('portal-empty-orders');
+
+  if (userOrders.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    list.innerHTML = userOrders.slice().reverse().map(o => renderOrderCard(o)).join('');
+  }
+}
+
+function portalGuestLookup() {
+  const id = document.getElementById('guest-order-id').value.trim().toUpperCase();
+  const orders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
+  const order = orders.find(o => o.id.toUpperCase() === id);
+
+  if (order) {
+    document.getElementById('guest-err').style.display = 'none';
+    document.getElementById('portal-login-view').style.display = 'none';
+    document.getElementById('portal-guest-result').style.display = 'block';
+    document.getElementById('guest-result-content').innerHTML = renderOrderCard(order, true);
+  } else {
+    document.getElementById('guest-err').style.display = 'block';
+  }
+}
+
+function backToPortalLogin() {
+  document.getElementById('portal-guest-result').style.display = 'none';
+  document.getElementById('portal-login-view').style.display = 'block';
+}
+
+function renderOrderCard(o, isGuest = false) {
+  const total = o.items.reduce((s, it) => s + (it.price * it.qty), 0);
+  const stepIdx = PORTAL_STATUS_STEPS.indexOf(o.status);
+  
+  let stepsHtml = '';
+  if (o.status !== 'cancelled') {
+    stepsHtml = `
+      <div class="track-steps">
+        ${PORTAL_STEP_NAMES.map((name, i) => `
+          <div class="track-step ${i <= stepIdx ? 'done' : ''}">
+            <div class="step-dot">${i < stepIdx ? '✓' : i + 1}</div>
+            <div class="step-label">${name}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="order-card">
+      <div class="order-card-header">
+        <span style="font-family:'DM Mono',monospace; font-weight:600;">${o.id}</span>
+        <span class="status-badge s-${o.status}">${o.status}</span>
+      </div>
+      <div class="order-card-body">
+        <div style="font-size:0.85rem; color:var(--text-mid); margin-bottom:10px;">Ordered on ${o.date}</div>
+        <div style="margin-bottom:12px;">
+          ${o.items.map(it => `<div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:4px;">
+            <span>${it.name} x ${it.qty}</span>
+            <span style="font-weight:600;">₹${(it.price * it.qty).toLocaleString()}</span>
+          </div>`).join('')}
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:10px;">
+          <span style="font-weight:700;">Total</span>
+          <span style="font-weight:800; color:var(--lavender-deep); font-size:1.1rem;">₹${total.toLocaleString()}</span>
+        </div>
+        ${stepsHtml}
+        ${o.trackingNo ? `<div style="margin-top:10px; font-size:0.8rem; background:var(--cream); padding:8px; border-radius:8px;">
+          🚚 <strong>Tracking:</strong> ${o.trackingNo}
+        </div>` : ''}
+      </div>
+    </div>
+  `;
+}
 
     async function loginAdmin() {
       const pin = document.getElementById('adminPin').value.trim();
