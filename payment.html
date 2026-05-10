@@ -490,21 +490,23 @@
     const note = encodeURIComponent(getNote());
     const tr   = 'CBS' + Date.now(); // Transaction Ref
     
-    // Standard parameters for UPI deep links
-    const params = `pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt.toFixed(2) : ''}&tr=${tr}&cu=INR`;
+    // Standard parameters
+    let params = `pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt.toFixed(2) : ''}&cu=INR`;
     
-    // App-specific schemes can help direct the user more accurately
-    // though upi://pay is the universal standard.
+    // For GPay, we use a slightly different approach to avoid the "Add Bank Account" bug
+    if (app === 'gpay') {
+      // Adding &mode=02 and &orgid=000000 often resolves the GPay bank account loop
+      // And we use the universal upi:// scheme which is often more stable than tez://
+      return `upi://pay?${params}&tr=${tr}&mode=02&orgid=000000`;
+    }
+
     switch(app) {
-      case 'gpay':
-        // GPay specific intent for Android/iOS
-        return `tez://upi/pay?${params}`;
       case 'phonepe':
-        return `phonepe://pay?${params}`;
+        return `phonepe://pay?${params}&tr=${tr}`;
       case 'paytm':
-        return `paytmmp://pay?${params}`;
+        return `paytmmp://pay?${params}&tr=${tr}`;
       default:
-        return `upi://pay?${params}`;
+        return `upi://pay?${params}&tr=${tr}`;
     }
   }
 
