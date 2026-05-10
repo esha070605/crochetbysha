@@ -728,7 +728,10 @@
   <div class="panel" id="panel-products">
     <div class="section-head">
       <h2>Products</h2>
-      <button class="btn-add" onclick="openAddModal()">+ Add Product</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn-add" style="background:var(--cream);color:var(--text)" onclick="syncInitialProducts()">📦 Import Previous</button>
+        <button class="btn-add" onclick="openAddModal()">+ Add Product</button>
+      </div>
     </div>
     <div class="product-grid" id="product-grid">
       <!-- filled by JS -->
@@ -1207,6 +1210,35 @@ async function deleteProduct(id) {
   }
 }
 
+/* ══════════════════════════ DATA SYNC ══════════════════════════ */
+const INITIAL_PRODUCTS = [
+  { id: 41, name: 'Hello Kitty Keychain', desc: 'A cute handmade crochet Hello Kitty keychain.', short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains', color: '#fce8f0', img: '🎀', imgBg: 2, badge: 'new', imageUrl: 'Keychains/Hello Kitty Keychain.jpeg', emojis: ['🎀', '✨', '💕'], tags: ['keychain', 'hellokitty', 'gift'], rating: 5, reviews: 15, isNew: true },
+  { id: 42, name: 'Duck Holding Daisy Keychain', desc: 'A lovely handmade crochet duck holding a little daisy keychain.', short: 'Cute bag charm', price: 350, oldPrice: null, category: 'keychains', color: '#fde5c0', img: '🦆', imgBg: 3, badge: 'new', imageUrl: 'Keychains/Duck Holding Daisy Keychain.jpeg', emojis: ['🦆', '🌼', '✨'], tags: ['keychain', 'duck', 'daisy'], rating: 5, reviews: 8, isNew: true },
+  { id: 43, name: 'Mikasa Scarf', desc: 'A warm and stylish handmade crochet Mikasa scarf.', short: 'Winter essential', price: 1100, oldPrice: null, category: 'accessories', color: '#f0c8d8', img: '🧣', imgBg: 2, badge: 'new', imageUrl: 'Accessories/Mikasa Sacarf.jpeg', emojis: ['🧣', '❄️', '✨'], tags: ['scarf', 'winter', 'mikasa'], rating: 5, reviews: 12, isNew: true },
+  { id: 44, name: 'Pillow', desc: 'A soft and comfortable handmade crochet pillow.', short: 'Cozy home decor', price: 1150, oldPrice: null, category: 'accessories', color: '#d0ebe3', img: '🛏️', imgBg: 4, badge: 'new', imageUrl: 'Accessories/Pillow.jpeg', emojis: ['🛏️', '✨', '💤'], tags: ['pillow', 'decor', 'cozy'], rating: 5, reviews: 8, isNew: true },
+  { id: 45, name: 'Scarf (Mini)', desc: 'A cute mini handmade crochet scarf.', short: 'Winter essential', price: 750, oldPrice: null, category: 'accessories', color: '#f0eaff', img: '🧣', imgBg: 1, badge: 'new', imageUrl: 'Accessories/Scarf (Mini).jpeg', emojis: ['🧣', '❄️', '✨'], tags: ['scarf', 'mini', 'winter'], rating: 5, reviews: 10, isNew: true },
+  { id: 46, name: 'Volleyball Keychain', desc: 'A fun handmade crochet volleyball keychain.', short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains', color: '#fef3e2', img: '🏐', imgBg: 3, badge: 'new', imageUrl: 'Keychains/Volleyball Keychain (1 piece).jpeg', emojis: ['🏐', '✨', '💛'], tags: ['keychain', 'volleyball', 'sports'], rating: 5, reviews: 8, isNew: true },
+  { id: 47, name: 'Frog Keychain', desc: 'An adorable tiny handmade crochet frog keychain.', short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains', color: '#d0ebe3', img: '🐸', imgBg: 4, badge: 'new', imageUrl: 'Keychains/Frog Keychain.jpeg', emojis: ['🐸', '✨', '💚'], tags: ['keychain', 'frog', 'cute'], rating: 5, reviews: 14, isNew: true },
+  { id: 48, name: 'Tooth Keychain', desc: 'A cute handmade crochet tooth keychain. Perfect for dentists!', short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains', color: '#f0eaff', img: '🦷', imgBg: 1, badge: 'new', imageUrl: 'Keychains/Tooth Keychain.jpeg', emojis: ['🦷', '✨', '🤍'], tags: ['keychain', 'tooth', 'dentist'], rating: 5, reviews: 6, isNew: true }
+];
+
+async function syncInitialProducts() {
+  if (!confirm('This will upload all previous default products to Firebase. Continue?')) return;
+  toast('Syncing products... Please wait.');
+  try {
+    for (const p of INITIAL_PRODUCTS) {
+      // Check if product with same name exists to avoid duplicates
+      if (!products.find(x => x.name === p.name)) {
+        await addDoc(collection(db, "products"), { ...p, id: '' });
+      }
+    }
+    toast('Old products synced! ✅');
+  } catch (e) {
+    console.error(e);
+    alert('Error syncing: ' + e.message + '\n\nMake sure your Firestore Security Rules allow writes!');
+  }
+}
+
 async function saveProduct() {
   console.log('Saving product... ID:', editingProductId);
   const name  = document.getElementById('prod-name').value.trim();
@@ -1245,15 +1277,17 @@ async function saveProduct() {
     } else {
       const docRef = await addDoc(collection(db, "products"), {
         ...data,
-        id: '' // will be set after
+        id: '' 
       });
+      // Immediately set the ID to the firestore doc ID for consistency
       await updateDoc(docRef, { id: docRef.id });
     }
     closeProductModal();
     toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
   } catch (e) {
-    console.error(e);
-    toast('Error saving product.');
+    console.error('Firestore Error:', e);
+    alert('Error saving product: ' + e.message + '\n\nCheck your Firebase Console -> Firestore -> Rules.\nThey should be set to "allow read, write: if true;" for testing.');
+    toast('Error saving product. ❌');
   }
 }
 
