@@ -1044,6 +1044,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
     // Your web app's Firebase configuration
     const firebaseConfig = {
@@ -1059,9 +1060,11 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
     // Make Firebase functions available globally
     window.db = db;
+    window.storage = storage;
     window.collection = collection;
     window.addDoc = addDoc;
     window.getDocs = getDocs;
@@ -1071,6 +1074,12 @@
     window.onSnapshot = onSnapshot;
     window.query = query;
     window.orderBy = orderBy;
+    
+    // Storage functions
+    window.sRef = ref;
+    window.uploadBytes = uploadBytes;
+    window.getDownloadURL = getDownloadURL;
+    window.deleteObject = deleteObject;
   </script>
 
   <script>
@@ -1241,37 +1250,61 @@ async function syncInitialProducts() {
 
 async function saveProduct() {
   console.log('Saving product... ID:', editingProductId);
+  const btn = document.querySelector('.btn-save');
+  const oldText = btn.textContent;
+  
   const name  = document.getElementById('prod-name').value.trim();
   const price = parseFloat(document.getElementById('prod-price').value);
   
   if (!name)        { toast('Please enter a product name.'); return; }
   if (isNaN(price)) { toast('Please enter a valid price.'); return; }
 
-  const existing = editingProductId ? products.find(x => String(x.id) === String(editingProductId)) : null;
-
-  const data = {
-    ...(existing || {
-      short:    'Handmade with love',
-      img:      '🧶',
-      imgBg:    Math.floor(Math.random() * 6) + 1,
-      badge:    'new',
-      emojis:   ['🧶', '✨', '💖'],
-      tags:     [document.getElementById('prod-cat').value, 'handmade'],
-      rating:   5,
-      reviews:  0,
-      isNew:    true,
-    }),
-    name,
-    price,
-    category: document.getElementById('prod-cat').value,
-    stock:    document.getElementById('prod-stock').value,
-    desc:     document.getElementById('prod-desc').value.trim(),
-    images:   [...currentImages],
-    imageUrl: currentImages.length > 0 ? currentImages[0] : (existing ? existing.imageUrl : null),
-    updatedAt: new Date().toISOString(),
-  };
+  btn.disabled = true;
+  btn.textContent = 'Uploading Images...';
 
   try {
+    const existing = editingProductId ? products.find(x => String(x.id) === String(editingProductId)) : null;
+
+    // 1. Process Images: Upload any base64 images to Firebase Storage
+    const finalImageUrls = [];
+    for (let i = 0; i < currentImages.length; i++) {
+      const img = currentImages[i];
+      if (img.startsWith('data:image')) {
+        // It's a new base64 image, upload to Storage
+        const blob = await (await fetch(img)).blob();
+        const fileName = `product_images/${Date.now()}_${i}.webp`;
+        const storageRef = sRef(storage, fileName);
+        await uploadBytes(storageRef, blob);
+        const url = await getDownloadURL(storageRef);
+        finalImageUrls.push(url);
+      } else {
+        // It's already a URL
+        finalImageUrls.push(img);
+      }
+    }
+
+    const data = {
+      ...(existing || {
+        short:    'Handmade with love',
+        img:      '🧶',
+        imgBg:    Math.floor(Math.random() * 6) + 1,
+        badge:    'new',
+        emojis:   ['🧶', '✨', '💖'],
+        tags:     [document.getElementById('prod-cat').value, 'handmade'],
+        rating:   5,
+        reviews:  0,
+        isNew:    true,
+      }),
+      name,
+      price,
+      category: document.getElementById('prod-cat').value,
+      stock:    document.getElementById('prod-stock').value,
+      desc:     document.getElementById('prod-desc').value.trim(),
+      images:   finalImageUrls,
+      imageUrl: finalImageUrls.length > 0 ? finalImageUrls[0] : (existing ? existing.imageUrl : null),
+      updatedAt: new Date().toISOString(),
+    };
+
     if (editingProductId) {
       await updateDoc(doc(db, "products", String(editingProductId)), data);
     } else {
@@ -1279,15 +1312,18 @@ async function saveProduct() {
         ...data,
         id: '' 
       });
-      // Immediately set the ID to the firestore doc ID for consistency
       await updateDoc(docRef, { id: docRef.id });
     }
+    
     closeProductModal();
     toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
   } catch (e) {
-    console.error('Firestore Error:', e);
-    alert('Error saving product: ' + e.message + '\n\nCheck your Firebase Console -> Firestore -> Rules.\nThey should be set to "allow read, write: if true;" for testing.');
+    console.error('Save Error:', e);
+    alert('Error saving: ' + e.message + '\n\nMake sure Firebase Storage is enabled in your console!');
     toast('Error saving product. ❌');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = oldText;
   }
 }
 
