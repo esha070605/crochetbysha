@@ -6,6 +6,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <style>
+    /* Firebase SDK */
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDrIp_t3pZ1xQ8Egf6NxBXZQzv8iVvuHBY",
+      authDomain: "crochetbysha-9e3b1.firebaseapp.com",
+      projectId: "crochetbysha-9e3b1",
+      storageBucket: "crochetbysha-9e3b1.firebasestorage.app",
+      messagingSenderId: "372180218462",
+      appId: "1:372180218462:web:bb1bf32cca86fdbb9bbacf",
+      measurementId: "G-X0MVEDXB5D"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.db = db;
+    window.collection = collection;
+    window.addDoc = addDoc;
+    window.getDocs = getDocs;
+    window.deleteDoc = deleteDoc;
+    window.doc = doc;
+    window.updateDoc = updateDoc;
+    window.onSnapshot = onSnapshot;
+    window.query = query;
+    window.where = where;
+    window.orderBy = orderBy;
+    window.limit = limit;
+  </script>
+  <style>
     * {
       margin: 0;
       padding: 0;
@@ -2968,19 +3001,15 @@
       }
     ];
 
-    let PRODUCTS = JSON.parse(localStorage.getItem('sha_products')) || [];
-    if (PRODUCTS.length === 0) {
-      PRODUCTS = INITIAL_PRODUCTS;
-      localStorage.setItem('sha_products', JSON.stringify(PRODUCTS));
-    }
-
-    // Storage listener for real-time sync with Admin Dashboard
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'sha_products') {
-        PRODUCTS = JSON.parse(e.newValue) || [];
+    let PRODUCTS = [];
+    
+    // Initial fetch for products
+    document.addEventListener('DOMContentLoaded', () => {
+      onSnapshot(collection(db, "products"), (snapshot) => {
+        PRODUCTS = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
         if (typeof renderShop === 'function') renderShop();
         if (typeof initHome === 'function') initHome();
-      }
+      });
     });
 
     const TESTIMONIALS = [
@@ -3430,12 +3459,9 @@
 
         const data = await response.json();
         if (data.status === "success") {
-          // Save to local orders for portal
-          const localOrders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
-          const newId = data.orderId || ('SHA-' + Math.floor(100000 + Math.random() * 900000));
+          // Save to Firestore orders for portal
           const newOrder = {
-            id: newId,
-            customerId: portalUser ? portalUser.email : (fn + ' ' + ln), // using name as id if not logged in
+            customerId: portalUser ? portalUser.email : (fn + ' ' + ln),
             date: new Date().toISOString().split('T')[0],
             items: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
             status: 'pending',
@@ -3444,11 +3470,22 @@
             trackingNo: '',
             shipping: { name: fn + ' ' + ln, address: addr, city: city, state: '', pin: '', phone: ph }
           };
-          localOrders.push(newOrder);
-          localStorage.setItem('cbs_orders', JSON.stringify(localOrders));
           
-          showToast('Order placed! Redirecting... 🧶');
-          window.location.href = `payment.html?amount=${total}&note=${encodeURIComponent(newId)}`;
+          try {
+            const docRef = await addDoc(collection(db, "orders"), {
+              ...newOrder,
+              id: '' // set below
+            });
+            const orderId = 'SHA-' + docRef.id.substring(0,6).toUpperCase();
+            await updateDoc(docRef, { id: orderId });
+            
+            showToast('Order placed! Redirecting... 🧶');
+            window.location.href = `payment.html?amount=${total}&note=${encodeURIComponent(orderId)}`;
+          } catch (e) {
+            console.error(e);
+            showToast('Order placed but failed to save to portal. Redirecting anyway...');
+            window.location.href = `payment.html?amount=${total}&note=${encodeURIComponent(fn + ' ' + ln)}`;
+          }
           return;
         } else {
           showToast('⚠️ Error: ' + (data.message || 'Could not place order.'));
@@ -3493,42 +3530,54 @@ function switchPortalTab(tab) {
   document.getElementById('panel-register').classList.toggle('active', tab === 'register');
 }
 
-function portalSignIn() {
+async function portalSignIn() {
   const email = document.getElementById('portal-email').value.trim().toLowerCase();
   const pass = document.getElementById('portal-pass').value;
-  const customers = JSON.parse(localStorage.getItem('cbs_customers') || '[]');
-  const user = customers.find(u => u.email === email && u.password === pass);
-
-  if (user) {
-    portalUser = user;
-    document.getElementById('login-err').style.display = 'none';
-    initPortal();
-    showToast(`Welcome back, ${user.name}! 👋`);
-  } else {
-    document.getElementById('login-err').style.display = 'block';
+  
+  try {
+    const q = query(collection(db, "customers"), where("email", "==", email), where("password", "==", pass), limit(1));
+    const snapshot = await getDocs(q);
+    
+    if (!snapshot.empty) {
+      portalUser = { ...snapshot.docs[0].data(), id: snapshot.docs[0].id };
+      document.getElementById('login-err').style.display = 'none';
+      initPortal();
+      showToast(`Welcome back, ${portalUser.name}! 👋`);
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+    }
+  } catch (e) {
+    console.error(e);
+    showToast('Error signing in.');
   }
 }
 
-function portalRegister() {
+async function portalRegister() {
   const name = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim().toLowerCase();
   const pass = document.getElementById('reg-pass').value;
 
   if (!name || !email || !pass) { showToast('Please fill all fields'); return; }
 
-  const customers = JSON.parse(localStorage.getItem('cbs_customers') || '[]');
-  if (customers.find(u => u.email === email)) {
-    document.getElementById('reg-err').style.display = 'block';
-    return;
-  }
+  try {
+    const q = query(collection(db, "customers"), where("email", "==", email), limit(1));
+    const snapshot = await getDocs(q);
+    
+    if (!snapshot.empty) {
+      document.getElementById('reg-err').style.display = 'block';
+      return;
+    }
 
-  const newUser = { name, email, password: pass };
-  customers.push(newUser);
-  localStorage.setItem('cbs_customers', JSON.stringify(customers));
-  portalUser = newUser;
-  document.getElementById('reg-err').style.display = 'none';
-  initPortal();
-  showToast('Account created successfully! 🎉');
+    const newUser = { name, email, password: pass };
+    const docRef = await addDoc(collection(db, "customers"), newUser);
+    portalUser = { ...newUser, id: docRef.id };
+    document.getElementById('reg-err').style.display = 'none';
+    initPortal();
+    showToast('Account created successfully! 🎉');
+  } catch (e) {
+    console.error(e);
+    showToast('Error creating account.');
+  }
 }
 
 function portalSignOut() {
@@ -3536,39 +3585,53 @@ function portalSignOut() {
   initPortal();
 }
 
-function renderPortalDashboard() {
-  const orders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
-  const userOrders = orders.filter(o => o.customerId === portalUser.email);
-  
+async function renderPortalDashboard() {
   document.getElementById('portal-user-name').textContent = portalUser.name.split(' ')[0];
-  document.getElementById('stat-total-orders').textContent = userOrders.length;
-  document.getElementById('stat-active-orders').textContent = userOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
-  document.getElementById('stat-completed-orders').textContent = userOrders.filter(o => o.status === 'delivered').length;
+  
+  try {
+    const q = query(collection(db, "orders"), where("customerId", "==", portalUser.email));
+    const snapshot = await getDocs(q);
+    const userOrders = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 
-  const list = document.getElementById('portal-orders-list');
-  const empty = document.getElementById('portal-empty-orders');
+    document.getElementById('stat-total-orders').textContent = userOrders.length;
+    document.getElementById('stat-active-orders').textContent = userOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
+    document.getElementById('stat-completed-orders').textContent = userOrders.filter(o => o.status === 'delivered').length;
 
-  if (userOrders.length === 0) {
-    list.innerHTML = '';
-    empty.style.display = 'block';
-  } else {
-    empty.style.display = 'none';
-    list.innerHTML = userOrders.slice().reverse().map(o => renderOrderCard(o)).join('');
+    const list = document.getElementById('portal-orders-list');
+    const empty = document.getElementById('portal-empty-orders');
+
+    if (userOrders.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+    } else {
+      empty.style.display = 'none';
+      list.innerHTML = userOrders.slice().reverse().map(o => renderOrderCard(o)).join('');
+    }
+  } catch (e) {
+    console.error(e);
+    showToast('Error loading orders.');
   }
 }
 
-function portalGuestLookup() {
-  const id = document.getElementById('guest-order-id').value.trim().toUpperCase();
-  const orders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
-  const order = orders.find(o => o.id.toUpperCase() === id);
-
-  if (order) {
-    document.getElementById('guest-err').style.display = 'none';
-    document.getElementById('portal-login-view').style.display = 'none';
-    document.getElementById('portal-guest-result').style.display = 'block';
-    document.getElementById('guest-result-content').innerHTML = renderOrderCard(order, true);
-  } else {
-    document.getElementById('guest-err').style.display = 'block';
+async function portalGuestLookup() {
+  const idInput = document.getElementById('guest-order-id').value.trim().toUpperCase();
+  
+  try {
+    const q = query(collection(db, "orders"), where("id", "==", idInput), limit(1));
+    const snapshot = await getDocs(q);
+    
+    if (!snapshot.empty) {
+      const order = { ...snapshot.docs[0].data(), id: snapshot.docs[0].id };
+      document.getElementById('guest-err').style.display = 'none';
+      document.getElementById('portal-login-view').style.display = 'none';
+      document.getElementById('portal-guest-result').style.display = 'block';
+      document.getElementById('guest-result-content').innerHTML = renderOrderCard(order, true);
+    } else {
+      document.getElementById('guest-err').style.display = 'block';
+    }
+  } catch (e) {
+    console.error(e);
+    showToast('Error looking up order.');
   }
 }
 

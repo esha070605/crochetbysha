@@ -1037,7 +1037,40 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDrIp_t3pZ1xQ8Egf6NxBXZQzv8iVvuHBY",
+      authDomain: "crochetbysha-9e3b1.firebaseapp.com",
+      projectId: "crochetbysha-9e3b1",
+      storageBucket: "crochetbysha-9e3b1.firebasestorage.app",
+      messagingSenderId: "372180218462",
+      appId: "1:372180218462:web:bb1bf32cca86fdbb9bbacf",
+      measurementId: "G-X0MVEDXB5D"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Make Firebase functions available globally
+    window.db = db;
+    window.collection = collection;
+    window.addDoc = addDoc;
+    window.getDocs = getDocs;
+    window.deleteDoc = deleteDoc;
+    window.doc = doc;
+    window.updateDoc = updateDoc;
+    window.onSnapshot = onSnapshot;
+    window.query = query;
+    window.orderBy = orderBy;
+  </script>
+
+  <script>
 /* ══════════════════════════ UTILS ══════════════════════════ */
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -1048,8 +1081,10 @@ function toast(msg) {
 }
 
 function loadData(key, def) {
-  const prefix = key === 'products' ? 'sha_' : 'cbs_';
-  try { return JSON.parse(localStorage.getItem(prefix + key)) || def; } catch { return def; }
+  if (key === 'products') return products || def;
+  if (key === 'orders')   return allOrders || def;
+  if (key === 'payments') return payments || def;
+  return def;
 }
 
 function saveData(key, val) {
@@ -1065,21 +1100,38 @@ function saveData(key, val) {
 /* ══════════════════════════ AUTH ══════════════════════════ */
 const CREDENTIALS = { username: 'sha_admin', password: 'Crochet@2024!' };
 
+
+
 function doLogin() {
   const u = document.getElementById('login-user').value.trim();
   const p = document.getElementById('login-pass').value;
   if (u === CREDENTIALS.username && p === CREDENTIALS.password) {
     document.getElementById('login-screen').style.display  = 'none';
     document.getElementById('admin-shell').style.display   = 'block';
-    refreshStats();
-    renderProducts();
-    renderPayments();
-    renderAdminOrders();
+    
+    // Set up Real-time listeners
+    onSnapshot(collection(db, "products"), (snapshot) => {
+      products = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      renderProducts();
+      refreshStats();
+    });
+
+    onSnapshot(collection(db, "payments"), (snapshot) => {
+      payments = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      renderPayments();
+      refreshStats();
+    });
+
+    onSnapshot(collection(db, "orders"), (snapshot) => {
+      allOrders = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      renderAdminOrders();
+      refreshStats();
+    });
+
   } else {
     document.getElementById('login-err').style.display = 'block';
   }
 }
-
 function doLogout() {
   document.getElementById('admin-shell').style.display  = 'none';
   document.getElementById('login-screen').style.display = 'flex';
@@ -1144,16 +1196,18 @@ function editProduct(id) {
   document.getElementById('product-modal').classList.add('show');
 }
 
-function deleteProduct(id) {
+async function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
-  products = products.filter(p => String(p.id) !== String(id));
-  saveData('products', products);
-  renderProducts();
-  refreshStats();
-  toast('Product deleted.');
+  try {
+    await deleteDoc(doc(db, "products", String(id)));
+    toast('Product deleted.');
+  } catch (e) {
+    console.error(e);
+    toast('Error deleting product.');
+  }
 }
 
-function saveProduct() {
+async function saveProduct() {
   console.log('Saving product... ID:', editingProductId);
   const name  = document.getElementById('prod-name').value.trim();
   const price = parseFloat(document.getElementById('prod-price').value);
@@ -1175,7 +1229,6 @@ function saveProduct() {
       reviews:  0,
       isNew:    true,
     }),
-    id:       editingProductId || Date.now().toString(),
     name,
     price,
     category: document.getElementById('prod-cat').value,
@@ -1186,17 +1239,22 @@ function saveProduct() {
     updatedAt: new Date().toISOString(),
   };
 
-  if (editingProductId) {
-    products = products.map(p => String(p.id) === String(editingProductId) ? data : p);
-  } else {
-    products.push(data);
+  try {
+    if (editingProductId) {
+      await updateDoc(doc(db, "products", String(editingProductId)), data);
+    } else {
+      const docRef = await addDoc(collection(db, "products"), {
+        ...data,
+        id: '' // will be set after
+      });
+      await updateDoc(docRef, { id: docRef.id });
+    }
+    closeProductModal();
+    toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
+  } catch (e) {
+    console.error(e);
+    toast('Error saving product.');
   }
-  
-  saveData('products', products);
-  closeProductModal();
-  renderProducts();
-  refreshStats();
-  toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
 }
 
 function renderProducts() {
@@ -1344,7 +1402,7 @@ function closePaymentModal() {
   document.getElementById('payment-modal').classList.remove('show');
 }
 
-function savePayment() {
+async function savePayment() {
   const name   = document.getElementById('pay-name').value.trim();
   const amount = parseFloat(document.getElementById('pay-amount').value);
   const date   = document.getElementById('pay-date').value;
@@ -1353,7 +1411,6 @@ function savePayment() {
   if (!date)        { toast('Please select a date.'); return; }
 
   const entry = {
-    id:     Date.now().toString(),
     name,
     amount,
     date,
@@ -1361,29 +1418,36 @@ function savePayment() {
     note:   document.getElementById('pay-note').value.trim(),
     status: document.getElementById('pay-status').value,
   };
-  payments.push(entry);
-  saveData('payments', payments);
-  closePaymentModal();
-  renderPayments();
-  refreshStats();
-  toast('Payment logged! ✅');
+  
+  try {
+    await addDoc(collection(db, "payments"), entry);
+    closePaymentModal();
+    toast('Payment logged! ✅');
+  } catch (e) {
+    console.error(e);
+    toast('Error logging payment.');
+  }
 }
 
-function updatePaymentStatus(id, status) {
-  payments = payments.map(p => p.id === id ? {...p, status} : p);
-  saveData('payments', payments);
-  renderPayments();
-  refreshStats();
-  toast(`Payment marked as ${status} ✅`);
+async function updatePaymentStatus(id, status) {
+  try {
+    await updateDoc(doc(db, "payments", id), { status });
+    toast(`Payment marked as ${status} ✅`);
+  } catch (e) {
+    console.error(e);
+    toast('Error updating payment.');
+  }
 }
 
-function deletePayment(id) {
+async function deletePayment(id) {
   if (!confirm('Delete this payment record?')) return;
-  payments = payments.filter(p => p.id !== id);
-  saveData('payments', payments);
-  renderPayments();
-  refreshStats();
-  toast('Record deleted.');
+  try {
+    await deleteDoc(doc(db, "payments", id));
+    toast('Record deleted.');
+  } catch (e) {
+    console.error(e);
+    toast('Error deleting record.');
+  }
 }
 
 function filterPayments(val)       { payFilterText   = val.toLowerCase(); renderPayments(); }
@@ -1499,13 +1563,7 @@ function renderOrderItems() {
     : '';
 }
 
-function nextOrderId() {
-  const lastId = allOrders.length > 0 ? allOrders[allOrders.length-1].id : 'SHA-000000';
-  const num = parseInt(lastId.split('-')[1]) + 1;
-  return 'SHA-' + num.toString().padStart(6, '0');
-}
-
-function saveOrder() {
+async function saveOrder() {
   const email = document.getElementById('ord-customer').value.trim().toLowerCase();
   const date  = document.getElementById('ord-date').value;
   if (!email) { toast('Please enter customer email.'); return; }
@@ -1515,8 +1573,7 @@ function saveOrder() {
   const now = new Date().toISOString().split('T')[0];
   const status = document.getElementById('ord-status').value;
 
-  const order = {
-    id:            editingOrderId || nextOrderId(),
+  const orderData = {
     customerId:    email,
     date,
     items:         orderItems.map(i=>({...i})),
