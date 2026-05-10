@@ -1260,7 +1260,7 @@ async function saveProduct() {
   if (isNaN(price)) { toast('Please enter a valid price.'); return; }
 
   btn.disabled = true;
-  btn.textContent = 'Uploading Images...';
+  btn.textContent = 'Uploading...';
 
   try {
     const existing = editingProductId ? products.find(x => String(x.id) === String(editingProductId)) : null;
@@ -1270,15 +1270,20 @@ async function saveProduct() {
     for (let i = 0; i < currentImages.length; i++) {
       const img = currentImages[i];
       if (img.startsWith('data:image')) {
-        // It's a new base64 image, upload to Storage
-        const blob = await (await fetch(img)).blob();
+        console.log(`Uploading image ${i+1}...`);
+        btn.textContent = `Uploading Image ${i+1}/${currentImages.length}...`;
+        
+        // Convert Base64 to Blob
+        const response = await fetch(img);
+        const blob = await response.blob();
+        
         const fileName = `product_images/${Date.now()}_${i}.webp`;
-        const storageRef = sRef(storage, fileName);
-        await uploadBytes(storageRef, blob);
-        const url = await getDownloadURL(storageRef);
+        const storageRef = window.sRef(window.storage, fileName);
+        
+        await window.uploadBytes(storageRef, blob);
+        const url = await window.getDownloadURL(storageRef);
         finalImageUrls.push(url);
       } else {
-        // It's already a URL
         finalImageUrls.push(img);
       }
     }
@@ -1305,21 +1310,24 @@ async function saveProduct() {
       updatedAt: new Date().toISOString(),
     };
 
+    console.log('Saving to Firestore...');
+    btn.textContent = 'Saving Details...';
+
     if (editingProductId) {
-      await updateDoc(doc(db, "products", String(editingProductId)), data);
+      await window.updateDoc(window.doc(window.db, "products", String(editingProductId)), data);
     } else {
-      const docRef = await addDoc(collection(db, "products"), {
+      const docRef = await window.addDoc(window.collection(window.db, "products"), {
         ...data,
         id: '' 
       });
-      await updateDoc(docRef, { id: docRef.id });
+      await window.updateDoc(docRef, { id: docRef.id });
     }
     
     closeProductModal();
     toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
   } catch (e) {
     console.error('Save Error:', e);
-    alert('Error saving: ' + e.message + '\n\nMake sure Firebase Storage is enabled in your console!');
+    alert('Error saving: ' + e.message + '\n\nMake sure Firebase Storage is enabled and Rules are set to public.');
     toast('Error saving product. ❌');
   } finally {
     btn.disabled = false;
@@ -1386,11 +1394,40 @@ function refreshStats() {
 function handleFiles(files) {
   const remaining = 10 - currentImages.length;
   const toAdd = Array.from(files).slice(0, remaining);
+  
   toAdd.forEach(file => {
+    // Compress/Resize client-side before previewing
     const reader = new FileReader();
     reader.onload = e => {
-      currentImages.push(e.target.result);
-      renderPreviews();
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Max dimension 1200px
+        const max = 1200;
+        if (width > max || height > max) {
+          if (width > height) {
+            height *= max / width;
+            width = max;
+          } else {
+            width *= max / height;
+            height = max;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Lower quality to reduce memory usage
+        const base64 = canvas.toDataURL('image/jpeg', 0.8);
+        currentImages.push(base64);
+        renderPreviews();
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   });
