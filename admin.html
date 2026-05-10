@@ -900,45 +900,7 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCzNO48K54ccnmiTIaDZ6ptPDhoWRhH72o",
-  authDomain: "crochetbysha-fc8f3.firebaseapp.com",
-  projectId: "crochetbysha-fc8f3",
-  storageBucket: "crochetbysha-fc8f3.firebasestorage.app",
-  messagingSenderId: "48661408149",
-  appId: "1:48661408149:web:8fe52aba525f539059ee9c",
-  measurementId: "G-FQK4TXTG9H",
-  databaseURL: "https://crochetbysha-fc8f3-default-rtdb.firebaseio.com/"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const productsRef = ref(db, 'products');
-const paymentsRef = ref(db, 'payments');
-
-let products = [];
-let payments = [];
-
-// Real-time sync from Firebase
-onValue(productsRef, (snapshot) => {
-  const data = snapshot.val();
-  products = data ? Object.values(data) : [];
-  renderProducts();
-  refreshStats();
-});
-
-onValue(paymentsRef, (snapshot) => {
-  const data = snapshot.val();
-  payments = data ? Object.values(data) : [];
-  renderPayments();
-  refreshStats();
-});
-
+<script>
 /* ══════════════════════════ UTILS ══════════════════════════ */
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -1045,7 +1007,10 @@ function editProduct(id) {
 
 function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
-  remove(ref(db, 'products/' + id));
+  products = products.filter(p => String(p.id) !== String(id));
+  saveData('products', products);
+  renderProducts();
+  refreshStats();
   toast('Product deleted.');
 }
 
@@ -1083,13 +1048,15 @@ function saveProduct() {
   };
 
   if (editingProductId) {
-    update(ref(db, 'products/' + editingProductId), data);
+    products = products.map(p => String(p.id) === String(editingProductId) ? data : p);
   } else {
-    const newId = data.id;
-    set(ref(db, 'products/' + newId), data);
+    products.push(data);
   }
   
+  saveData('products', products);
   closeProductModal();
+  renderProducts();
+  refreshStats();
   toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
 }
 
@@ -1131,7 +1098,8 @@ function renderProducts() {
 }
 
 /* ══════════════════════════ DATA INIT ══════════════════════════ */
-// Now handled by Firebase onValue listeners above
+let products = loadData('products', []);
+let payments = loadData('payments', []);
 
 function refreshStats() {
   const sp = document.getElementById('stat-products');
@@ -1143,25 +1111,6 @@ function refreshStats() {
   if (sn) sn.textContent = payments.filter(p => p.status === 'pending').length;
   if (sv) sv.textContent = payments.filter(p => p.status === 'verified').length;
 }
-
-/* ══════════════════════════ CLOUD SYNC ══════════════════════════ */
-function saveDataToFirebase(key, val) {
-  // Key is 'products' or 'payments'
-  // Realtime database uses 'set' on a specific reference
-  const targetRef = ref(db, key);
-  
-  // Convert array to object mapping to avoid array-index issues in Firebase
-  const dataMap = {};
-  val.forEach(item => {
-    if (item.id) dataMap[item.id] = item;
-  });
-
-  set(targetRef, dataMap).catch(e => {
-    console.error('Firebase Sync Error:', e);
-    toast('⚠️ Cloud Sync Failed! Check internet.');
-  });
-}
-
 
 /* ── multi-image handling ── */
 function handleFiles(files) {
@@ -1261,9 +1210,8 @@ function savePayment() {
   if (isNaN(amount)){ toast('Please enter the amount.'); return; }
   if (!date)        { toast('Please select a date.'); return; }
 
-  const id = Date.now().toString();
   const entry = {
-    id,
+    id:     Date.now().toString(),
     name,
     amount,
     date,
@@ -1271,23 +1219,30 @@ function savePayment() {
     note:   document.getElementById('pay-note').value.trim(),
     status: document.getElementById('pay-status').value,
   };
-  
-  set(ref(db, 'payments/' + id), entry);
+  payments.push(entry);
+  saveData('payments', payments);
   closePaymentModal();
+  renderPayments();
+  refreshStats();
   toast('Payment logged! ✅');
 }
 
 function updatePaymentStatus(id, status) {
-  update(ref(db, 'payments/' + id), { status });
+  payments = payments.map(p => p.id === id ? {...p, status} : p);
+  saveData('payments', payments);
+  renderPayments();
+  refreshStats();
   toast(`Payment marked as ${status} ✅`);
 }
 
 function deletePayment(id) {
   if (!confirm('Delete this payment record?')) return;
-  remove(ref(db, 'payments/' + id));
+  payments = payments.filter(p => p.id !== id);
+  saveData('payments', payments);
+  renderPayments();
+  refreshStats();
   toast('Record deleted.');
 }
-
 
 function filterPayments(val)       { payFilterText   = val.toLowerCase(); renderPayments(); }
 function filterPaymentStatus(val)  { payFilterStatus = val;               renderPayments(); }
@@ -1342,35 +1297,25 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// Export functions to window for HTML onclick attributes
-window.doLogin = doLogin;
-window.doLogout = doLogout;
-window.switchTab = switchTab;
-window.openAddModal = openAddModal;
-window.closeProductModal = closeProductModal;
-window.editProduct = editProduct;
-window.deleteProduct = deleteProduct;
-window.saveProduct = saveProduct;
-window.handleFiles = handleFiles;
-window.handleDrag = handleDrag;
-window.handleDrop = handleDrop;
-window.removeImg = removeImg;
-window.openViewer = openViewer;
-window.viewerNav = viewerNav;
-window.closeViewer = closeViewer;
-window.openAddPaymentModal = openAddPaymentModal;
-window.closePaymentModal = closePaymentModal;
-window.savePayment = savePayment;
-window.updatePaymentStatus = updatePaymentStatus;
-window.deletePayment = deletePayment;
-window.filterPayments = filterPayments;
-window.filterPaymentStatus = filterPaymentStatus;
-window.goToSlide = goToSlide;
-window.moveSlider = moveSlider;
-
 // Final Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
-...
+  const passInput = document.getElementById('login-pass');
+  if (passInput) {
+    passInput.addEventListener('keydown', e => { 
+      if (e.key === 'Enter') doLogin(); 
+    });
+  }
+  
+  // Close modals on backdrop click
+  ['product-modal','payment-modal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('show');
+      });
+    }
+  });
+});
 </script>
 </body>
 </html>

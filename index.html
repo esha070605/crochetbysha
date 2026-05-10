@@ -2724,21 +2724,11 @@
       }
     ];
 
-    let PRODUCTS = [];
-
-    // Real-time sync from Firebase
-    onValue(productsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        PRODUCTS = Object.values(data);
-      } else {
-        // Fallback to initial products if cloud is empty
-        PRODUCTS = INITIAL_PRODUCTS;
-      }
-      renderShop();
-      if (document.getElementById('page-home').classList.contains('active')) initHome();
-    });
-
+    let PRODUCTS = JSON.parse(localStorage.getItem('sha_products')) || [];
+    if (PRODUCTS.length === 0) {
+      PRODUCTS = INITIAL_PRODUCTS;
+      localStorage.setItem('sha_products', JSON.stringify(PRODUCTS));
+    }
 
     // Storage listener for real-time sync with Admin Dashboard
     window.addEventListener('storage', (e) => {
