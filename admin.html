@@ -1037,24 +1037,7 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDocs, collection, onSnapshot, deleteDoc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-
-/* ══════════════════════════ FIREBASE INIT ══════════════════════════ */
-const firebaseConfig = {
-  apiKey: "AIzaSyDrIp_t3pZ1xQ8Egf6NxBXZQzv8iVvuHBY",
-  authDomain: "crochetbysha-9e3b1.firebaseapp.com",
-  projectId: "crochetbysha-9e3b1",
-  storageBucket: "crochetbysha-9e3b1.firebasestorage.app",
-  messagingSenderId: "372180218462",
-  appId: "1:372180218462:web:bb1bf32cca86fdbb9bbacf",
-  measurementId: "G-X0MVEDXB5D"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
+<script>
 /* ══════════════════════════ UTILS ══════════════════════════ */
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -1063,416 +1046,24 @@ function toast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
-// Data cache
-let products = [];
-let payments = [];
-let allOrders = [];
 
-    /* ══════════════════════════ DATA SEED ══════════════════════════ */
-    const INITIAL_PRODUCTS = [
-      {
-        id: "1", name: 'Batman Keychain', desc: 'Handmade crochet Batman keychain. A perfect gift or bag charm!',
-        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#c9bfee', img: '🦇', imgBg: 1, badge: 'new',
-        imageUrl: 'Keychains/Batman Keychain.jpeg',
-        emojis: ['🦇', '🎀', '✨'], tags: ['keychain', 'batman', 'gift'], rating: 5, reviews: 8, isNew: true
-      },
-      {
-        id: "2", name: 'Barbie Shoulder Bag', desc: 'A stunning handmade crochet Barbie themed shoulder bag. Perfect for everyday use!',
-        short: 'Handwoven with cotton yarn', price: 750, oldPrice: null, category: 'bags',
-        color: '#f0c8d8', img: '👜', imgBg: 2, badge: 'new',
-        imageUrl: 'Bags/Barbie Shoulder Bag.jpeg',
-        emojis: ['👜', '🎀', '💕'], tags: ['bag', 'barbie', 'pink'], rating: 5, reviews: 10, isNew: true
-      },
-      {
-        id: "3", name: 'Gajra', desc: 'A beautiful handmade crochet gajra for hair. Elegant and long-lasting!',
-        short: 'Hair accessory', price: 450, oldPrice: null, category: 'accessories',
-        color: '#f0c8d8', img: '🌸', imgBg: 2, badge: '',
-        imageUrl: 'Accessories/Gajra.jpeg',
-        emojis: ['🌸', '✨', '💕'], tags: ['hair', 'gajra', 'gift'], rating: 5, reviews: 89, isNew: false
-      },
-      {
-        id: "4", name: 'Handwarmers (Pink)', desc: 'Cozy and cute handmade crochet pink handwarmers.',
-        short: 'Winter essential', price: 550, oldPrice: null, category: 'accessories',
-        color: '#fcd5e5', img: '🧤', imgBg: 6, badge: '',
-        imageUrl: 'Accessories/Handwarmers (Pink).jpeg',
-        emojis: ['🧤', '🌸', '✨'], tags: ['handwarmers', 'winter', 'pink'], rating: 4, reviews: 31, isNew: false
-      },
-      {
-        id: "5", name: 'Bunny Plushie (Overalls)', desc: 'An adorable handmade crochet bunny plushie wearing tiny overalls.',
-        short: 'Handmade amigurumi doll', price: 1150, oldPrice: null, category: 'plushies',
-        color: '#d0ebe3', img: '🐰', imgBg: 4, badge: 'new',
-        imageUrl: 'Plushies/Bunny Plushie (Overalls).jpeg',
-        emojis: ['🐰', '👖', '🧶'], tags: ['plushie', 'bunny', 'gift'], rating: 5, reviews: 57, isNew: true
-      },
-      {
-        id: "6", name: 'Handwarmers (Star)', desc: 'Trendy handmade crochet handwarmers with star details.',
-        short: 'Winter essential', price: 550, oldPrice: null, category: 'accessories',
-        color: '#c9bfee', img: '🧤', imgBg: 1, badge: 'new',
-        imageUrl: 'Accessories/Handwarmers (Star).jpeg',
-        emojis: ['🧤', '⭐', '✨'], tags: ['handwarmers', 'star', 'winter'], rating: 5, reviews: 45, isNew: true
-      },
-      {
-        id: "7", name: 'Chicken Plushie (Large)', desc: 'A large, fluffy and round handmade crochet chicken plushie.',
-        short: 'Handmade amigurumi doll', price: 500, oldPrice: null, category: 'plushies',
-        color: '#fde5c0', img: '🐔', imgBg: 3, badge: 'new',
-        imageUrl: 'Plushies/Chicken Plushie (Large).jpeg',
-        emojis: ['🐔', '💛', '🎁'], tags: ['plushie', 'chicken', 'large'], rating: 5, reviews: 45, isNew: true
-      },
-      {
-        id: "8", name: 'Bow Keychain', desc: 'Handmade crochet bow keychain. Adorable and lightweight!',
-        short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#f0c8d8', img: '🎀', imgBg: 2, badge: 'new',
-        imageUrl: 'Keychains/Bow Keychain.jpeg',
-        emojis: ['🎀', '✨', '💕'], tags: ['keychain', 'bow', 'gift'], rating: 5, reviews: 6, isNew: true
-      },
-      {
-        id: "9", name: 'Bunny Keychain', desc: 'Handmade crochet bunny keychain. Super fluffy and cute!',
-        short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
-        color: '#fce8f0', img: '🐰', imgBg: 6, badge: 'new',
-        imageUrl: 'Keychains/Bunny Keychain.jpeg',
-        emojis: ['🐰', '🎀', '✨'], tags: ['keychain', 'bunny', 'gift'], rating: 5, reviews: 9, isNew: true
-      },
-      {
-        id: "10", name: 'Camera Keychain', desc: 'Handmade crochet camera keychain. Perfect for photography lovers!',
-        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
-        color: '#fde5c0', img: '📷', imgBg: 3, badge: 'new',
-        imageUrl: 'Keychains/Camera Keychain.jpeg',
-        emojis: ['📷', '✨', '💕'], tags: ['keychain', 'camera', 'gift'], rating: 5, reviews: 10, isNew: true
-      },
-      {
-        id: "11", name: 'Chicken Keychain', desc: 'Cute handmade crochet chicken keychain.',
-        short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
-        color: '#fde5c0', img: '🐔', imgBg: 5, badge: 'new',
-        imageUrl: 'Keychains/Chicken Keychain.jpeg',
-        emojis: ['🐔', '✨', '💛'], tags: ['keychain', 'chicken', 'gift'], rating: 5, reviews: 4, isNew: true
-      },
-      {
-        id: "12", name: 'Duck Holding Flower Keychain', desc: 'Handmade crochet duck holding a tiny flower keychain.',
-        short: 'Cute bag charm', price: 350, oldPrice: null, category: 'keychains',
-        color: '#fef3e2', img: '🦆', imgBg: 3, badge: 'new',
-        imageUrl: 'Keychains/Duck Holding Flower Keychain.jpeg',
-        emojis: ['🦆', '🌸', '✨'], tags: ['keychain', 'duck', 'gift'], rating: 5, reviews: 12, isNew: true
-      },
-      {
-        id: "13", name: 'Elephant Keychain', desc: 'Sweet handmade crochet elephant keychain.',
-        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#f0eaff', img: '🐘', imgBg: 1, badge: 'new',
-        imageUrl: 'Keychains/Elephant Keychain.jpeg',
-        emojis: ['🐘', '🎀', '✨'], tags: ['keychain', 'elephant', 'gift'], rating: 5, reviews: 6, isNew: true
-      },
-      {
-        id: "14", name: 'Frog Keychain', desc: 'Classic handmade crochet frog keychain. Everyone\'s favorite!',
-        short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#d0ebe3', img: '🐸', imgBg: 4, badge: 'new',
-        imageUrl: 'Keychains/Frog Keychain.jpeg',
-        emojis: ['🐸', '✨', '💚'], tags: ['keychain', 'frog', 'gift'], rating: 5, reviews: 20, isNew: true
-      },
-      {
-        id: "15", name: 'Gojo Satoru Keychain', desc: 'Handmade crochet Gojo Satoru keychain from Jujutsu Kaisen.',
-        short: 'Cute bag charm', price: 450, oldPrice: null, category: 'keychains',
-        color: '#c9bfee', img: '🕶️', imgBg: 5, badge: 'new',
-        imageUrl: 'Keychains/Gojo Satoru Keychain.jpeg',
-        emojis: ['🕶️', '✨', '🔥'], tags: ['keychain', 'gojo', 'gift'], rating: 5, reviews: 15, isNew: true
-      },
-      {
-        id: "16", name: 'Heart Keychain', desc: 'Simple and sweet handmade crochet heart keychain.',
-        short: 'Cute bag charm', price: 150, oldPrice: null, category: 'keychains',
-        color: '#fcd5e5', img: '❤️', imgBg: 6, badge: 'new',
-        imageUrl: 'Keychains/Heart Keychain.jpeg',
-        emojis: ['❤️', '✨', '💕'], tags: ['keychain', 'heart', 'gift'], rating: 5, reviews: 12, isNew: true
-      },
-      {
-        id: "17", name: 'Nezuko Keychain', desc: 'Handmade crochet Nezuko keychain from Demon Slayer.',
-        short: 'Cute bag charm', price: 450, oldPrice: null, category: 'keychains',
-        color: '#fcd5e5', img: '👺', imgBg: 6, badge: 'new',
-        imageUrl: 'Keychains/Nezuko Keychain.jpeg',
-        emojis: ['👺', '🌸', '✨'], tags: ['keychain', 'nezuko', 'gift'], rating: 5, reviews: 11, isNew: true
-      },
-      {
-        id: "32", name: 'Octopus Keychain', desc: 'Handmade crochet octopus keychain. Reversible and cute!',
-        short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#e8f5f0', img: '🐙', imgBg: 4, badge: 'new',
-        imageUrl: 'Keychains/Octopus Keychain.jpeg',
-        emojis: ['🐙', '✨', '💕'], tags: ['keychain', 'octopus', 'gift'], rating: 5, reviews: 14, isNew: true
-      },
-      {
-        id: "33", name: 'Pig Keychain', desc: 'Sweet handmade crochet pig keychain.',
-        short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
-        color: '#fce8f0', img: '🐷', imgBg: 6, badge: 'new',
-        imageUrl: 'Keychains/Pig Keychain.jpeg',
-        emojis: ['🐷', '🌸', '✨'], tags: ['keychain', 'pig', 'gift'], rating: 5, reviews: 9, isNew: true
-      },
-      {
-        id: "34", name: 'Shiba Inu Keychain', desc: 'Adorable handmade crochet Shiba Inu dog keychain.',
-        short: 'Cute bag charm', price: 450, oldPrice: null, category: 'keychains',
-        color: '#fde5c0', img: '🐕', imgBg: 3, badge: 'new',
-        imageUrl: 'Keychains/Shiba Inu Keychain.jpeg',
-        emojis: ['🐕', '✨', '💛'], tags: ['keychain', 'shiba', 'gift'], rating: 5, reviews: 8, isNew: true
-      },
-      {
-        id: "35", name: 'Snorlax Keychain', desc: 'Handmade crochet Snorlax keychain for Pokemon fans!',
-        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#e8f5f0', img: '😴', imgBg: 4, badge: 'new',
-        imageUrl: 'Keychains/Snorlax Keychain.jpeg',
-        emojis: ['😴', '✨', '🌀'], tags: ['keychain', 'snorlax', 'gift'], rating: 5, reviews: 10, isNew: true
-      },
-      {
-        id: "36", name: 'Spider-Man Keychain', desc: 'Handmade crochet Spider-Man keychain. Your friendly neighborhood charm!',
-        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#fcd5e5', img: '🕷️', imgBg: 6, badge: 'new',
-        imageUrl: 'Keychains/Spider-Man Keychain.jpeg',
-        emojis: ['🕷️', '🕸️', '🔥'], tags: ['keychain', 'spiderman', 'gift'], rating: 5, reviews: 18, isNew: true
-      },
-      {
-        id: "37", name: 'Strawberry Keychain', desc: 'Juicy and cute handmade crochet strawberry keychain.',
-        short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#fcd5e5', img: '🍓', imgBg: 2, badge: 'new',
-        imageUrl: 'Keychains/Strawberry Keychain.jpeg',
-        emojis: ['🍓', '✨', '🍃'], tags: ['keychain', 'strawberry', 'gift'], rating: 5, reviews: 22, isNew: true
-      },
-      {
-        id: "38", name: 'Wolf Keychain', desc: 'Cool handmade crochet wolf keychain.',
-        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#f0eaff', img: '🐺', imgBg: 1, badge: 'new',
-        imageUrl: 'Keychains/Wolf Keychain.jpeg',
-        emojis: ['🐺', '✨', '🌙'], tags: ['keychain', 'wolf', 'gift'], rating: 5, reviews: 5, isNew: true
-      },
-      {
-        id: "29", name: 'Penguin Keychain (Overalls)', desc: 'Adorable handmade crochet penguin keychain wearing tiny overalls!',
-        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#f0c8d8', img: '🐧', imgBg: 2, badge: 'new',
-        imageUrl: 'Keychains/Penguin Keychain (Overalls).jpeg',
-        emojis: ['🐧', '👖', '✨'], tags: ['keychain', 'penguin', 'overalls', 'gift'], rating: 5, reviews: 3, isNew: true
-      },
-      {
-        id: "18", name: 'Dreamiest Bouquet', desc: 'A dreamy handmade crochet bouquet that lasts forever.',
-        short: 'Forever flowers', price: 1500, oldPrice: null, category: 'bouquets',
-        color: '#f0c8d8', img: '💐', imgBg: 2, badge: 'new',
-        imageUrl: 'Bouquets/Dreamiest Bouquet.jpeg',
-        emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'flower', 'gift'], rating: 5, reviews: 3, isNew: true
-      },
-      {
-        id: "19", name: 'Forever Bouquet', desc: 'A gorgeous crochet bouquet designed to stay beautiful forever.',
-        short: 'Forever flowers', price: 1900, oldPrice: null, category: 'bouquets',
-        color: '#c9bfee', img: '💐', imgBg: 1, badge: 'new',
-        imageUrl: 'Bouquets/Forever Bouquet.jpeg',
-        emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'flower', 'gift'], rating: 5, reviews: 2, isNew: true
-      },
-      {
-        id: "20", name: 'Lily Bouquet (Large)', desc: 'Large handmade crochet lily bouquet, elegant and stunning.',
-        short: 'Forever flowers', price: 1400, oldPrice: null, category: 'bouquets',
-        color: '#fde5c0', img: '💐', imgBg: 3, badge: 'new',
-        imageUrl: 'Bouquets/Lily Bouquet (Large).jpeg',
-        emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'lily', 'gift'], rating: 5, reviews: 4, isNew: true
-      },
-      {
-        id: "21", name: 'Lily Bouquet (Lavender)', desc: 'Lavender themed crochet lily bouquet. A peaceful and beautiful arrangement.',
-        short: 'Forever flowers', price: 1200, oldPrice: null, category: 'bouquets',
-        color: '#c9bfee', img: '💐', imgBg: 5, badge: 'new',
-        imageUrl: 'Bouquets/Lily Bouquet (Lavender).jpeg',
-        emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'lily', 'gift'], rating: 5, reviews: 5, isNew: true
-      },
-      {
-        id: "22", name: 'Rose Bouquet', desc: 'Classic handmade crochet rose bouquet. Perfect for anniversaries or Valentine\'s day.',
-        short: 'Forever flowers', price: 1080, oldPrice: null, category: 'bouquets',
-        color: '#f0c8d8', img: '🌹', imgBg: 2, badge: 'new',
-        imageUrl: 'Bouquets/Rose Bouquet.jpeg',
-        emojis: ['🌹', '💐', '💕'], tags: ['bouquet', 'rose', 'gift'], rating: 5, reviews: 7, isNew: true
-      },
-      {
-        id: "23", name: 'Rose Bucket Bouquet', desc: 'Beautiful crochet roses arranged in a cute bucket.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
-        color: '#fce8f0', img: '🌹', imgBg: 6, badge: 'new',
-        imageUrl: 'Bouquets/Rose Bucket Bouquet.jpeg',
-        emojis: ['🌹', '💐', '💕'], tags: ['bouquet', 'rose', 'gift'], rating: 5, reviews: 2, isNew: true
-      },
-      {
-        id: "24", name: 'Rose and Sunflower Bouquet', desc: 'A bright mix of crochet roses and sunflowers to bring sunshine to any room.',
-        short: 'Forever flowers', price: 550, oldPrice: null, category: 'bouquets',
-        color: '#fde5c0', img: '🌻', imgBg: 3, badge: 'new',
-        imageUrl: 'Bouquets/Rose and Sunflower Bouquet.jpeg',
-        emojis: ['🌻', '🌹', '✨'], tags: ['bouquet', 'sunflower', 'rose'], rating: 5, reviews: 6, isNew: true
-      },
-      {
-        id: "25", name: 'Sunflower Bouquet (2 Flowers Incl)', desc: 'A pair of vibrant handmade crochet sunflowers.',
-        short: 'Forever flowers', price: 500, oldPrice: null, category: 'bouquets',
-        color: '#fef3e2', img: '🌻', imgBg: 3, badge: 'new',
-        imageUrl: 'Bouquets/Sunflower Bouquet (2 Flowers Incl).jpeg',
-        emojis: ['🌻', '✨', '💛'], tags: ['bouquet', 'sunflower', 'gift'], rating: 5, reviews: 3, isNew: true
-      },
-      {
-        id: "26", name: 'Sunflower Bouquet', desc: 'A beautiful and bright handmade crochet sunflower bouquet.',
-        short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
-        color: '#fde5c0', img: '🌻', imgBg: 3, badge: 'new',
-        imageUrl: 'Bouquets/Sunflower Bouquet.jpeg',
-        emojis: ['🌻', '✨', '💛'], tags: ['bouquet', 'sunflower', 'gift'], rating: 5, reviews: 8, isNew: true
-      },
-      {
-        id: "27", name: 'Tulip Bouquet (Special)', desc: 'A special arrangement of lovely handmade crochet tulips.',
-        short: 'Forever flowers', price: 950, oldPrice: null, category: 'bouquets',
-        color: '#f0c8d8', img: '🌷', imgBg: 2, badge: 'new',
-        imageUrl: 'Bouquets/Tulip Bouquet (Special).jpeg',
-        emojis: ['🌷', '✨', '💕'], tags: ['bouquet', 'tulip', 'gift'], rating: 5, reviews: 4, isNew: true
-      },
-      {
-        id: "28", name: 'Tulip Bouquet', desc: 'Classic handmade crochet tulip bouquet. Sweet and simple.',
-        short: 'Forever flowers', price: 450, oldPrice: null, category: 'bouquets',
-        color: '#f0eaff', img: '🌷', imgBg: 1, badge: 'new',
-        imageUrl: 'Bouquets/Tulip Bouquet.jpeg',
-        emojis: ['🌷', '✨', '💕'], tags: ['bouquet', 'tulip', 'gift'], rating: 5, reviews: 5, isNew: true
-      },
-      {
-        id: "30", name: 'Anniversary Bouquet (Red)', desc: 'A stunning handmade crochet red anniversary bouquet.',
-        short: 'Forever flowers', price: 1250, oldPrice: null, category: 'bouquets',
-        color: '#fce8f0', img: '🌹', imgBg: 6, badge: 'new',
-        imageUrl: 'Bouquets/Anniversary Bouquet (Red).jpeg',
-        emojis: ['🌹', '💐', '💕'], tags: ['bouquet', 'anniversary', 'red', 'gift'], rating: 5, reviews: 3, isNew: true
-      },
-      {
-        id: "31", name: 'Anniversary Bouquet (Blue)', desc: 'A beautiful handmade crochet blue anniversary bouquet.',
-        short: 'Forever flowers', price: 1250, oldPrice: null, category: 'bouquets',
-        color: '#e8f5f0', img: '💐', imgBg: 4, badge: 'new',
-        imageUrl: 'Bouquets/Anniversary Bouquet (Blue).jpeg',
-        emojis: ['💐', '✨', '💙'], tags: ['bouquet', 'anniversary', 'blue', 'gift'], rating: 5, reviews: 2, isNew: true
-      },
-      {
-        id: "39", name: 'Sunflower Keychain', desc: 'A bright and beautiful handmade crochet sunflower keychain.',
-        short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#fef3e2', img: '🌻', imgBg: 3, badge: 'new',
-        imageUrl: 'Keychains/Sunflower Keychain.jpeg',
-        emojis: ['🌻', '✨', '💛'], tags: ['keychain', 'sunflower', 'gift'], rating: 5, reviews: 10, isNew: true
-      },
-      {
-        id: "40", name: 'Turtle Keychain', desc: 'An adorable little handmade crochet turtle keychain.',
-        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
-        color: '#d0ebe3', img: '🐢', imgBg: 4, badge: 'new',
-        imageUrl: 'Keychains/Turtle Keychain.jpeg',
-        emojis: ['🐢', '✨', '💚'], tags: ['keychain', 'turtle', 'gift'], rating: 5, reviews: 12, isNew: true
-      },
-      {
-        id: "41", name: 'Hello Kitty Keychain', desc: 'A super cute handmade crochet Hello Kitty keychain.',
-        short: 'Cute bag charm', price: 220, oldPrice: null, category: 'keychains',
-        color: '#f0c8d8', img: '🎀', imgBg: 2, badge: 'new',
-        imageUrl: 'Keychains/Hello Kitty Keychain.jpeg',
-        emojis: ['🎀', '✨', '💕'], tags: ['keychain', 'hellokitty', 'gift'], rating: 5, reviews: 15, isNew: true
-      },
-      {
-        id: "42", name: 'Duck Holding Daisy Keychain', desc: 'A lovely handmade crochet duck holding a little daisy keychain.',
-        short: 'Cute bag charm', price: 350, oldPrice: null, category: 'keychains',
-        color: '#fde5c0', img: '🦆', imgBg: 3, badge: 'new',
-        imageUrl: 'Keychains/Duck Holding Daisy Keychain.jpeg',
-        emojis: ['🦆', '🌼', '✨'], tags: ['keychain', 'duck', 'daisy'], rating: 5, reviews: 8, isNew: true
-      },
-      {
-        id: "43", name: 'Mikasa Scarf', desc: 'A warm and stylish handmade crochet Mikasa scarf.',
-        short: 'Winter essential', price: 1100, oldPrice: null, category: 'accessories',
-        color: '#f0c8d8', img: '🧣', imgBg: 2, badge: 'new',
-        imageUrl: 'Accessories/Mikasa Sacarf.jpeg',
-        emojis: ['🧣', '❄️', '✨'], tags: ['scarf', 'winter', 'mikasa'], rating: 5, reviews: 12, isNew: true
-      },
-      {
-        id: "44", name: 'Pillow', desc: 'A soft and comfortable handmade crochet pillow.',
-        short: 'Cozy home decor', price: 1150, oldPrice: null, category: 'accessories',
-        color: '#d0ebe3', img: '🛏️', imgBg: 4, badge: 'new',
-        imageUrl: 'Accessories/Pillow.jpeg',
-        emojis: ['🛏️', '✨', '💤'], tags: ['pillow', 'decor', 'cozy'], rating: 5, reviews: 8, isNew: true
-      },
-      {
-        id: "45", name: 'Scarf (Mini)', desc: 'A cute mini handmade crochet scarf.',
-        short: 'Winter essential', price: 750, oldPrice: null, category: 'accessories',
-        color: '#f0eaff', img: '🧣', imgBg: 1, badge: 'new',
-        imageUrl: 'Accessories/Scarf (Mini).jpeg',
-        emojis: ['🧣', '❄️', '✨'], tags: ['scarf', 'mini', 'winter'], rating: 5, reviews: 10, isNew: true
-      },
-      {
-        id: "46", name: 'Volleyball Keychain', desc: 'A fun handmade crochet volleyball keychain.',
-        short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#f0c8d8', img: '🏐', imgBg: 2, badge: 'new',
-        imageUrl: 'Keychains/Volleyball Keychain.jpeg',
-        emojis: ['🏐', '✨', '🔥'], tags: ['keychain', 'volleyball', 'gift'], rating: 5, reviews: 3, isNew: true
-      },
-      {
-        id: "47", name: 'Frog Keychain (Tiny)', desc: 'A tiny and adorable handmade crochet frog keychain.',
-        short: 'Cute bag charm', price: 150, oldPrice: null, category: 'keychains',
-        color: '#e8f5f0', img: '🐸', imgBg: 4, badge: 'new',
-        imageUrl: 'Keychains/Frog Keychain (Tiny).jpeg',
-        emojis: ['🐸', '✨', '💚'], tags: ['keychain', 'frog', 'cute'], rating: 5, reviews: 14, isNew: true
-      },
-      {
-        id: "48", name: 'Tooth Keychain', desc: 'A cute handmade crochet tooth keychain. Perfect for dentists!',
-        short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
-        color: '#f0eaff', img: '🦷', imgBg: 1, badge: 'new',
-        imageUrl: 'Keychains/Tooth Keychain.jpeg',
-        emojis: ['🦷', '✨', '🤍'], tags: ['keychain', 'tooth', 'dentist'], rating: 5, reviews: 6, isNew: true
-      }
-    ];
-
-    async function syncToFirebase() {
-      const prodSnap = await getDocs(collection(db, "products"));
-      if (prodSnap.empty) {
-        console.log("Seeding initial products to Firebase...");
-        for (const p of INITIAL_PRODUCTS) {
-          await setDoc(doc(db, "products", p.id), p);
-        }
-      }
-
-      // Also migrate from local storage if anything new exists there
-      const localProducts = JSON.parse(localStorage.getItem('sha_products')) || [];
-      const localPayments = JSON.parse(localStorage.getItem('cbs_payments')) || [];
-      const localOrders   = JSON.parse(localStorage.getItem('cbs_orders')) || [];
-
-      if (localProducts.length > 0) {
-        for (const p of localProducts) {
-          await setDoc(doc(db, "products", String(p.id)), p);
-        }
-        localStorage.removeItem('sha_products'); // Clean up
-      }
-
-      const paySnap = await getDocs(collection(db, "payments"));
-      if (paySnap.empty && localPayments.length > 0) {
-        for (const p of localPayments) { await setDoc(doc(db, "payments", String(p.id)), p); }
-        localStorage.removeItem('cbs_payments');
-      }
-
-      const ordSnap = await getDocs(collection(db, "orders"));
-      if (ordSnap.empty && localOrders.length > 0) {
-        for (const o of localOrders) { await setDoc(doc(db, "orders", String(o.id)), o); }
-        localStorage.removeItem('cbs_orders');
-      }
-    }
-
-// Listeners
-onSnapshot(collection(db, "products"), (snap) => {
-  products = snap.docs.map(doc => doc.data());
-  renderProducts();
-  refreshStats();
-});
-
-onSnapshot(collection(db, "payments"), (snap) => {
-  payments = snap.docs.map(doc => doc.data());
-  renderPayments();
-  refreshStats();
-});
-
-onSnapshot(collection(db, "orders"), (snap) => {
-  allOrders = snap.docs.map(doc => doc.data());
-  renderAdminOrders();
-  refreshStats();
-});
-
-async function saveData(key, val) {
-  // val is usually the whole array in the old code, but for Firebase we save individual docs
-  // However, the old code calls saveData(key, products) after modifying the array.
-  // We'll adapt by saving the specific item if possible, or just updating the collection.
+function loadData(key, def) {
+  const prefix = key === 'products' ? 'sha_' : 'cbs_';
+  try { return JSON.parse(localStorage.getItem(prefix + key)) || def; } catch { return def; }
 }
 
+function saveData(key, val) {
+  const prefix = key === 'products' ? 'sha_' : 'cbs_';
+  try {
+    localStorage.setItem(prefix + key, JSON.stringify(val));
+  } catch (e) {
+    console.error('Storage Error:', e);
+    toast('⚠️ Error: Storage quota exceeded. Try using fewer or smaller images.');
+  }
+}
 
 /* ══════════════════════════ AUTH ══════════════════════════ */
 const CREDENTIALS = { username: 'sha_admin', password: 'Crochet@2024!' };
-
-syncToFirebase();
-
 
 function doLogin() {
   const u = document.getElementById('login-user').value.trim();
@@ -1488,8 +1079,6 @@ function doLogin() {
     document.getElementById('login-err').style.display = 'block';
   }
 }
-window.doLogin = doLogin;
-
 
 function doLogout() {
   document.getElementById('admin-shell').style.display  = 'none';
@@ -1498,8 +1087,6 @@ function doLogout() {
   document.getElementById('login-pass').value = '';
   document.getElementById('login-err').style.display = 'none';
 }
-window.doLogout = doLogout;
-
 
 /* ══════════════════════════ TABS ══════════════════════════ */
 function switchTab(name) {
@@ -1513,8 +1100,6 @@ function switchTab(name) {
   if (target) target.classList.add('active');
   if (name === 'orders') renderAdminOrders();
 }
-window.switchTab = switchTab;
-
 
 /* ══════════════════════════ PRODUCTS ══════════════════════════ */
 let editingProductId = null;
@@ -1543,7 +1128,7 @@ function closeProductModal() {
   document.getElementById('product-modal').classList.remove('show');
 }
 
-async function editProduct(id) {
+function editProduct(id) {
   console.log('Editing product:', id);
   const p = products.find(x => String(x.id) === String(id));
   if (!p) { toast('Product not found.'); return; }
@@ -1558,22 +1143,17 @@ async function editProduct(id) {
   renderPreviews();
   document.getElementById('product-modal').classList.add('show');
 }
-window.editProduct = editProduct;
 
-async function deleteProduct(id) {
+function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
-  try {
-    await deleteDoc(doc(db, "products", String(id)));
-    toast('Product deleted.');
-  } catch (e) {
-    console.error(e);
-    toast('Error deleting product.');
-  }
+  products = products.filter(p => String(p.id) !== String(id));
+  saveData('products', products);
+  renderProducts();
+  refreshStats();
+  toast('Product deleted.');
 }
-window.deleteProduct = deleteProduct;
 
-
-async function saveProduct() {
+function saveProduct() {
   console.log('Saving product... ID:', editingProductId);
   const name  = document.getElementById('prod-name').value.trim();
   const price = parseFloat(document.getElementById('prod-price').value);
@@ -1606,19 +1186,18 @@ async function saveProduct() {
     updatedAt: new Date().toISOString(),
   };
 
-  try {
-    await setDoc(doc(db, "products", String(data.id)), data);
-    closeProductModal();
-    toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
-  } catch (e) {
-    console.error(e);
-    toast('Error saving product. Check console.');
+  if (editingProductId) {
+    products = products.map(p => String(p.id) === String(editingProductId) ? data : p);
+  } else {
+    products.push(data);
   }
+  
+  saveData('products', products);
+  closeProductModal();
+  renderProducts();
+  refreshStats();
+  toast(editingProductId ? 'Product updated! ✅' : 'Product added! ✅');
 }
-window.saveProduct = saveProduct;
-window.openAddModal = openAddModal;
-window.closeProductModal = closeProductModal;
-
 
 function renderProducts() {
   const grid  = document.getElementById('product-grid');
@@ -1657,25 +1236,23 @@ function renderProducts() {
   });
 }
 
+/* ══════════════════════════ DATA INIT ══════════════════════════ */
+let products = loadData('products', []);
+let payments = loadData('payments', []);
+
 function refreshStats() {
   const sp = document.getElementById('stat-products');
   const sy = document.getElementById('stat-payments');
   const sn = document.getElementById('stat-pending');
   const sv = document.getElementById('stat-verified');
   
+  const allOrders = loadData('orders', []);
+  
   if (sp) sp.textContent = products.length;
   if (sy) sy.textContent = payments.length;
   if (sn) sn.textContent = payments.filter(p => p.status === 'pending').length;
   if (sv) sv.textContent = payments.filter(p => p.status === 'verified').length;
 }
-window.openViewer = openViewer;
-window.viewerNav = viewerNav;
-window.closeViewer = closeViewer;
-window.handleFiles = handleFiles;
-window.handleDrag = handleDrag;
-window.handleDrop = handleDrop;
-window.removeImg = removeImg;
-
 
 /* ── multi-image handling ── */
 function handleFiles(files) {
@@ -1752,7 +1329,22 @@ function closeViewer(e) {
 }
 
 /* ══════════════════════════ PAYMENTS ══════════════════════════ */
-async function savePayment() {
+let payFilterText   = '';
+let payFilterStatus = 'all';
+
+function openAddPaymentModal() {
+  ['pay-name','pay-ref','pay-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-date').value   = new Date().toISOString().split('T')[0];
+  document.getElementById('pay-status').value = 'pending';
+  document.getElementById('payment-modal').classList.add('show');
+}
+
+function closePaymentModal() {
+  document.getElementById('payment-modal').classList.remove('show');
+}
+
+function savePayment() {
   const name   = document.getElementById('pay-name').value.trim();
   const amount = parseFloat(document.getElementById('pay-amount').value);
   const date   = document.getElementById('pay-date').value;
@@ -1769,45 +1361,30 @@ async function savePayment() {
     note:   document.getElementById('pay-note').value.trim(),
     status: document.getElementById('pay-status').value,
   };
-  
-  try {
-    await setDoc(doc(db, "payments", String(entry.id)), entry);
-    closePaymentModal();
-    toast('Payment logged! ✅');
-  } catch (e) {
-    console.error(e);
-    toast('Error logging payment.');
-  }
+  payments.push(entry);
+  saveData('payments', payments);
+  closePaymentModal();
+  renderPayments();
+  refreshStats();
+  toast('Payment logged! ✅');
 }
-window.savePayment = savePayment;
-window.openAddPaymentModal = openAddPaymentModal;
-window.closePaymentModal = closePaymentModal;
 
-async function updatePaymentStatus(id, status) {
-  try {
-    await updateDoc(doc(db, "payments", String(id)), { status });
-    toast(`Payment marked as ${status} ✅`);
-  } catch (e) {
-    console.error(e);
-    toast('Error updating status.');
-  }
+function updatePaymentStatus(id, status) {
+  payments = payments.map(p => p.id === id ? {...p, status} : p);
+  saveData('payments', payments);
+  renderPayments();
+  refreshStats();
+  toast(`Payment marked as ${status} ✅`);
 }
-window.updatePaymentStatus = updatePaymentStatus;
 
-async function deletePayment(id) {
+function deletePayment(id) {
   if (!confirm('Delete this payment record?')) return;
-  try {
-    await deleteDoc(doc(db, "payments", String(id)));
-    toast('Record deleted.');
-  } catch (e) {
-    console.error(e);
-    toast('Error deleting record.');
-  }
+  payments = payments.filter(p => p.id !== id);
+  saveData('payments', payments);
+  renderPayments();
+  refreshStats();
+  toast('Record deleted.');
 }
-window.deletePayment = deletePayment;
-window.filterPayments = filterPayments;
-window.filterPaymentStatus = filterPaymentStatus;
-
 
 function filterPayments(val)       { payFilterText   = val.toLowerCase(); renderPayments(); }
 function filterPaymentStatus(val)  { payFilterStatus = val;               renderPayments(); }
@@ -1854,8 +1431,13 @@ function renderPayments() {
   });
 }
 
-// Duplicate toast removed
-
+/* ══════════════════════════ UTILS ══════════════════════════ */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
 
 /* ══════════════════════════ ORDERS ══════════════════════════ */
 let allOrders = [];
@@ -1923,7 +1505,7 @@ function nextOrderId() {
   return 'SHA-' + num.toString().padStart(6, '0');
 }
 
-async function saveOrder() {
+function saveOrder() {
   const email = document.getElementById('ord-customer').value.trim().toLowerCase();
   const date  = document.getElementById('ord-date').value;
   if (!email) { toast('Please enter customer email.'); return; }
@@ -1933,9 +1515,8 @@ async function saveOrder() {
   const now = new Date().toISOString().split('T')[0];
   const status = document.getElementById('ord-status').value;
 
-  const orderId = editingOrderId || nextOrderId();
   const order = {
-    id:            orderId,
+    id:            editingOrderId || nextOrderId(),
     customerId:    email,
     date,
     items:         orderItems.map(i=>({...i})),
@@ -1958,21 +1539,17 @@ async function saveOrder() {
     }
   };
 
-  try {
-    await setDoc(doc(db, "orders", String(order.id)), order);
-    closeOrderModal();
-    toast(editingOrderId ? `Order ${order.id} updated ✅` : `Order ${order.id} created ✅`);
-  } catch (e) {
-    console.error(e);
-    toast('Error saving order.');
+  if (editingOrderId) {
+    allOrders = allOrders.map(o => o.id === editingOrderId ? order : o);
+  } else {
+    allOrders.push(order);
   }
+  saveData('orders', allOrders);
+  closeOrderModal();
+  renderAdminOrders();
+  refreshStats();
+  toast(editingOrderId ? `Order ${order.id} updated ✅` : `Order ${order.id} created ✅`);
 }
-window.saveOrder = saveOrder;
-window.openAddOrderModal = openAddOrderModal;
-window.closeOrderModal = closeOrderModal;
-window.addOrderItem = addOrderItem;
-window.removeOrderItem = removeOrderItem;
-
 
 function editOrder(id) {
   const o = allOrders.find(x=>x.id===id);
@@ -1996,42 +1573,30 @@ function editOrder(id) {
   document.getElementById('order-modal').classList.add('show');
 }
 
-async function deleteOrder(id) {
+function deleteOrder(id) {
   if (!confirm('Delete order ' + id + '?')) return;
-  try {
-    await deleteDoc(doc(db, "orders", String(id)));
-    toast('Order deleted.');
-  } catch (e) {
-    console.error(e);
-    toast('Error deleting order.');
-  }
+  allOrders = allOrders.filter(o => o.id !== id);
+  saveData('orders', allOrders);
+  renderAdminOrders();
+  refreshStats();
+  toast('Order deleted.');
 }
-window.deleteOrder = deleteOrder;
-window.editOrder = editOrder;
 
-
-async function updateOrderStatus(id, status) {
+function updateOrderStatus(id, status) {
   const now = new Date().toISOString().split('T')[0];
-  const o = allOrders.find(x => x.id === id);
-  if (!o) return;
-  
-  const tl = {...(o.timeline||{})};
-  if (['confirmed','shipped','delivered'].includes(status) && !tl.confirmed) tl.confirmed = now;
-  if (['shipped','delivered'].includes(status)             && !tl.shipped)   tl.shipped   = now;
-  if (status === 'delivered'                               && !tl.delivered) tl.delivered = now;
-
-  try {
-    await updateDoc(doc(db, "orders", String(id)), { status, timeline: tl });
-    toast('Order status updated ✅');
-  } catch (e) {
-    console.error(e);
-    toast('Error updating status.');
-  }
+  allOrders = allOrders.map(o => {
+    if (o.id !== id) return o;
+    const tl = {...(o.timeline||{})};
+    if (['confirmed','shipped','delivered'].includes(status) && !tl.confirmed) tl.confirmed = now;
+    if (['shipped','delivered'].includes(status)             && !tl.shipped)   tl.shipped   = now;
+    if (status === 'delivered'                               && !tl.delivered) tl.delivered = now;
+    return {...o, status, timeline: tl};
+  });
+  saveData('orders', allOrders);
+  renderAdminOrders();
+  refreshStats();
+  toast('Order status updated ✅');
 }
-window.updateOrderStatus = updateOrderStatus;
-window.filterOrders = filterOrders;
-window.filterOrderStatus = filterOrderStatus;
-
 
 function filterOrders(val) { orderFilter = val.toLowerCase(); renderAdminOrders(); }
 function filterOrderStatus(val) { orderStatusFilter = val; renderAdminOrders(); }
@@ -2045,7 +1610,7 @@ const ORD_PILL = {
 };
 
 function renderAdminOrders() {
-
+  allOrders = loadData('orders', []);
   const tbody = document.getElementById('orders-tbody');
   const empty = document.getElementById('orders-empty-admin');
   if (!tbody) return;
@@ -2089,32 +1654,25 @@ function renderAdminOrders() {
   });
 }
 
-  // EXPOSE TO WINDOW
-  window.renderAdminOrders = renderAdminOrders;
-  window.renderPayments = renderPayments;
-  window.renderProducts = renderProducts;
-  window.refreshStats = refreshStats;
-
-  // Final Event Listeners
-  document.addEventListener('DOMContentLoaded', () => {
-    const passInput = document.getElementById('login-pass');
-    if (passInput) {
-      passInput.addEventListener('keydown', e => { 
-        if (e.key === 'Enter') doLogin(); 
+// Final Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+  const passInput = document.getElementById('login-pass');
+  if (passInput) {
+    passInput.addEventListener('keydown', e => { 
+      if (e.key === 'Enter') doLogin(); 
+    });
+  }
+  
+  // Close modals on backdrop click
+  ['product-modal','payment-modal','order-modal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('show');
       });
     }
-    
-    // Close modals on backdrop click
-    ['product-modal','payment-modal','order-modal'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('click', function(e) {
-          if (e.target === this) this.classList.remove('show');
-        });
-      }
-    });
   });
+});
 </script>
-
 </body>
 </html>

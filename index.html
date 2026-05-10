@@ -446,17 +446,14 @@
     }
 
     .product-img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
+      height: 200px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 4.5rem;
       position: relative;
       overflow: hidden;
-      border-radius: var(--radius-md);
     }
-
 
     .product-img-bg-1 {
       background: linear-gradient(135deg, #f0eaff, #e8e0f8);
@@ -2626,358 +2623,344 @@
     </div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDocs, collection, onSnapshot, query, where, getDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+  <script>
 
-    /* ══════════════════════════ FIREBASE INIT ══════════════════════════ */
-    const firebaseConfig = {
-      apiKey: "AIzaSyDrIp_t3pZ1xQ8Egf6NxBXZQzv8iVvuHBY",
-      authDomain: "crochetbysha-9e3b1.firebaseapp.com",
-      projectId: "crochetbysha-9e3b1",
-      storageBucket: "crochetbysha-9e3b1.firebasestorage.app",
-      messagingSenderId: "372180218462",
-      appId: "1:372180218462:web:bb1bf32cca86fdbb9bbacf",
-      measurementId: "G-X0MVEDXB5D"
-    };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    let PRODUCTS = [];
-
+    // =====================================================================
+    // ✏️ INITIAL PRODUCTS — fall back here if localStorage is empty
+    // =====================================================================
     const INITIAL_PRODUCTS = [
       {
-        id: "1", name: 'Batman Keychain', desc: 'Handmade crochet Batman keychain. A perfect gift or bag charm!',
+        id: 1, name: 'Batman Keychain', desc: 'Handmade crochet Batman keychain. A perfect gift or bag charm!',
         short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
         color: '#c9bfee', img: '🦇', imgBg: 1, badge: 'new',
         imageUrl: 'Keychains/Batman Keychain.jpeg',
         emojis: ['🦇', '🎀', '✨'], tags: ['keychain', 'batman', 'gift'], rating: 5, reviews: 8, isNew: true
       },
       {
-        id: "2", name: 'Barbie Shoulder Bag', desc: 'A stunning handmade crochet Barbie themed shoulder bag. Perfect for everyday use!',
+        id: 2, name: 'Barbie Shoulder Bag', desc: 'A stunning handmade crochet Barbie themed shoulder bag. Perfect for everyday use!',
         short: 'Handwoven with cotton yarn', price: 750, oldPrice: null, category: 'bags',
         color: '#f0c8d8', img: '👜', imgBg: 2, badge: 'new',
         imageUrl: 'Bags/Barbie Shoulder Bag.jpeg',
         emojis: ['👜', '🎀', '💕'], tags: ['bag', 'barbie', 'pink'], rating: 5, reviews: 10, isNew: true
       },
       {
-        id: "3", name: 'Gajra', desc: 'A beautiful handmade crochet gajra for hair. Elegant and long-lasting!',
-        short: 'Hair accessory', price: 450, oldPrice: null, category: 'accessories',
+        id: 3, name: 'Gajra', desc: 'Beautiful handmade crochet gajra for your hair.',
+        short: 'Hair accessory', price: 500, oldPrice: null, category: 'accessories',
         color: '#f0c8d8', img: '🌸', imgBg: 2, badge: '',
         imageUrl: 'Accessories/Gajra.jpeg',
         emojis: ['🌸', '✨', '💕'], tags: ['hair', 'gajra', 'gift'], rating: 5, reviews: 89, isNew: false
       },
       {
-        id: "4", name: 'Handwarmers (Pink)', desc: 'Cozy and cute handmade crochet pink handwarmers.',
+        id: 4, name: 'Handwarmers (Pink)', desc: 'Cozy and cute handmade crochet pink handwarmers.',
         short: 'Winter essential', price: 550, oldPrice: null, category: 'accessories',
         color: '#fcd5e5', img: '🧤', imgBg: 6, badge: '',
         imageUrl: 'Accessories/Handwarmers (Pink).jpeg',
         emojis: ['🧤', '🌸', '✨'], tags: ['handwarmers', 'winter', 'pink'], rating: 4, reviews: 31, isNew: false
       },
       {
-        id: "5", name: 'Bunny Plushie (Overalls)', desc: 'An adorable handmade crochet bunny plushie wearing tiny overalls.',
+        id: 5, name: 'Bunny Plushie (Overalls)', desc: 'An adorable handmade crochet bunny plushie wearing tiny overalls.',
         short: 'Handmade amigurumi doll', price: 1150, oldPrice: null, category: 'plushies',
         color: '#d0ebe3', img: '🐰', imgBg: 4, badge: 'new',
         imageUrl: 'Plushies/Bunny Plushie (Overalls).jpeg',
         emojis: ['🐰', '👖', '🧶'], tags: ['plushie', 'bunny', 'gift'], rating: 5, reviews: 57, isNew: true
       },
       {
-        id: "6", name: 'Handwarmers (Star)', desc: 'Trendy handmade crochet handwarmers with star details.',
+        id: 6, name: 'Handwarmers (Star)', desc: 'Trendy handmade crochet handwarmers with star details.',
         short: 'Winter essential', price: 550, oldPrice: null, category: 'accessories',
         color: '#c9bfee', img: '🧤', imgBg: 1, badge: 'new',
         imageUrl: 'Accessories/Handwarmers (Star).jpeg',
         emojis: ['🧤', '⭐', '✨'], tags: ['handwarmers', 'star', 'winter'], rating: 5, reviews: 45, isNew: true
       },
       {
-        id: "7", name: 'Chicken Plushie (Large)', desc: 'A large, fluffy and round handmade crochet chicken plushie.',
+        id: 7, name: 'Chicken Plushie (Large)', desc: 'A large, fluffy and round handmade crochet chicken plushie.',
         short: 'Handmade amigurumi doll', price: 500, oldPrice: null, category: 'plushies',
         color: '#fde5c0', img: '🐔', imgBg: 3, badge: 'new',
         imageUrl: 'Plushies/Chicken Plushie (Large).jpeg',
         emojis: ['🐔', '💛', '🎁'], tags: ['plushie', 'chicken', 'large'], rating: 5, reviews: 45, isNew: true
       },
       {
-        id: "8", name: 'Bow Keychain', desc: 'Handmade crochet bow keychain. Adorable and lightweight!',
+        id: 8, name: 'Bow Keychain', desc: 'Handmade crochet bow keychain. Adorable and lightweight!',
         short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
         color: '#f0c8d8', img: '🎀', imgBg: 2, badge: 'new',
         imageUrl: 'Keychains/Bow Keychain.jpeg',
         emojis: ['🎀', '✨', '💕'], tags: ['keychain', 'bow', 'gift'], rating: 5, reviews: 6, isNew: true
       },
       {
-        id: "9", name: 'Bunny Keychain', desc: 'Handmade crochet bunny keychain. Super fluffy and cute!',
+        id: 9, name: 'Bunny Keychain', desc: 'Handmade crochet bunny keychain. Super fluffy and cute!',
         short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
         color: '#fce8f0', img: '🐰', imgBg: 6, badge: 'new',
         imageUrl: 'Keychains/Bunny Keychain.jpeg',
         emojis: ['🐰', '🎀', '✨'], tags: ['keychain', 'bunny', 'gift'], rating: 5, reviews: 9, isNew: true
       },
       {
-        id: "10", name: 'Camera Keychain', desc: 'Handmade crochet camera keychain. Perfect for photography lovers!',
+        id: 10, name: 'Camera Keychain', desc: 'Handmade crochet camera keychain. Perfect for photography lovers!',
         short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
         color: '#fde5c0', img: '📷', imgBg: 3, badge: 'new',
         imageUrl: 'Keychains/Camera Keychain.jpeg',
-        emojis: ['📷', '✨', '💕'], tags: ['keychain', 'camera', 'gift'], rating: 5, reviews: 10, isNew: true
+        emojis: ['📷', '🎀', '✨'], tags: ['keychain', 'camera', 'gift'], rating: 5, reviews: 12, isNew: true
       },
       {
-        id: "11", name: 'Chicken Keychain', desc: 'Cute handmade crochet chicken keychain.',
-        short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
-        color: '#fde5c0', img: '🐔', imgBg: 5, badge: 'new',
-        imageUrl: 'Keychains/Chicken Keychain.jpeg',
-        emojis: ['🐔', '✨', '💛'], tags: ['keychain', 'chicken', 'gift'], rating: 5, reviews: 4, isNew: true
-      },
-      {
-        id: "12", name: 'Duck Holding Flower Keychain', desc: 'Handmade crochet duck holding a tiny flower keychain.',
-        short: 'Cute bag charm', price: 350, oldPrice: null, category: 'keychains',
-        color: '#fef3e2', img: '🦆', imgBg: 3, badge: 'new',
-        imageUrl: 'Keychains/Duck Holding Flower Keychain.jpeg',
-        emojis: ['🦆', '🌸', '✨'], tags: ['keychain', 'duck', 'gift'], rating: 5, reviews: 12, isNew: true
-      },
-      {
-        id: "13", name: 'Elephant Keychain', desc: 'Sweet handmade crochet elephant keychain.',
-        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#f0eaff', img: '🐘', imgBg: 1, badge: 'new',
-        imageUrl: 'Keychains/Elephant Keychain.jpeg',
-        emojis: ['🐘', '🎀', '✨'], tags: ['keychain', 'elephant', 'gift'], rating: 5, reviews: 6, isNew: true
-      },
-      {
-        id: "14", name: 'Frog Keychain', desc: 'Classic handmade crochet frog keychain. Everyone\'s favorite!',
+        id: 11, name: 'Evil Eye Keychain', desc: 'Handmade crochet evil eye keychain. Protects and looks stunning!',
         short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#d0ebe3', img: '🐸', imgBg: 4, badge: 'new',
-        imageUrl: 'Keychains/Frog Keychain.jpeg',
-        emojis: ['🐸', '✨', '💚'], tags: ['keychain', 'frog', 'gift'], rating: 5, reviews: 20, isNew: true
+        color: '#c9bfee', img: '👁️', imgBg: 5, badge: 'hot',
+        imageUrl: 'Keychains/Evil Eye Keychain.jpeg',
+        emojis: ['👁️', '✨', '💜'], tags: ['keychain', 'evileye', 'gift'], rating: 5, reviews: 15, isNew: false
       },
       {
-        id: "15", name: 'Gojo Satoru Keychain', desc: 'Handmade crochet Gojo Satoru keychain from Jujutsu Kaisen.',
-        short: 'Cute bag charm', price: 450, oldPrice: null, category: 'keychains',
-        color: '#c9bfee', img: '🕶️', imgBg: 5, badge: 'new',
-        imageUrl: 'Keychains/Gojo Satoru Keychain.jpeg',
-        emojis: ['🕶️', '✨', '🔥'], tags: ['keychain', 'gojo', 'gift'], rating: 5, reviews: 15, isNew: true
-      },
-      {
-        id: "16", name: 'Heart Keychain', desc: 'Simple and sweet handmade crochet heart keychain.',
-        short: 'Cute bag charm', price: 150, oldPrice: null, category: 'keychains',
-        color: '#fcd5e5', img: '❤️', imgBg: 6, badge: 'new',
-        imageUrl: 'Keychains/Heart Keychain.jpeg',
-        emojis: ['❤️', '✨', '💕'], tags: ['keychain', 'heart', 'gift'], rating: 5, reviews: 12, isNew: true
-      },
-      {
-        id: "17", name: 'Nezuko Keychain', desc: 'Handmade crochet Nezuko keychain from Demon Slayer.',
-        short: 'Cute bag charm', price: 450, oldPrice: null, category: 'keychains',
-        color: '#fcd5e5', img: '👺', imgBg: 6, badge: 'new',
-        imageUrl: 'Keychains/Nezuko Keychain.jpeg',
-        emojis: ['👺', '🌸', '✨'], tags: ['keychain', 'nezuko', 'gift'], rating: 5, reviews: 11, isNew: true
-      },
-      {
-        id: "32", name: 'Octopus Keychain', desc: 'Handmade crochet octopus keychain. Reversible and cute!',
+        id: 12, name: 'Owl Keychain', desc: 'Handmade crochet owl keychain. Wise and wonderfully crafted!',
         short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#e8f5f0', img: '🐙', imgBg: 4, badge: 'new',
-        imageUrl: 'Keychains/Octopus Keychain.jpeg',
-        emojis: ['🐙', '✨', '💕'], tags: ['keychain', 'octopus', 'gift'], rating: 5, reviews: 14, isNew: true
+        color: '#fde5c0', img: '🦦', imgBg: 3, badge: 'new',
+        imageUrl: 'Keychains/Owl Keychain.jpeg',
+        emojis: ['🦦', '✨', '🌙'], tags: ['keychain', 'owl', 'gift'], rating: 5, reviews: 7, isNew: true
       },
       {
-        id: "33", name: 'Pig Keychain', desc: 'Sweet handmade crochet pig keychain.',
-        short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
-        color: '#fce8f0', img: '🐷', imgBg: 6, badge: 'new',
+        id: 13, name: 'Panda Keychain', desc: 'Handmade crochet panda keychain. Black, white and utterly adorable!',
+        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        color: '#e8f5f0', img: '🐼', imgBg: 4, badge: 'new',
+        imageUrl: 'Keychains/Panda Keychain.jpeg',
+        emojis: ['🐼', '✨', '🎍'], tags: ['keychain', 'panda', 'gift'], rating: 5, reviews: 11, isNew: true
+      },
+      {
+        id: 14, name: 'Penguin Keychain', desc: 'Handmade crochet penguin keychain. Adorably waddling on your bag!',
+        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        color: '#c9bfee', img: '🐧', imgBg: 1, badge: 'new',
+        imageUrl: 'Keychains/Penguin Keychain.jpeg',
+        emojis: ['🐧', '✨', '🌟'], tags: ['keychain', 'penguin', 'gift'], rating: 5, reviews: 10, isNew: true
+      },
+      {
+        id: 15, name: 'Pig Keychain', desc: 'Handmade crochet pig keychain. Pink, plump and absolutely precious!',
+        short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
+        color: '#f0c8d8', img: '🐷', imgBg: 2, badge: 'new',
         imageUrl: 'Keychains/Pig Keychain.jpeg',
-        emojis: ['🐷', '🌸', '✨'], tags: ['keychain', 'pig', 'gift'], rating: 5, reviews: 9, isNew: true
+        emojis: ['🐷', '✨', '💕'], tags: ['keychain', 'pig', 'gift'], rating: 5, reviews: 8, isNew: true
       },
       {
-        id: "34", name: 'Shiba Inu Keychain', desc: 'Adorable handmade crochet Shiba Inu dog keychain.',
-        short: 'Cute bag charm', price: 450, oldPrice: null, category: 'keychains',
-        color: '#fde5c0', img: '🐕', imgBg: 3, badge: 'new',
-        imageUrl: 'Keychains/Shiba Inu Keychain.jpeg',
-        emojis: ['🐕', '✨', '💛'], tags: ['keychain', 'shiba', 'gift'], rating: 5, reviews: 8, isNew: true
+        id: 16, name: 'Whale Keychain', desc: 'Handmade crochet whale keychain. Deep-sea charm for your bag!',
+        short: 'Cute bag charm', price: 299, oldPrice: null, category: 'keychains',
+        color: '#ddd0f5', img: '🐳', imgBg: 5, badge: 'new',
+        imageUrl: 'Keychains/Whale Keychain.jpeg',
+        emojis: ['🐳', '✨', '💙'], tags: ['keychain', 'whale', 'gift'], rating: 5, reviews: 6, isNew: true
       },
       {
-        id: "35", name: 'Snorlax Keychain', desc: 'Handmade crochet Snorlax keychain for Pokemon fans!',
+        id: 17, name: 'Wolf Keychain', desc: 'Handmade crochet wolf keychain. Wild, fierce and wonderfully made!',
         short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#e8f5f0', img: '😴', imgBg: 4, badge: 'new',
-        imageUrl: 'Keychains/Snorlax Keychain.jpeg',
-        emojis: ['😴', '✨', '🌀'], tags: ['keychain', 'snorlax', 'gift'], rating: 5, reviews: 10, isNew: true
-      },
-      {
-        id: "36", name: 'Spider-Man Keychain', desc: 'Handmade crochet Spider-Man keychain. Your friendly neighborhood charm!',
-        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#fcd5e5', img: '🕷️', imgBg: 6, badge: 'new',
-        imageUrl: 'Keychains/Spider-Man Keychain.jpeg',
-        emojis: ['🕷️', '🕸️', '🔥'], tags: ['keychain', 'spiderman', 'gift'], rating: 5, reviews: 18, isNew: true
-      },
-      {
-        id: "37", name: 'Strawberry Keychain', desc: 'Juicy and cute handmade crochet strawberry keychain.',
-        short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#fcd5e5', img: '🍓', imgBg: 2, badge: 'new',
-        imageUrl: 'Keychains/Strawberry Keychain.jpeg',
-        emojis: ['🍓', '✨', '🍃'], tags: ['keychain', 'strawberry', 'gift'], rating: 5, reviews: 22, isNew: true
-      },
-      {
-        id: "38", name: 'Wolf Keychain', desc: 'Cool handmade crochet wolf keychain.',
-        short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
-        color: '#f0eaff', img: '🐺', imgBg: 1, badge: 'new',
+        color: '#c9bfee', img: '🐺', imgBg: 1, badge: 'new',
         imageUrl: 'Keychains/Wolf Keychain.jpeg',
         emojis: ['🐺', '✨', '🌙'], tags: ['keychain', 'wolf', 'gift'], rating: 5, reviews: 5, isNew: true
       },
       {
-        id: "29", name: 'Penguin Keychain (Overalls)', desc: 'Adorable handmade crochet penguin keychain wearing tiny overalls!',
+        id: 29, name: 'Penguin Keychain (Overalls)', desc: 'Adorable handmade crochet penguin keychain wearing tiny overalls!',
         short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
         color: '#f0c8d8', img: '🐧', imgBg: 2, badge: 'new',
         imageUrl: 'Keychains/Penguin Keychain (Overalls).jpeg',
         emojis: ['🐧', '👖', '✨'], tags: ['keychain', 'penguin', 'overalls', 'gift'], rating: 5, reviews: 3, isNew: true
       },
       {
-        id: "18", name: 'Dreamiest Bouquet', desc: 'A dreamy handmade crochet bouquet that lasts forever.',
+        id: 18, name: 'Dreamiest Bouquet', desc: 'A dreamy handmade crochet bouquet that lasts forever.',
         short: 'Forever flowers', price: 1500, oldPrice: null, category: 'bouquets',
         color: '#f0c8d8', img: '💐', imgBg: 2, badge: 'new',
         imageUrl: 'Bouquets/Dreamiest Bouquet.jpeg',
         emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'flower', 'gift'], rating: 5, reviews: 3, isNew: true
       },
       {
-        id: "19", name: 'Forever Bouquet', desc: 'A gorgeous crochet bouquet designed to stay beautiful forever.',
+        id: 19, name: 'Forever Bouquet', desc: 'A gorgeous crochet bouquet designed to stay beautiful forever.',
         short: 'Forever flowers', price: 1900, oldPrice: null, category: 'bouquets',
         color: '#c9bfee', img: '💐', imgBg: 1, badge: 'new',
         imageUrl: 'Bouquets/Forever Bouquet.jpeg',
         emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'flower', 'gift'], rating: 5, reviews: 2, isNew: true
       },
       {
-        id: "20", name: 'Lily Bouquet (Large)', desc: 'Large handmade crochet lily bouquet, elegant and stunning.',
+        id: 20, name: 'Lily Bouquet (Large)', desc: 'Large handmade crochet lily bouquet, elegant and stunning.',
         short: 'Forever flowers', price: 1400, oldPrice: null, category: 'bouquets',
         color: '#fde5c0', img: '💐', imgBg: 3, badge: 'new',
         imageUrl: 'Bouquets/Lily Bouquet (Large).jpeg',
         emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'lily', 'gift'], rating: 5, reviews: 4, isNew: true
       },
       {
-        id: "21", name: 'Lily Bouquet (Lavender)', desc: 'Lavender themed crochet lily bouquet. A peaceful and beautiful arrangement.',
+        id: 21, name: 'Lily Bouquet (Lavender)', desc: 'Lavender themed crochet lily bouquet. A peaceful and beautiful arrangement.',
         short: 'Forever flowers', price: 1200, oldPrice: null, category: 'bouquets',
         color: '#c9bfee', img: '💐', imgBg: 5, badge: 'new',
         imageUrl: 'Bouquets/Lily Bouquet (Lavender).jpeg',
         emojis: ['💐', '✨', '💕'], tags: ['bouquet', 'lily', 'gift'], rating: 5, reviews: 5, isNew: true
       },
       {
-        id: "22", name: 'Rose Bouquet', desc: 'Classic handmade crochet rose bouquet. Perfect for anniversaries or Valentine\'s day.',
+        id: 22, name: 'Rose Bouquet', desc: 'Classic handmade crochet rose bouquet. Perfect for anniversaries or Valentine\'s day.',
         short: 'Forever flowers', price: 1080, oldPrice: null, category: 'bouquets',
         color: '#f0c8d8', img: '🌹', imgBg: 2, badge: 'new',
         imageUrl: 'Bouquets/Rose Bouquet.jpeg',
         emojis: ['🌹', '💐', '💕'], tags: ['bouquet', 'rose', 'gift'], rating: 5, reviews: 7, isNew: true
       },
       {
-        id: "23", name: 'Rose Bucket Bouquet', desc: 'Beautiful crochet roses arranged in a cute bucket.',
+        id: 23, name: 'Rose Bucket Bouquet', desc: 'Beautiful crochet roses arranged in a cute bucket.',
         short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
         color: '#fce8f0', img: '🌹', imgBg: 6, badge: 'new',
         imageUrl: 'Bouquets/Rose Bucket Bouquet.jpeg',
         emojis: ['🌹', '💐', '💕'], tags: ['bouquet', 'rose', 'gift'], rating: 5, reviews: 2, isNew: true
       },
       {
-        id: "24", name: 'Rose and Sunflower Bouquet', desc: 'A bright mix of crochet roses and sunflowers to bring sunshine to any room.',
+        id: 24, name: 'Rose and Sunflower Bouquet', desc: 'A bright mix of crochet roses and sunflowers to bring sunshine to any room.',
         short: 'Forever flowers', price: 550, oldPrice: null, category: 'bouquets',
         color: '#fde5c0', img: '🌻', imgBg: 3, badge: 'new',
         imageUrl: 'Bouquets/Rose and Sunflower Bouquet.jpeg',
         emojis: ['🌻', '🌹', '✨'], tags: ['bouquet', 'sunflower', 'rose'], rating: 5, reviews: 6, isNew: true
       },
       {
-        id: "25", name: 'Sunflower Bouquet (2 Flowers Incl)', desc: 'A pair of vibrant handmade crochet sunflowers.',
+        id: 25, name: 'Sunflower Bouquet (2 Flowers Incl)', desc: 'A pair of vibrant handmade crochet sunflowers.',
         short: 'Forever flowers', price: 500, oldPrice: null, category: 'bouquets',
         color: '#fef3e2', img: '🌻', imgBg: 3, badge: 'new',
         imageUrl: 'Bouquets/Sunflower Bouquet (2 Flowers Incl).jpeg',
         emojis: ['🌻', '✨', '💛'], tags: ['bouquet', 'sunflower', 'gift'], rating: 5, reviews: 3, isNew: true
       },
       {
-        id: "26", name: 'Sunflower Bouquet', desc: 'A beautiful and bright handmade crochet sunflower bouquet.',
+        id: 26, name: 'Sunflower Bouquet', desc: 'A beautiful and bright handmade crochet sunflower bouquet.',
         short: 'Forever flowers', price: 1000, oldPrice: null, category: 'bouquets',
         color: '#fde5c0', img: '🌻', imgBg: 3, badge: 'new',
         imageUrl: 'Bouquets/Sunflower Bouquet.jpeg',
         emojis: ['🌻', '✨', '💛'], tags: ['bouquet', 'sunflower', 'gift'], rating: 5, reviews: 8, isNew: true
       },
       {
-        id: "27", name: 'Tulip Bouquet (Special)', desc: 'A special arrangement of lovely handmade crochet tulips.',
+        id: 27, name: 'Tulip Bouquet (Special)', desc: 'A special arrangement of lovely handmade crochet tulips.',
         short: 'Forever flowers', price: 950, oldPrice: null, category: 'bouquets',
         color: '#f0c8d8', img: '🌷', imgBg: 2, badge: 'new',
         imageUrl: 'Bouquets/Tulip Bouquet (Special).jpeg',
         emojis: ['🌷', '✨', '💕'], tags: ['bouquet', 'tulip', 'gift'], rating: 5, reviews: 4, isNew: true
       },
       {
-        id: "28", name: 'Tulip Bouquet', desc: 'Classic handmade crochet tulip bouquet. Sweet and simple.',
+        id: 28, name: 'Tulip Bouquet', desc: 'Classic handmade crochet tulip bouquet. Sweet and simple.',
         short: 'Forever flowers', price: 450, oldPrice: null, category: 'bouquets',
         color: '#f0eaff', img: '🌷', imgBg: 1, badge: 'new',
         imageUrl: 'Bouquets/Tulip Bouquet.jpeg',
         emojis: ['🌷', '✨', '💕'], tags: ['bouquet', 'tulip', 'gift'], rating: 5, reviews: 5, isNew: true
       },
       {
-        id: "30", name: 'Anniversary Bouquet (Red)', desc: 'A stunning handmade crochet red anniversary bouquet.',
+        id: 30, name: 'Anniversary Bouquet (Red)', desc: 'A stunning handmade crochet red anniversary bouquet.',
         short: 'Forever flowers', price: 1250, oldPrice: null, category: 'bouquets',
         color: '#fce8f0', img: '🌹', imgBg: 6, badge: 'new',
         imageUrl: 'Bouquets/Anniversary Bouquet (Red).jpeg',
         emojis: ['🌹', '💐', '💕'], tags: ['bouquet', 'anniversary', 'red', 'gift'], rating: 5, reviews: 3, isNew: true
       },
       {
-        id: "31", name: 'Anniversary Bouquet (Blue)', desc: 'A beautiful handmade crochet blue anniversary bouquet.',
+        id: 31, name: 'Anniversary Bouquet (Blue)', desc: 'A beautiful handmade crochet blue anniversary bouquet.',
         short: 'Forever flowers', price: 1250, oldPrice: null, category: 'bouquets',
         color: '#e8f5f0', img: '💐', imgBg: 4, badge: 'new',
         imageUrl: 'Bouquets/Anniversary Bouquet (Blue).jpeg',
         emojis: ['💐', '✨', '💙'], tags: ['bouquet', 'anniversary', 'blue', 'gift'], rating: 5, reviews: 2, isNew: true
       },
       {
-        id: "39", name: 'Sunflower Keychain', desc: 'A bright and beautiful handmade crochet sunflower keychain.',
+        id: 32, name: 'Plush Bow Shoulder Bag', desc: 'A cute and fluffy handmade crochet plush bow shoulder bag.',
+        short: 'Handwoven with cotton yarn', price: 8000, oldPrice: null, category: 'bags',
+        color: '#f0eaff', img: '👜', imgBg: 1, badge: 'new',
+        imageUrl: 'Bags/Plush Bow Shoulder Bag.jpeg',
+        emojis: ['👜', '🎀', '✨'], tags: ['bag', 'plush', 'bow'], rating: 5, reviews: 7, isNew: true
+      },
+      {
+        id: 33, name: 'Plush Pink Shoulder Bag', desc: 'An adorable pink plush crochet shoulder bag.',
+        short: 'Handwoven with cotton yarn', price: 750, oldPrice: null, category: 'bags',
+        color: '#fce8f0', img: '👜', imgBg: 6, badge: 'new',
+        imageUrl: 'Bags/Plush Pink Shoulder Bag.jpeg',
+        emojis: ['👜', '🎀', '💕'], tags: ['bag', 'plush', 'pink'], rating: 5, reviews: 4, isNew: true
+      },
+      {
+        id: 34, name: 'Tulip Tote Bag', desc: 'A spacious and beautiful handmade crochet tulip tote bag.',
+        short: 'Handwoven with cotton yarn', price: 1500, oldPrice: null, category: 'bags',
+        color: '#fde5c0', img: '👜', imgBg: 3, badge: 'new',
+        imageUrl: 'Bags/Tulip Tote Bag.jpeg',
+        emojis: ['👜', '🌷', '✨'], tags: ['bag', 'tote', 'tulip'], rating: 5, reviews: 6, isNew: true
+      },
+      {
+        id: 35, name: 'Chicken Plushie (Small)', desc: 'A cute, small handmade crochet chicken plushie.',
+        short: 'Handmade amigurumi doll', price: 450, oldPrice: null, category: 'plushies',
+        color: '#fef3e2', img: '🐔', imgBg: 3, badge: 'new',
+        imageUrl: 'Plushies/Chicken Plushie (Small).jpeg',
+        emojis: ['🐔', '✨', '💛'], tags: ['plushie', 'chicken', 'small'], rating: 5, reviews: 8, isNew: true
+      },
+      {
+        id: 36, name: 'Teddy Plushie (Brown)', desc: 'A classic brown handmade crochet teddy bear plushie.',
+        short: 'Handmade amigurumi doll', price: 600, oldPrice: null, category: 'plushies',
+        color: '#f0c8d8', img: '🧸', imgBg: 2, badge: 'new',
+        imageUrl: 'Plushies/Teddy Plushie (Brown).jpeg',
+        emojis: ['🧸', '🤎', '🎁'], tags: ['plushie', 'teddy', 'brown'], rating: 5, reviews: 15, isNew: true
+      },
+      {
+        id: 37, name: 'Teddy Plushie (White)', desc: 'A soft white handmade crochet teddy bear plushie.',
+        short: 'Handmade amigurumi doll', price: 600, oldPrice: null, category: 'plushies',
+        color: '#f0eaff', img: '🧸', imgBg: 1, badge: 'new',
+        imageUrl: 'Plushies/Teddy Plushie (White).jpeg',
+        emojis: ['🧸', '🤍', '🎁'], tags: ['plushie', 'teddy', 'white'], rating: 5, reviews: 12, isNew: true
+      },
+      {
+        id: 38, name: 'Toothless', desc: 'Handmade crochet Toothless dragon plushie. Perfect for How to Train Your Dragon fans!',
+        short: 'Handmade amigurumi doll', price: 1000, oldPrice: null, category: 'plushies',
+        color: '#c9bfee', img: '🐉', imgBg: 5, badge: 'new',
+        imageUrl: 'Plushies/Toothless.jpeg',
+        emojis: ['🐉', '🖤', '✨'], tags: ['plushie', 'toothless', 'dragon'], rating: 5, reviews: 20, isNew: true
+      },
+      {
+        id: 39, name: 'Sunflower Keychain', desc: 'A bright and beautiful handmade crochet sunflower keychain.',
         short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
         color: '#fef3e2', img: '🌻', imgBg: 3, badge: 'new',
         imageUrl: 'Keychains/Sunflower Keychain.jpeg',
         emojis: ['🌻', '✨', '💛'], tags: ['keychain', 'sunflower', 'gift'], rating: 5, reviews: 10, isNew: true
       },
       {
-        id: "40", name: 'Turtle Keychain', desc: 'An adorable little handmade crochet turtle keychain.',
+        id: 40, name: 'Turtle Keychain', desc: 'An adorable little handmade crochet turtle keychain.',
         short: 'Cute bag charm', price: 250, oldPrice: null, category: 'keychains',
         color: '#d0ebe3', img: '🐢', imgBg: 4, badge: 'new',
         imageUrl: 'Keychains/Turtle Keychain.jpeg',
         emojis: ['🐢', '✨', '💚'], tags: ['keychain', 'turtle', 'gift'], rating: 5, reviews: 12, isNew: true
       },
       {
-        id: "41", name: 'Hello Kitty Keychain', desc: 'A super cute handmade crochet Hello Kitty keychain.',
+        id: 41, name: 'Hello Kitty Keychain', desc: 'A super cute handmade crochet Hello Kitty keychain.',
         short: 'Cute bag charm', price: 220, oldPrice: null, category: 'keychains',
         color: '#f0c8d8', img: '🎀', imgBg: 2, badge: 'new',
         imageUrl: 'Keychains/Hello Kitty Keychain.jpeg',
         emojis: ['🎀', '✨', '💕'], tags: ['keychain', 'hellokitty', 'gift'], rating: 5, reviews: 15, isNew: true
       },
       {
-        id: "42", name: 'Duck Holding Daisy Keychain', desc: 'A lovely handmade crochet duck holding a little daisy keychain.',
+        id: 42, name: 'Duck Holding Daisy Keychain', desc: 'A lovely handmade crochet duck holding a little daisy keychain.',
         short: 'Cute bag charm', price: 350, oldPrice: null, category: 'keychains',
         color: '#fde5c0', img: '🦆', imgBg: 3, badge: 'new',
         imageUrl: 'Keychains/Duck Holding Daisy Keychain.jpeg',
         emojis: ['🦆', '🌼', '✨'], tags: ['keychain', 'duck', 'daisy'], rating: 5, reviews: 8, isNew: true
       },
       {
-        id: "43", name: 'Mikasa Scarf', desc: 'A warm and stylish handmade crochet Mikasa scarf.',
+        id: 43, name: 'Mikasa Scarf', desc: 'A warm and stylish handmade crochet Mikasa scarf.',
         short: 'Winter essential', price: 1100, oldPrice: null, category: 'accessories',
         color: '#f0c8d8', img: '🧣', imgBg: 2, badge: 'new',
         imageUrl: 'Accessories/Mikasa Sacarf.jpeg',
         emojis: ['🧣', '❄️', '✨'], tags: ['scarf', 'winter', 'mikasa'], rating: 5, reviews: 12, isNew: true
       },
       {
-        id: "44", name: 'Pillow', desc: 'A soft and comfortable handmade crochet pillow.',
+        id: 44, name: 'Pillow', desc: 'A soft and comfortable handmade crochet pillow.',
         short: 'Cozy home decor', price: 1150, oldPrice: null, category: 'accessories',
         color: '#d0ebe3', img: '🛏️', imgBg: 4, badge: 'new',
         imageUrl: 'Accessories/Pillow.jpeg',
         emojis: ['🛏️', '✨', '💤'], tags: ['pillow', 'decor', 'cozy'], rating: 5, reviews: 8, isNew: true
       },
       {
-        id: "45", name: 'Scarf (Mini)', desc: 'A cute mini handmade crochet scarf.',
+        id: 45, name: 'Scarf (Mini)', desc: 'A cute mini handmade crochet scarf.',
         short: 'Winter essential', price: 750, oldPrice: null, category: 'accessories',
         color: '#f0eaff', img: '🧣', imgBg: 1, badge: 'new',
         imageUrl: 'Accessories/Scarf (Mini).jpeg',
         emojis: ['🧣', '❄️', '✨'], tags: ['scarf', 'mini', 'winter'], rating: 5, reviews: 10, isNew: true
       },
       {
-        id: "46", name: 'Volleyball Keychain', desc: 'A fun handmade crochet volleyball keychain.',
+        id: 46, name: 'Volleyball Keychain', desc: 'A fun handmade crochet volleyball keychain.',
         short: 'Cute bag charm', price: 180, oldPrice: null, category: 'keychains',
-        color: '#f0c8d8', img: '🏐', imgBg: 2, badge: 'new',
-        imageUrl: 'Keychains/Volleyball Keychain.jpeg',
-        emojis: ['🏐', '✨', '🔥'], tags: ['keychain', 'volleyball', 'gift'], rating: 5, reviews: 3, isNew: true
+        color: '#fef3e2', img: '🏐', imgBg: 3, badge: 'new',
+        imageUrl: 'Keychains/Volleyball Keychain (1 piece).jpeg',
+        emojis: ['🏐', '✨', '💛'], tags: ['keychain', 'volleyball', 'sports'], rating: 5, reviews: 8, isNew: true
       },
       {
-        id: "47", name: 'Frog Keychain (Tiny)', desc: 'A tiny and adorable handmade crochet frog keychain.',
-        short: 'Cute bag charm', price: 150, oldPrice: null, category: 'keychains',
-        color: '#e8f5f0', img: '🐸', imgBg: 4, badge: 'new',
-        imageUrl: 'Keychains/Frog Keychain (Tiny).jpeg',
+        id: 47, name: 'Frog Keychain', desc: 'An adorable tiny handmade crochet frog keychain.',
+        short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
+        color: '#d0ebe3', img: '🐸', imgBg: 4, badge: 'new',
+        imageUrl: 'Keychains/Frog Keychain.jpeg',
         emojis: ['🐸', '✨', '💚'], tags: ['keychain', 'frog', 'cute'], rating: 5, reviews: 14, isNew: true
       },
       {
-        id: "48", name: 'Tooth Keychain', desc: 'A cute handmade crochet tooth keychain. Perfect for dentists!',
+        id: 48, name: 'Tooth Keychain', desc: 'A cute handmade crochet tooth keychain. Perfect for dentists!',
         short: 'Cute bag charm', price: 200, oldPrice: null, category: 'keychains',
         color: '#f0eaff', img: '🦷', imgBg: 1, badge: 'new',
         imageUrl: 'Keychains/Tooth Keychain.jpeg',
@@ -2985,24 +2968,20 @@
       }
     ];
 
-    let PRODUCTS = INITIAL_PRODUCTS;
+    let PRODUCTS = JSON.parse(localStorage.getItem('sha_products')) || [];
+    if (PRODUCTS.length === 0) {
+      PRODUCTS = INITIAL_PRODUCTS;
+      localStorage.setItem('sha_products', JSON.stringify(PRODUCTS));
+    }
 
-    // Real-time products from Firebase
-    onSnapshot(collection(db, "products"), (snap) => {
-      if (!snap.empty) {
-        PRODUCTS = snap.docs.map(doc => doc.data());
-        console.log("Products synced from Firebase:", PRODUCTS.length);
-      } else {
-        console.log("Firebase empty, using initial products.");
-        PRODUCTS = INITIAL_PRODUCTS;
+    // Storage listener for real-time sync with Admin Dashboard
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'sha_products') {
+        PRODUCTS = JSON.parse(e.newValue) || [];
+        if (typeof renderShop === 'function') renderShop();
+        if (typeof initHome === 'function') initHome();
       }
-      if (typeof renderShop === 'function') renderShop();
-      if (typeof initHome === 'function') initHome();
     });
-
-    window.db = db; // Export for other functions
-
-
 
     const TESTIMONIALS = [
       { text: "Ordered a tote bag and it arrived beautifully packaged. The quality is insane for the price. Already ordered two more as gifts!", name: "Zara A.", loc: "Mumbai", avatar: "ZA", color: "#7c6bbf" },
@@ -3419,6 +3398,7 @@
       const ph = document.getElementById('phone').value.trim();
       const addr = document.getElementById('address').value.trim();
       const city = document.getElementById('city').value.trim();
+      const notes = document.getElementById('orderNotes').value.trim();
 
       if (!fn || !ph || !addr || !city) { showToast('⚠️ Please fill in all required fields'); return; }
       if (cart.length === 0) { showToast('Your cart is empty!'); return; }
@@ -3427,7 +3407,7 @@
       const shipping = subtotal >= 3000 ? 0 : 250;
       const total = subtotal + shipping;
 
-      const cartItemsString = cart.map(item => `${item.name} (${item.color || 'Default'}) x ${item.qty}`).join(", ");
+      const cartItemsString = cart.map(item => `${item.name} (${item.color}) x ${item.qty}`).join(", ");
       const totalQuantity = cart.reduce((a, i) => a + i.qty, 0);
 
       const btn = document.getElementById('checkoutBtn');
@@ -3436,10 +3416,7 @@
       btn.disabled = true;
 
       try {
-        const orderId = 'SHA-' + Math.floor(100000 + Math.random() * 900000);
-        
-        // Post to Google Sheet for legacy sync
-        fetch(SCRIPT_URL, {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbxEMxXp66GUj2biODCvesLs43p6dM1yk4oOs4aTtpNidp6vPQnyZtxcQPpU5BsoevH1FA/exec", {
           method: "POST",
           body: JSON.stringify({
             name: fn + " " + ln,
@@ -3449,35 +3426,41 @@
             quantity: totalQuantity,
             price: total
           }),
-        }).catch(e => console.warn("Google Sheet sync failed, but continuing with Firebase...", e));
+        });
 
-        const newOrder = {
-          id: orderId,
-          customerId: portalUser ? portalUser.email : (fn + ' ' + ln).toLowerCase(),
-          date: new Date().toISOString().split('T')[0],
-          items: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
-          status: 'pending',
-          paymentStatus: 'pending',
-          paymentRef: '',
-          trackingNo: '',
-          shipping: { name: fn + ' ' + ln, address: addr, city: city, state: '', pin: '', phone: ph },
-          updatedAt: new Date().toISOString()
-        };
-
-        await setDoc(doc(db, "orders", orderId), newOrder);
-        
-        showToast('Order placed! Redirecting... 🧶');
-        window.location.href = `payment.html?amount=${total}&note=${encodeURIComponent(orderId)}`;
+        const data = await response.json();
+        if (data.status === "success") {
+          // Save to local orders for portal
+          const localOrders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
+          const newId = data.orderId || ('SHA-' + Math.floor(100000 + Math.random() * 900000));
+          const newOrder = {
+            id: newId,
+            customerId: portalUser ? portalUser.email : (fn + ' ' + ln), // using name as id if not logged in
+            date: new Date().toISOString().split('T')[0],
+            items: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+            status: 'pending',
+            paymentStatus: 'pending',
+            paymentRef: '',
+            trackingNo: '',
+            shipping: { name: fn + ' ' + ln, address: addr, city: city, state: '', pin: '', phone: ph }
+          };
+          localOrders.push(newOrder);
+          localStorage.setItem('cbs_orders', JSON.stringify(localOrders));
+          
+          showToast('Order placed! Redirecting... 🧶');
+          window.location.href = `payment.html?amount=${total}&note=${encodeURIComponent(newId)}`;
+          return;
+        } else {
+          showToast('⚠️ Error: ' + (data.message || 'Could not place order.'));
+        }
       } catch (error) {
         console.error(error);
-        showToast('⚠️ Error placing order. Please check your connection.');
+        showToast('⚠️ Network error. Please check your connection and try again.');
       } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
       }
     }
-    window.placeOrder = placeOrder;
-
 
     function closeModal() { document.getElementById('orderModal').classList.remove('open'); }
 
@@ -3510,114 +3493,84 @@ function switchPortalTab(tab) {
   document.getElementById('panel-register').classList.toggle('active', tab === 'register');
 }
 
-async function portalSignIn() {
+function portalSignIn() {
   const email = document.getElementById('portal-email').value.trim().toLowerCase();
   const pass = document.getElementById('portal-pass').value;
-  if (!email || !pass) { showToast('Please enter credentials'); return; }
+  const customers = JSON.parse(localStorage.getItem('cbs_customers') || '[]');
+  const user = customers.find(u => u.email === email && u.password === pass);
 
-  try {
-    const userDoc = await getDoc(doc(db, "customers", email));
-    if (userDoc.exists() && userDoc.data().password === pass) {
-      portalUser = userDoc.data();
-      document.getElementById('login-err').style.display = 'none';
-      initPortal();
-      showToast(`Welcome back, ${portalUser.name}! 👋`);
-    } else {
-      document.getElementById('login-err').style.display = 'block';
-    }
-  } catch (e) {
-    console.error(e);
-    showToast('Error signing in.');
+  if (user) {
+    portalUser = user;
+    document.getElementById('login-err').style.display = 'none';
+    initPortal();
+    showToast(`Welcome back, ${user.name}! 👋`);
+  } else {
+    document.getElementById('login-err').style.display = 'block';
   }
 }
-window.portalSignIn = portalSignIn;
 
-async function portalRegister() {
+function portalRegister() {
   const name = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim().toLowerCase();
   const pass = document.getElementById('reg-pass').value;
 
   if (!name || !email || !pass) { showToast('Please fill all fields'); return; }
 
-  try {
-    const userDoc = await getDoc(doc(db, "customers", email));
-    if (userDoc.exists()) {
-      document.getElementById('reg-err').style.display = 'block';
-      return;
-    }
-
-    const newUser = { name, email, password: pass, createdAt: new Date().toISOString() };
-    await setDoc(doc(db, "customers", email), newUser);
-    portalUser = newUser;
-    document.getElementById('reg-err').style.display = 'none';
-    initPortal();
-    showToast('Account created successfully! 🎉');
-  } catch (e) {
-    console.error(e);
-    showToast('Error creating account.');
+  const customers = JSON.parse(localStorage.getItem('cbs_customers') || '[]');
+  if (customers.find(u => u.email === email)) {
+    document.getElementById('reg-err').style.display = 'block';
+    return;
   }
+
+  const newUser = { name, email, password: pass };
+  customers.push(newUser);
+  localStorage.setItem('cbs_customers', JSON.stringify(customers));
+  portalUser = newUser;
+  document.getElementById('reg-err').style.display = 'none';
+  initPortal();
+  showToast('Account created successfully! 🎉');
 }
-window.portalRegister = portalRegister;
 
 function portalSignOut() {
   portalUser = null;
   initPortal();
 }
-window.portalSignOut = portalSignOut;
-window.switchPortalTab = switchPortalTab;
 
+function renderPortalDashboard() {
+  const orders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
+  const userOrders = orders.filter(o => o.customerId === portalUser.email);
+  
+  document.getElementById('portal-user-name').textContent = portalUser.name.split(' ')[0];
+  document.getElementById('stat-total-orders').textContent = userOrders.length;
+  document.getElementById('stat-active-orders').textContent = userOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
+  document.getElementById('stat-completed-orders').textContent = userOrders.filter(o => o.status === 'delivered').length;
 
-async function renderPortalDashboard() {
-  try {
-    const q = query(collection(db, "orders"), where("customerId", "==", portalUser.email));
-    const snap = await getDocs(q);
-    const userOrders = snap.docs.map(doc => doc.data());
-    
-    document.getElementById('portal-user-name').textContent = portalUser.name.split(' ')[0];
-    document.getElementById('stat-total-orders').textContent = userOrders.length;
-    document.getElementById('stat-active-orders').textContent = userOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
-    document.getElementById('stat-completed-orders').textContent = userOrders.filter(o => o.status === 'delivered').length;
+  const list = document.getElementById('portal-orders-list');
+  const empty = document.getElementById('portal-empty-orders');
 
-    const list = document.getElementById('portal-orders-list');
-    const empty = document.getElementById('portal-empty-orders');
-
-    if (userOrders.length === 0) {
-      list.innerHTML = '';
-      empty.style.display = 'block';
-    } else {
-      empty.style.display = 'none';
-      list.innerHTML = userOrders.slice().sort((a,b)=> new Date(b.date) - new Date(a.date)).map(o => renderOrderCard(o)).join('');
-    }
-  } catch (e) {
-    console.error(e);
-    showToast('Error loading dashboard.');
+  if (userOrders.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    list.innerHTML = userOrders.slice().reverse().map(o => renderOrderCard(o)).join('');
   }
 }
-window.renderPortalDashboard = renderPortalDashboard;
 
-
-async function portalGuestLookup() {
+function portalGuestLookup() {
   const id = document.getElementById('guest-order-id').value.trim().toUpperCase();
-  if (!id) { showToast('Please enter Order ID'); return; }
+  const orders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
+  const order = orders.find(o => o.id.toUpperCase() === id);
 
-  try {
-    const docSnap = await getDoc(doc(db, "orders", id));
-    if (docSnap.exists()) {
-      const order = docSnap.data();
-      document.getElementById('guest-err').style.display = 'none';
-      document.getElementById('portal-login-view').style.display = 'none';
-      document.getElementById('portal-guest-result').style.display = 'block';
-      document.getElementById('guest-result-content').innerHTML = renderOrderCard(order, true);
-    } else {
-      document.getElementById('guest-err').style.display = 'block';
-    }
-  } catch (e) {
-    console.error(e);
-    showToast('Error looking up order.');
+  if (order) {
+    document.getElementById('guest-err').style.display = 'none';
+    document.getElementById('portal-login-view').style.display = 'none';
+    document.getElementById('portal-guest-result').style.display = 'block';
+    document.getElementById('guest-result-content').innerHTML = renderOrderCard(order, true);
+  } else {
+    document.getElementById('guest-err').style.display = 'block';
   }
 }
-window.portalGuestLookup = portalGuestLookup;
-
 
 function backToPortalLogin() {
   document.getElementById('portal-guest-result').style.display = 'none';
@@ -3760,33 +3713,11 @@ function renderOrderCard(o, isGuest = false) {
       els.forEach(el => obs.observe(el));
     }
 
-    // EXPOSE TO WINDOW
-    window.showPage = showPage;
-    window.goBack = goBack;
-    window.toggleMobileMenu = toggleMobileMenu;
-    window.filterCategory = filterCategory;
-    window.filterProducts = filterProducts;
-    window.openProduct = openProduct;
-    window.changeQty = changeQty;
-    window.moveSlider = moveSlider;
-    window.goToSlide = goToSlide;
-    window.addToCartFromDetail = addToCartFromDetail;
-    window.toggleWishDetail = toggleWishDetail;
-    window.updateCartQty = updateCartQty;
-    window.removeFromCart = removeFromCart;
-    window.selectPayment = selectPayment;
-    window.backToPortalLogin = backToPortalLogin;
-    window.toggleWish = toggleWish;
-    window.quickAddCart = quickAddCart;
-    window.loginAdmin = loginAdmin;
-    window.loadAdminOrders = loadAdminOrders;
-
     // INIT
     initHome();
     updateCartBadge();
     updateWishBadge();
     setupFadeIns();
   </script>
-
 
 
