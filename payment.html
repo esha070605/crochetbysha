@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crochet by Sha — Payment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --rose:    #e8a0b4;
+      --blush:   #f5d0dc;
+      --cream:   #fdf6f0;
+      --lavender:#d8cce8;
+      --lilac:   #ede6f5;
+      --text:    #3d2c35;
+      --muted:   #8a7080;
+      --white:   #ffffff;
+      --shadow:  0 8px 32px rgba(180,120,150,0.13);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 16px 80px;
+    }
+
+    /* ── decorative blobs ── */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 420px; height: 420px;
+      background: var(--blush);
+      top: -100px; left: -120px;
+    }
+    body::after {
+      width: 340px; height: 340px;
+      background: var(--lavender);
+      bottom: -80px; right: -100px;
+    }
+
+    .page-wrap { position: relative; z-index: 1; width: 100%; max-width: 520px; }
+
+    /* ── header ── */
+    .brand {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .brand h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+    .brand h1 span { color: var(--rose); font-style: italic; }
+    .brand p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ── card ── */
+    .card {
+      background: var(--white);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 36px 32px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-title .icon {
+      width: 34px; height: 34px;
+      background: var(--lilac);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+
+    /* ── order summary ── */
+    #order-summary .line {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--blush);
+      font-size: 0.9rem;
+    }
+    #order-summary .line:last-child { border-bottom: none; font-weight: 500; }
+    #order-summary .line span:last-child { color: var(--rose); font-weight: 600; }
+
+    /* ── amount input ── */
+    .amount-row {
+      display: flex;
+      align-items: center;
+      background: var(--cream);
+      border: 1.5px solid var(--blush);
+      border-radius: 12px;
+      padding: 0 16px;
+      margin-bottom: 24px;
+      transition: border-color 0.2s;
+    }
+    .amount-row:focus-within { border-color: var(--rose); }
+    .amount-row span { font-size: 1.1rem; color: var(--muted); }
+    .amount-row input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--text);
+      padding: 14px 8px;
+      outline: none;
+    }
+
+    /* ── note input ── */
+    .note-input {
+      width: 100%;
+      border: 1.5px solid var(--blush);
+      border-radius: 12px;
+      background: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text);
+      padding: 12px 16px;
+      outline: none;
+      resize: none;
+      transition: border-color 0.2s;
+      margin-bottom: 24px;
+    }
+    .note-input:focus { border-color: var(--rose); }
+
+    /* ── pay buttons ── */
+    .pay-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 16px 12px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(180,120,150,0.22); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-upi {
+      background: linear-gradient(135deg, var(--rose) 0%, #c97fa0 100%);
+      color: var(--white);
+      grid-column: span 2;
+      flex-direction: row;
+      padding: 18px 20px;
+      font-size: 0.95rem;
+    }
+    .btn-upi .btn-icon { font-size: 1.3rem; }
+
+    .btn-gpay  { background: var(--lilac);  color: var(--text); }
+    .btn-phone { background: var(--blush);   color: var(--text); }
+
+    .btn-label { font-size: 0.75rem; opacity: 0.8; }
+
+    /* ── QR section ── */
+    .qr-wrap {
+      text-align: center;
+    }
+    .qr-wrap img {
+      width: 210px;
+      height: 210px;
+      object-fit: contain;
+      border-radius: 16px;
+      border: 2px solid var(--blush);
+      margin-bottom: 14px;
+    }
+    .upi-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--lilac);
+      border-radius: 40px;
+      padding: 8px 18px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--rose);
+      transition: transform 0.15s;
+    }
+    .copy-btn:hover { transform: scale(1.2); }
+    .qr-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 6px 0 18px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--blush);
+    }
+
+    /* ── modal overlay ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(61,44,53,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+
+    .modal {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 36px 28px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(180,120,150,0.25);
+      text-align: center;
+      animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.88); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+    .modal h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+    }
+    .modal p { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .modal .upi-big {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+      background: var(--lilac);
+      border-radius: 12px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      word-break: break-all;
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .app-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 8px;
+      border-radius: 14px;
+      border: 1.5px solid var(--blush);
+      background: var(--cream);
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.18s, background 0.18s;
+    }
+    .app-btn:hover { border-color: var(--rose); background: var(--blush); }
+    .app-btn .app-icon { font-size: 1.6rem; }
+
+    .modal-close {
+      background: var(--blush);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.18s;
+    }
+    .modal-close:hover { background: var(--rose); color: var(--white); }
+
+    /* ── toast ── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--text);
+      color: var(--white);
+      font-size: 0.85rem;
+      padding: 10px 22px;
+      border-radius: 40px;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── instructions ── */
+    .instructions {
+      background: var(--lilac);
+      border-radius: 16px;
+      padding: 20px 24px;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .instructions ol { padding-left: 18px; }
+    .instructions li { margin-bottom: 4px; }
+    .instructions strong { color: #7a5a9e; }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <!-- Brand -->
+  <div class="brand">
+    <h1>Crochet <span>by Sha</span></h1>
+    <p>Handmade with love &amp; yarn</p>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon">🧾</div>
+      Order Summary
+    </div>
+    <div id="order-summary">
+      <div class="line"><span>Item(s)</span><span id="item-total">₹0.00</span></div>
+      <div class="line"><span>Shipping</span><span>₹0.00</span></div>
+      <div class="line"><span>Total Payable</span><span id="grand-total">₹0.00</span></div>
+    </div>
+  </div>
+
+  <!-- Payment Card -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon">💳</div>
+      Pay Now
+    </div>
+
+    <!-- Amount -->
+    <div class="amount-row">
+      <span>₹</span>
+      <input type="number" id="amount-input" placeholder="Enter amount" min="1"/>
+    </div>
+
+    <!-- Note -->
+    <textarea class="note-input" id="note-input" rows="2" placeholder="Add a note (e.g. your name, order #)..."></textarea>
+
+    <!-- UPI Button -->
+    <div class="pay-grid">
+      <button class="btn btn-upi" onclick="openUPIModal()">
+        <span class="btn-icon">📲</span>
+        Pay via UPI
+      </button>
+      <button class="btn btn-gpay" onclick="launchApp('gpay')">
+        <span style="font-size:1.4rem">G</span>
+        <span class="btn-label">Google Pay</span>
+      </button>
+      <button class="btn btn-phone" onclick="launchApp('phonepe')">
+        <span style="font-size:1.4rem">☎</span>
+        <span class="btn-label">PhonePe</span>
+      </button>
+    </div>
+
+    <div class="divider">or scan QR</div>
+
+    <!-- QR Code -->
+    <div class="qr-wrap">
+      <img src="upi-qr.jpeg" alt="UPI QR Code for Esha Satvase"/>
+      <div>
+        <div class="upi-chip">
+          🔗 esha19691@okaxis
+          <button class="copy-btn" onclick="copyUPI()" title="Copy UPI ID">📋</button>
+        </div>
+      </div>
+      <p class="qr-note">Scan with any UPI app — GPay, PhonePe, Paytm, BHIM</p>
+    </div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="card">
+    <div class="card-title">
+      <div class="icon">📌</div>
+      How to Pay
+    </div>
+    <div class="instructions">
+      <ol>
+        <li>Enter the exact <strong>order amount</strong> above.</li>
+        <li>Add your <strong>name &amp; order number</strong> in the note.</li>
+        <li>Click <strong>Pay via UPI</strong> or scan the QR code.</li>
+        <li>After payment, <strong>screenshot your confirmation</strong> and WhatsApp it to us.</li>
+        <li>Your order will be confirmed within <strong>24 hours</strong> ✨</li>
+      </ol>
+    </div>
+  </div>
+
+</div>
+
+<!-- UPI Modal -->
+<div class="modal-overlay" id="upi-modal">
+  <div class="modal">
+    <div style="font-size:2.5rem;margin-bottom:10px">💝</div>
+    <h2>Pay via UPI</h2>
+    <p>Copy the UPI ID or open your preferred app to pay</p>
+    <div class="upi-big">esha19691@okaxis</div>
+    <div class="app-grid">
+      <button class="app-btn" onclick="launchApp('gpay')">
+        <span class="app-icon">G</span>
+        Google Pay
+      </button>
+      <button class="app-btn" onclick="launchApp('phonepe')">
+        <span class="app-icon">☎</span>
+        PhonePe
+      </button>
+      <button class="app-btn" onclick="launchApp('paytm')">
+        <span class="app-icon">💙</span>
+        Paytm
+      </button>
+      <button class="app-btn" onclick="launchApp('bhim')">
+        <span class="app-icon">🇮🇳</span>
+        BHIM
+      </button>
+      <button class="app-btn" onclick="copyUPI()">
+        <span class="app-icon">📋</span>
+        Copy ID
+      </button>
+      <button class="app-btn" onclick="launchApp('generic')">
+        <span class="app-icon">🔗</span>
+        Other App
+      </button>
+    </div>
+    <button class="modal-close" onclick="closeUPIModal()">Done</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const UPI_ID   = 'esha19691@okaxis';
+  const UPI_NAME = 'Esha Satvase';
+
+  /* ── read URL params (so your shop can pass amount) ── */
+  const params = new URLSearchParams(window.location.search);
+  const preAmount = params.get('amount') || '';
+  const preNote   = params.get('note')   || '';
+  if (preAmount) {
+    document.getElementById('amount-input').value = preAmount;
+    document.getElementById('item-total').textContent  = '₹' + parseFloat(preAmount).toFixed(2);
+    document.getElementById('grand-total').textContent = '₹' + parseFloat(preAmount).toFixed(2);
+  }
+  if (preNote) document.getElementById('note-input').value = preNote;
+
+  document.getElementById('amount-input').addEventListener('input', function () {
+    const v = parseFloat(this.value) || 0;
+    document.getElementById('item-total').textContent  = '₹' + v.toFixed(2);
+    document.getElementById('grand-total').textContent = '₹' + v.toFixed(2);
+  });
+
+  function getAmount()  { return parseFloat(document.getElementById('amount-input').value) || 0; }
+  function getNote()    { return document.getElementById('note-input').value.trim() || 'CrochetBySha Order'; }
+
+  function buildUPILink(app) {
+    const amt  = getAmount();
+    const note = encodeURIComponent(getNote());
+    const base = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`;
+    const links = {
+      gpay:    `tez://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`,
+      phonepe: `phonepe://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`,
+      paytm:   `paytmmp://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`,
+      bhim:    base,
+      generic: base,
+    };
+    return links[app] || base;
+  }
+
+  function launchApp(app) {
+    if (getAmount() <= 0) { showToast('Please enter an amount first ✨'); return; }
+    const link = buildUPILink(app);
+    window.location.href = link;
+    setTimeout(() => showToast('Opening ' + app + '… if nothing happens, use QR code'), 800);
+  }
+
+  function openUPIModal()  { document.getElementById('upi-modal').classList.add('show'); }
+  function closeUPIModal() { document.getElementById('upi-modal').classList.remove('show'); }
+
+  document.getElementById('upi-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeUPIModal();
+  });
+
+  function copyUPI() {
+    navigator.clipboard.writeText(UPI_ID).then(() => showToast('UPI ID copied! ✅'));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+</body>
+</html>
