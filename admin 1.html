@@ -460,85 +460,6 @@
     }
     .btn-cancel:hover { border-color: var(--muted); }
 
-    /* ══════════════════════════ MOBILE ADAPTABILITY ══════════════════════════ */
-    @media (max-width: 768px) {
-      .tabs {
-        padding: 10px 15px 0;
-        overflow-x: auto;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-      }
-      .tab {
-        padding: 8px 16px;
-        font-size: 0.8rem;
-      }
-      .panel {
-        padding: 20px 15px;
-      }
-      .section-head {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-      }
-      .section-head div {
-        width: 100%;
-        justify-content: space-between;
-      }
-      .table-toolbar {
-        flex-direction: column;
-        gap: 10px;
-      }
-      .search-box, .filter-select {
-        width: 100%;
-      }
-      .stat-row {
-        grid-template-columns: 1fr 1fr;
-      }
-      .form-two {
-        grid-template-columns: 1fr;
-        gap: 0;
-      }
-      .modal-box {
-        width: 95%;
-        padding: 25px 20px;
-        margin: 10px auto;
-      }
-      .top-bar {
-        padding: 10px 15px;
-      }
-      .top-bar .brand {
-        font-size: 1.1rem;
-      }
-      
-      /* Make tables readable on mobile */
-      table thead { display: none; }
-      table tr {
-        display: block;
-        margin-bottom: 15px;
-        border: 1.5px solid var(--blush);
-        border-radius: 12px;
-        padding: 10px;
-        background: var(--white);
-      }
-      table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 0;
-        border: none;
-        font-size: 0.85rem;
-        text-align: right;
-      }
-      table td::before {
-        content: attr(data-label);
-        font-weight: 700;
-        color: var(--muted);
-        text-transform: uppercase;
-        font-size: 0.7rem;
-        text-align: left;
-      }
-    }
-
     /* ── add product btn ── */
     .btn-add {
       display: inline-flex;
@@ -718,7 +639,6 @@
 <!-- ═══════════════════════════ LOGIN ═══════════════════════════ -->
 <div id="login-screen">
   <div class="login-box">
-    <button onclick="window.location.href='index.html'" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:0.8rem;margin-bottom:1rem;display:flex;align-items:center;gap:4px;justify-content:center;width:100%;">← Back to Website</button>
     <h1>Crochet <span>by Sha</span></h1>
     <p class="sub">Admin Dashboard</p>
 
@@ -748,10 +668,8 @@
 
   <!-- Top bar -->
   <div class="top-bar">
-    <div class="brand" style="cursor:pointer" onclick="window.location.href='index.html'">Crochet <span>by Sha</span></div>
+    <div class="brand">Crochet <span>by Sha</span></div>
     <div class="badge">Admin Panel</div>
-    <div style="flex:1"></div>
-    <button class="logout-btn" style="background:var(--sage);color:var(--text);margin-right:10px;" onclick="window.location.href='index.html'">Website ↗</button>
     <button class="logout-btn" onclick="doLogout()">Sign Out</button>
   </div>
 
@@ -822,10 +740,7 @@
   <div class="panel" id="panel-orders">
     <div class="section-head">
       <h2>Customer Orders</h2>
-      <div style="display:flex; gap:10px;">
-        <button class="btn-secondary" onclick="exportOrdersCSV()" style="padding: 10px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: var(--white); border: 1.5px solid var(--blush); color: var(--muted); transition: all 0.2s;">📊 Export CSV</button>
-        <button class="btn-add" onclick="openAddOrderModal()">+ Create Order</button>
-      </div>
+      <button class="btn-add" onclick="openAddOrderModal()">+ Create Order</button>
     </div>
     <div class="table-wrap">
       <div class="table-toolbar">
@@ -918,12 +833,13 @@
       <div class="form-row">
         <label>Category</label>
         <select id="prod-cat">
-          <option value="bags">Bags</option>
-          <option value="accessories">Accessories</option>
-          <option value="plushies">Plushies</option>
-          <option value="keychains">Keychains</option>
-          <option value="bouquets">Bouquets</option>
-          <option value="other">Other</option>
+          <option>Amigurumi</option>
+          <option>Home Decor</option>
+          <option>Accessories</option>
+          <option>Bags & Pouches</option>
+          <option>Baby Items</option>
+          <option>Keychains</option>
+          <option>Other</option>
         </select>
       </div>
     </div>
@@ -1120,30 +1036,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ══════════════════════════ UTILS ══════════════════════════ */
-function toast(msg) {
-  const t = document.getElementById('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function loadData(key, def) {
-  const prefix = key === 'products' ? 'sha_' : 'cbs_';
-  try { return JSON.parse(localStorage.getItem(prefix + key)) || def; } catch { return def; }
-}
-
-function saveData(key, val) {
-  const prefix = key === 'products' ? 'sha_' : 'cbs_';
-  try {
-    localStorage.setItem(prefix + key, JSON.stringify(val));
-  } catch (e) {
-    console.error('Storage Error:', e);
-    toast('⚠️ Error: Storage quota exceeded. Try using fewer or smaller images.');
-  }
-}
-
 /* ══════════════════════════ AUTH ══════════════════════════ */
 const CREDENTIALS = { username: 'sha_admin', password: 'Crochet@2024!' };
 
@@ -1161,6 +1053,7 @@ function doLogin() {
     document.getElementById('login-err').style.display = 'block';
   }
 }
+document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
 
 function doLogout() {
   document.getElementById('admin-shell').style.display  = 'none';
@@ -1172,35 +1065,49 @@ function doLogout() {
 
 /* ══════════════════════════ TABS ══════════════════════════ */
 function switchTab(name) {
-  console.log('Switching to tab:', name);
   document.querySelectorAll('.tab').forEach((t,i) => {
     const names = ['dashboard','products','orders','payments'];
     t.classList.toggle('active', names[i] === name);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  const target = document.getElementById('panel-' + name);
-  if (target) target.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
   if (name === 'orders') renderAdminOrders();
+}
+
+/* ══════════════════════════ DATA STORE ══════════════════════════ */
+// Uses localStorage so data persists between sessions on the same browser
+function loadData(key, def) {
+  try { return JSON.parse(localStorage.getItem('cbs_' + key)) || def; } catch { return def; }
+}
+function saveData(key, val) {
+  localStorage.setItem('cbs_' + key, JSON.stringify(val));
+}
+
+let products = loadData('products', []);
+let payments = loadData('payments', []);
+
+/* ══════════════════════════ STATS ══════════════════════════ */
+function refreshStats() {
+  products = loadData('products', products);
+  payments = loadData('payments', payments);
+  allOrders = loadData('orders', []);
+  document.getElementById('stat-products').textContent = products.length;
+  document.getElementById('stat-payments').textContent = payments.length;
+  document.getElementById('stat-pending').textContent  = payments.filter(p => p.status === 'pending').length;
+  document.getElementById('stat-verified').textContent = payments.filter(p => p.status === 'verified').length;
 }
 
 /* ══════════════════════════ PRODUCTS ══════════════════════════ */
 let editingProductId = null;
-let currentImages = []; 
+let currentImages = []; // array of base64 strings
 
 function openAddModal() {
-  console.log('Opening Add Product Modal');
   editingProductId = null;
   currentImages    = [];
   document.getElementById('prod-modal-title').textContent = 'Add New Product';
-  ['prod-name','prod-price','prod-desc'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  const cat = document.getElementById('prod-cat');
-  if (cat) cat.value = 'plushies';
-  const stock = document.getElementById('prod-stock');
-  if (stock) stock.value = 'in';
-  
+  ['prod-name','prod-price','prod-desc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('prod-cat').value   = 'Amigurumi';
+  document.getElementById('prod-stock').value = 'in';
   document.getElementById('img-previews').innerHTML = '';
   document.getElementById('img-count-info').textContent = '';
   document.getElementById('product-modal').classList.add('show');
@@ -1211,16 +1118,15 @@ function closeProductModal() {
 }
 
 function editProduct(id) {
-  console.log('Editing product:', id);
-  const p = products.find(x => String(x.id) === String(id));
-  if (!p) { toast('Product not found.'); return; }
+  const p = products.find(x => x.id === id);
+  if (!p) return;
   editingProductId = id;
   currentImages    = [...(p.images || [])];
   document.getElementById('prod-modal-title').textContent = 'Edit Product';
   document.getElementById('prod-name').value  = p.name;
   document.getElementById('prod-price').value = p.price;
   document.getElementById('prod-desc').value  = p.desc || '';
-  document.getElementById('prod-cat').value   = p.category || 'other';
+  document.getElementById('prod-cat').value   = p.category || 'Other';
   document.getElementById('prod-stock').value = p.stock || 'in';
   renderPreviews();
   document.getElementById('product-modal').classList.add('show');
@@ -1228,7 +1134,7 @@ function editProduct(id) {
 
 function deleteProduct(id) {
   if (!confirm('Delete this product?')) return;
-  products = products.filter(p => String(p.id) !== String(id));
+  products = products.filter(p => p.id !== id);
   saveData('products', products);
   renderProducts();
   refreshStats();
@@ -1236,27 +1142,12 @@ function deleteProduct(id) {
 }
 
 function saveProduct() {
-  console.log('Saving product... ID:', editingProductId);
   const name  = document.getElementById('prod-name').value.trim();
   const price = parseFloat(document.getElementById('prod-price').value);
-  
   if (!name)        { toast('Please enter a product name.'); return; }
   if (isNaN(price)) { toast('Please enter a valid price.'); return; }
 
-  const existing = editingProductId ? products.find(x => String(x.id) === String(editingProductId)) : null;
-
   const data = {
-    ...(existing || {
-      short:    'Handmade with love',
-      img:      '🧶',
-      imgBg:    Math.floor(Math.random() * 6) + 1,
-      badge:    'new',
-      emojis:   ['🧶', '✨', '💖'],
-      tags:     [document.getElementById('prod-cat').value, 'handmade'],
-      rating:   5,
-      reviews:  0,
-      isNew:    true,
-    }),
     id:       editingProductId || Date.now().toString(),
     name,
     price,
@@ -1264,16 +1155,14 @@ function saveProduct() {
     stock:    document.getElementById('prod-stock').value,
     desc:     document.getElementById('prod-desc').value.trim(),
     images:   [...currentImages],
-    imageUrl: currentImages.length > 0 ? currentImages[0] : (existing ? existing.imageUrl : null),
     updatedAt: new Date().toISOString(),
   };
 
   if (editingProductId) {
-    products = products.map(p => String(p.id) === String(editingProductId) ? data : p);
+    products = products.map(p => p.id === editingProductId ? data : p);
   } else {
     products.push(data);
   }
-  
   saveData('products', products);
   closeProductModal();
   renderProducts();
@@ -1284,22 +1173,19 @@ function saveProduct() {
 function renderProducts() {
   const grid  = document.getElementById('product-grid');
   const empty = document.getElementById('prod-empty');
-  if (!grid || !empty) return;
-  
   grid.innerHTML = '';
   if (products.length === 0) { empty.style.display = 'block'; return; }
   empty.style.display = 'none';
 
   products.forEach(p => {
-    const firstImg = p.images && p.images.length > 0 ? p.images[0] : (p.imageUrl || null);
+    const firstImg = p.images && p.images.length > 0 ? p.images[0] : null;
     const card = document.createElement('div');
     card.className = 'product-card';
     card.innerHTML = `
       <div class="product-img-wrap">
         ${firstImg
-          ? `<img src="${firstImg}" alt="${p.name}" style="cursor:pointer" onclick="openViewer('${p.id}',0)" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>`
-          : ''}
-        <div style="display:${firstImg ? 'none' : 'flex'};align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:2.5rem;background:var(--cream);">${p.img || '🧶'}</div>
+          ? `<img src="${firstImg}" alt="${p.name}" style="cursor:pointer" onclick="openViewer('${p.id}',0)"/>`
+          : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:2.5rem;">🧶</div>`}
         ${p.images && p.images.length > 1 ? `<div class="img-count-badge">📷 ${p.images.length}</div>` : ''}
       </div>
       <div class="product-info">
@@ -1316,24 +1202,6 @@ function renderProducts() {
       </div>`;
     grid.appendChild(card);
   });
-}
-
-/* ══════════════════════════ DATA INIT ══════════════════════════ */
-let products = loadData('products', []);
-let payments = loadData('payments', []);
-
-function refreshStats() {
-  const sp = document.getElementById('stat-products');
-  const sy = document.getElementById('stat-payments');
-  const sn = document.getElementById('stat-pending');
-  const sv = document.getElementById('stat-verified');
-  
-  const allOrders = loadData('orders', []);
-  
-  if (sp) sp.textContent = products.length;
-  if (sy) sy.textContent = payments.length;
-  if (sn) sn.textContent = payments.filter(p => p.status === 'pending').length;
-  if (sv) sv.textContent = payments.filter(p => p.status === 'verified').length;
 }
 
 /* ── multi-image handling ── */
@@ -1510,27 +1378,21 @@ function renderPayments() {
         </div>
       </td>`;
     tbody.appendChild(row);
-    // Add mobile data-labels
-    const cells = row.querySelectorAll('td');
-    const labels = ['#', 'Date', 'Customer', 'Note', 'Amount', 'Ref', 'Status', 'Actions'];
-    cells.forEach((c, i) => c.setAttribute('data-label', labels[i]));
   });
 }
 
-/* ══════════════════════════ UTILS ══════════════════════════ */
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
 /* ══════════════════════════ ORDERS ══════════════════════════ */
-let allOrders = [];
-let editingOrderId = null;
-let orderItems = [];
-let orderFilter = '';
+let allOrders      = loadData('orders', []);
+let orderFilter    = '';
 let orderStatusFilter = 'all';
+let editingOrderId = null;
+let orderItems     = []; // [{name,qty,price}]
+
+function nextOrderId() {
+  const nums = allOrders.map(o => parseInt((o.id||'SHA-000000').replace('SHA-',''))||0);
+  const next  = nums.length ? Math.max(...nums) + 1 : 1;
+  return 'SHA-' + String(next).padStart(6, '0');
+}
 
 function openAddOrderModal() {
   editingOrderId = null;
@@ -1541,7 +1403,6 @@ function openAddOrderModal() {
   document.getElementById('ord-pstatus').value  = 'pending';
   document.getElementById('ord-ref').value      = '';
   document.getElementById('ord-tracking').value = '';
-  document.getElementById('ord-addr-name').value = '';
   document.getElementById('ord-addr').value     = '';
   document.getElementById('ord-city').value     = '';
   document.getElementById('ord-state').value    = '';
@@ -1579,16 +1440,11 @@ function renderOrderItems() {
       <button onclick="removeOrderItem(${i})" style="background:none;border:1.5px solid var(--blush);border-radius:8px;padding:9px 11px;cursor:pointer;color:var(--red);font-size:0.8rem" title="Remove">✕</button>`;
     wrap.appendChild(row);
   });
+  // total
   const total = orderItems.reduce((s,it)=>s+(it.price*it.qty),0);
   document.getElementById('ord-total-display').textContent = orderItems.length
     ? `Total: ₹${total.toLocaleString('en-IN')}`
     : '';
-}
-
-function nextOrderId() {
-  const lastId = allOrders.length > 0 ? allOrders[allOrders.length-1].id : 'SHA-000000';
-  const num = parseInt(lastId.split('-')[1]) + 1;
-  return 'SHA-' + num.toString().padStart(6, '0');
 }
 
 function saveOrder() {
@@ -1610,6 +1466,7 @@ function saveOrder() {
     paymentStatus: document.getElementById('ord-pstatus').value,
     paymentRef:    document.getElementById('ord-ref').value.trim(),
     trackingNo:    document.getElementById('ord-tracking').value.trim(),
+    shippingNotes: '',
     shipping: {
       name:    document.getElementById('ord-addr-name').value.trim() || email,
       address: document.getElementById('ord-addr').value.trim(),
@@ -1737,69 +1594,22 @@ function renderAdminOrders() {
         </div>
       </td>`;
     tbody.appendChild(row);
-    // Add mobile data-labels
-    const cells = row.querySelectorAll('td');
-    const labels = ['Order ID', 'Date', 'Customer', 'Items', 'Total', 'Payment', 'Status', 'Actions'];
-    cells.forEach((c, i) => c.setAttribute('data-label', labels[i]));
   });
 }
 
-function exportOrdersCSV() {
-  const orders = loadData('orders', []);
-  if (!orders.length) { toast('No orders to export.'); return; }
-
-  let csv = 'Order ID,Date,Customer,Items,Total,Payment,Status,Shipping Name,Address,City,State,PIN,Phone\n';
-  
-  orders.forEach(o => {
-    const total = o.items.reduce((s,i)=>s+(i.price*i.qty),0);
-    const items = o.items.map(i => `${i.name} (x${i.qty})`).join('; ');
-    const row = [
-      o.id,
-      o.date,
-      o.customerId,
-      `"${items}"`,
-      total,
-      o.paymentStatus,
-      o.status,
-      `"${o.shipping?.name || ''}"`,
-      `"${o.shipping?.address || ''}"`,
-      `"${o.shipping?.city || ''}"`,
-      `"${o.shipping?.state || ''}"`,
-      o.shipping?.pin || '',
-      o.shipping?.phone || ''
-    ];
-    csv += row.join(',') + '\n';
-  });
-
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.setAttribute('hidden', '');
-  a.setAttribute('href', url);
-  a.setAttribute('download', `CBS_Orders_${new Date().toISOString().split('T')[0]}.csv`);
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  toast('📊 CSV Exported Successfully!');
+/* ══════════════════════════ UTILS ══════════════════════════ */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// Final Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-  const passInput = document.getElementById('login-pass');
-  if (passInput) {
-    passInput.addEventListener('keydown', e => { 
-      if (e.key === 'Enter') doLogin(); 
-    });
-  }
-  
-  // Close modals on backdrop click
-  ['product-modal','payment-modal','order-modal'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('show');
-      });
-    }
+// Close modals on backdrop click
+['product-modal','payment-modal','order-modal'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('show');
   });
 });
 </script>

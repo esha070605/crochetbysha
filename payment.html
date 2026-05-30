@@ -355,18 +355,7 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* ── instructions ── */
-    .instructions {
-      background: var(--lilac);
-      border-radius: 16px;
-      padding: 20px 24px;
-      font-size: 0.85rem;
-      line-height: 1.7;
-      color: var(--text);
-    }
-    .instructions ol { padding-left: 18px; }
-    .instructions li { margin-bottom: 4px; }
-    .instructions strong { color: #7a5a9e; }
+
   </style>
 </head>
 <body>
@@ -375,22 +364,12 @@
 
   <!-- Brand -->
   <div class="brand">
+    <button onclick="window.location.href='index.html'" style="background:none;border:none;cursor:pointer;color:var(--rose);font-size:0.9rem;margin-bottom:1rem;display:flex;align-items:center;gap:6px;justify-content:center;width:100%;">← Back to Shop</button>
     <h1>Crochet <span>by Sha</span></h1>
     <p>Handmade with love &amp; yarn</p>
   </div>
 
-  <!-- Order Summary -->
-  <div class="card">
-    <div class="card-title">
-      <div class="icon">🧾</div>
-      Order Summary
-    </div>
-    <div id="order-summary">
-      <div class="line"><span>Item(s)</span><span id="item-total">₹0.00</span></div>
-      <div class="line"><span>Shipping</span><span>₹0.00</span></div>
-      <div class="line"><span>Total Payable</span><span id="grand-total">₹0.00</span></div>
-    </div>
-  </div>
+
 
   <!-- Payment Card -->
   <div class="card">
@@ -415,11 +394,11 @@
         Pay via UPI
       </button>
       <button class="btn btn-gpay" onclick="launchApp('gpay')">
-        <span style="font-size:1.4rem">G</span>
+        <span style="font-size:1.4rem; font-weight: 800; color: #4285F4;">G</span>
         <span class="btn-label">Google Pay</span>
       </button>
       <button class="btn btn-phone" onclick="launchApp('phonepe')">
-        <span style="font-size:1.4rem">☎</span>
+        <span style="font-size:1.4rem; color: #5f259f;">🟣</span>
         <span class="btn-label">PhonePe</span>
       </button>
     </div>
@@ -430,31 +409,16 @@
     <div class="qr-wrap">
       <img src="upi-qr.jpeg" alt="UPI QR Code for Esha Satvase"/>
       <div>
-        <div class="upi-chip">
+        <a href="upi://pay?pa=esha19691@okaxis&pn=Esha%20Satvase&cu=INR" class="upi-chip" style="text-decoration:none;">
           🔗 esha19691@okaxis
-          <button class="copy-btn" onclick="copyUPI()" title="Copy UPI ID">📋</button>
-        </div>
+        </a>
+        <button class="copy-btn" onclick="copyUPI()" title="Copy UPI ID">📋</button>
       </div>
       <p class="qr-note">Scan with any UPI app — GPay, PhonePe, Paytm, BHIM</p>
     </div>
   </div>
 
-  <!-- Instructions -->
-  <div class="card">
-    <div class="card-title">
-      <div class="icon">📌</div>
-      How to Pay
-    </div>
-    <div class="instructions">
-      <ol>
-        <li>Enter the exact <strong>order amount</strong> above.</li>
-        <li>Add your <strong>name &amp; order number</strong> in the note.</li>
-        <li>Click <strong>Pay via UPI</strong> or scan the QR code.</li>
-        <li>After payment, <strong>screenshot your confirmation</strong> and WhatsApp it to us.</li>
-        <li>Your order will be confirmed within <strong>24 hours</strong> ✨</li>
-      </ol>
-    </div>
-  </div>
+
 
 </div>
 
@@ -464,18 +428,20 @@
     <div style="font-size:2.5rem;margin-bottom:10px">💝</div>
     <h2>Pay via UPI</h2>
     <p>Copy the UPI ID or open your preferred app to pay</p>
-    <div class="upi-big">esha19691@okaxis</div>
+    <a href="upi://pay?pa=esha19691@okaxis&pn=Esha%20Satvase&cu=INR" style="text-decoration:none;">
+      <div class="upi-big">esha19691@okaxis</div>
+    </a>
     <div class="app-grid">
       <button class="app-btn" onclick="launchApp('gpay')">
-        <span class="app-icon">G</span>
-        Google Pay
+        <span class="app-icon" style="color: #4285F4;">G</span>
+        G-Pay
       </button>
       <button class="app-btn" onclick="launchApp('phonepe')">
-        <span class="app-icon">☎</span>
+        <span class="app-icon" style="color: #5f259f;">🟣</span>
         PhonePe
       </button>
       <button class="app-btn" onclick="launchApp('paytm')">
-        <span class="app-icon">💙</span>
+        <span class="app-icon" style="color: #00BAF2;">🔵</span>
         Paytm
       </button>
       <button class="app-btn" onclick="launchApp('bhim')">
@@ -487,8 +453,8 @@
         Copy ID
       </button>
       <button class="app-btn" onclick="launchApp('generic')">
-        <span class="app-icon">🔗</span>
-        Other App
+        <span class="app-icon">📲</span>
+        Other
       </button>
     </div>
     <button class="modal-close" onclick="closeUPIModal()">Done</button>
@@ -507,17 +473,14 @@
   const preAmount = params.get('amount') || '';
   const preNote   = params.get('note')   || '';
   if (preAmount) {
-    document.getElementById('amount-input').value = preAmount;
-    document.getElementById('item-total').textContent  = '₹' + parseFloat(preAmount).toFixed(2);
-    document.getElementById('grand-total').textContent = '₹' + parseFloat(preAmount).toFixed(2);
+    const amtInput = document.getElementById('amount-input');
+    amtInput.value = preAmount;
+    amtInput.readOnly = true;
+    amtInput.style.opacity = '0.7';
+    amtInput.style.cursor = 'not-allowed';
   }
   if (preNote) document.getElementById('note-input').value = preNote;
 
-  document.getElementById('amount-input').addEventListener('input', function () {
-    const v = parseFloat(this.value) || 0;
-    document.getElementById('item-total').textContent  = '₹' + v.toFixed(2);
-    document.getElementById('grand-total').textContent = '₹' + v.toFixed(2);
-  });
 
   function getAmount()  { return parseFloat(document.getElementById('amount-input').value) || 0; }
   function getNote()    { return document.getElementById('note-input').value.trim() || 'CrochetBySha Order'; }
@@ -525,22 +488,61 @@
   function buildUPILink(app) {
     const amt  = getAmount();
     const note = encodeURIComponent(getNote());
-    const base = `upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`;
-    const links = {
-      gpay:    `tez://upi/pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`,
-      phonepe: `phonepe://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`,
-      paytm:   `paytmmp://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt : ''}&cu=INR`,
-      bhim:    base,
-      generic: base,
-    };
-    return links[app] || base;
+    const tr   = 'CBS' + Date.now(); // Transaction Ref
+    
+    // Standard parameters
+    let params = `pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&tn=${note}${amt ? '&am=' + amt.toFixed(2) : ''}&cu=INR`;
+    
+    // For GPay, we use a slightly different approach to avoid the "Add Bank Account" bug
+    if (app === 'gpay') {
+      // Adding &mode=02 and &orgid=000000 often resolves the GPay bank account loop
+      // And we use the universal upi:// scheme which is often more stable than tez://
+      return `upi://pay?${params}&tr=${tr}&mode=02&orgid=000000`;
+    }
+
+    switch(app) {
+      case 'phonepe':
+        return `phonepe://pay?${params}&tr=${tr}`;
+      case 'paytm':
+        return `paytmmp://pay?${params}&tr=${tr}`;
+      default:
+        return `upi://pay?${params}&tr=${tr}`;
+    }
   }
 
   function launchApp(app) {
-    if (getAmount() <= 0) { showToast('Please enter an amount first ✨'); return; }
+    if (getAmount() <= 0) {
+      showToast('Please enter an amount first ✨');
+      return;
+    }
+
+    // Check if likely mobile (UPI deep links don't work on desktop)
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isMobile && app !== 'generic') {
+      showToast('Please scan the QR code to pay from your computer 📱');
+      return;
+    }
+
     const link = buildUPILink(app);
+    
+    // Track if the page loses focus (meaning an app likely opened)
+    let appOpened = false;
+    window.onblur = () => { appOpened = true; };
+
+    // Try to launch the app
     window.location.href = link;
-    setTimeout(() => showToast('Opening ' + app + '… if nothing happens, use QR code'), 800);
+
+    // Fallback message if the app doesn't open after a short delay
+    setTimeout(() => {
+      if (!appOpened) {
+        if (app === 'generic') {
+          showToast('Opening UPI apps... if nothing happens, use QR code');
+        } else {
+          showToast('Could not open ' + app + '. Try "Other" or scan the QR code.');
+        }
+      }
+      window.onblur = null;
+    }, 2500);
   }
 
   function openUPIModal()  { document.getElementById('upi-modal').classList.add('show'); }

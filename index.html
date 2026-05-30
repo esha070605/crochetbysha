@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -820,6 +821,65 @@
       align-items: start;
     }
 
+    .pd-image-container {
+      position: relative;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      height: 420px;
+      background: var(--cream);
+    }
+
+    .pd-image-slider {
+      display: flex;
+      height: 100%;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pd-slide {
+      min-width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8rem;
+    }
+
+    .pd-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .slider-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: all 0.2s;
+      z-index: 10;
+      color: var(--text);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .slider-nav:hover {
+      background: white;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .slider-nav.prev { left: 15px; }
+    .slider-nav.next { right: 15px; }
+
     .pd-image {
       border-radius: var(--radius-lg);
       height: 420px;
@@ -1038,9 +1098,9 @@
         grid-template-columns: 1fr;
       }
 
-      .pd-image {
-        height: 280px;
-        font-size: 6rem;
+      .pd-image-container {
+        height: auto;
+        aspect-ratio: 1;
       }
     }
 
@@ -1467,29 +1527,7 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* WHATSAPP */
-    .wa-btn {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      z-index: 90;
-      width: 56px;
-      height: 56px;
-      background: #25d366;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.6rem;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
-      border: none;
-      transition: all 0.2s;
-    }
 
-    .wa-btn:hover {
-      transform: scale(1.1);
-    }
 
     /* MODAL */
     .modal-overlay {
@@ -1868,6 +1906,209 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* =====================================================================
+       📦 PORTAL STYLES (Integrated from customer-portal.html)
+       ===================================================================== */
+    :root {
+      /* Re-declaring some specific portal vars to avoid conflicts */
+      --amber: #fef3e2;
+      --amber-deep: #b87a00;
+      --sky: #e1f5fe;
+      --sky-deep: #0288d1;
+      --sage-deep: #2e7d32;
+    }
+
+    .portal-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      min-height: 60vh;
+    }
+
+    .login-box {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      box-shadow: var(--shadow-lg);
+      max-width: 450px;
+      margin: 2rem auto;
+    }
+
+    .login-tabs {
+      display: flex;
+      background: var(--cream);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 2rem;
+      gap: 4px;
+    }
+    .login-tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-mid);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .login-tab.active {
+      background: var(--white);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .portal-field-group { margin-bottom: 1.2rem; text-align: left; }
+    .portal-field-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-mid);
+      margin-bottom: 6px;
+    }
+    .portal-field-group input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: var(--text);
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .portal-field-group input:focus { border-color: var(--lavender-deep); }
+
+    .btn-portal {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--lavender-deep);
+      color: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-portal:hover { opacity: 0.9; }
+
+    .portal-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 1.5rem 0;
+      color: var(--text-mid);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+    .portal-divider::before, .portal-divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* Guest lookup */
+    .portal-lookup {
+      background: var(--blush);
+      border-radius: 16px;
+      padding: 1.2rem;
+    }
+    .lookup-row { display: flex; gap: 8px; margin-top: 10px; }
+    .lookup-row input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+    }
+
+    /* Portal Content */
+    .portal-welcome {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .portal-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-pill {
+      background: var(--white);
+      padding: 1.2rem;
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .stat-pill .icon { font-size: 1.5rem; }
+    .stat-pill .val { font-size: 1.2rem; font-weight: 700; display: block; }
+    .stat-pill .lbl { font-size: 0.7rem; color: var(--text-mid); text-transform: uppercase; }
+
+    .order-card {
+      background: var(--white);
+      border-radius: 18px;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .order-card-header {
+      padding: 1rem 1.5rem;
+      background: var(--cream);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .order-card-body { padding: 1.2rem 1.5rem; }
+    
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .s-pending   { background: var(--amber);  color: var(--amber-deep); }
+    .s-confirmed { background: var(--lavender);  color: var(--lavender-deep); }
+    .s-shipped   { background: var(--sky);    color: var(--sky-deep); }
+    .s-delivered { background: var(--sage);   color: var(--sage-deep); }
+    .s-cancelled { background: #ffeaea;       color: var(--red); }
+
+    .track-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 1.5rem 0;
+      padding: 0 10px;
+    }
+    .track-steps::before {
+      content: ''; position: absolute; top: 12px; left: 20px; right: 20px; height: 2px; background: var(--border); z-index: 0;
+    }
+    .track-step {
+      position: relative; z-index: 1; text-align: center; flex: 1;
+    }
+    .step-dot {
+      width: 24px; height: 24px; border-radius: 50%; background: var(--white); border: 2px solid var(--border);
+      margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem;
+    }
+    .track-step.done .step-dot { background: var(--lavender-deep); border-color: var(--lavender-deep); color: white; }
+    .step-label { font-size: 0.6rem; font-weight: 600; color: var(--text-mid); }
   </style>
 
   <nav id="mainNav">
@@ -1877,7 +2118,7 @@
       <a onclick="showPage('shop')" id="nav-shop">Shop</a>
       <a onclick="showPage('about')" id="nav-about">About</a>
       <a onclick="showPage('contact')" id="nav-contact">Contact</a>
-      <a onclick="showPage('track')" id="nav-track">Track Order</a>
+      <a onclick="showPage('portal')" id="nav-portal">My Portal</a>
     </div>
     <div class="nav-right">
       <button class="nav-icon-btn" onclick="showPage('cart')" title="Cart" style="position:relative;">🛒<span
@@ -1900,7 +2141,7 @@
       <div class="mobile-menu-item" onclick="showPage('shop');toggleMobileMenu()">Shop</div>
       <div class="mobile-menu-item" onclick="showPage('about');toggleMobileMenu()">About</div>
       <div class="mobile-menu-item" onclick="showPage('contact');toggleMobileMenu()">Contact</div>
-      <div class="mobile-menu-item" onclick="showPage('track');toggleMobileMenu()">Track Order</div>
+      <div class="mobile-menu-item" onclick="showPage('portal');toggleMobileMenu()">My Portal</div>
     </div>
     <div class="mobile-menu-buttons">
       <button class="btn-primary" style="width:100%;text-align:center;" onclick="showPage('shop');toggleMobileMenu()">Start Shopping</button>
@@ -1911,8 +2152,7 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <!-- WHATSAPP -->
-  <button class="wa-btn" onclick="openWhatsApp()" title="Chat on WhatsApp">💬</button>
+
 
   <!-- ORDER MODAL -->
   <div class="modal-overlay" id="orderModal">
@@ -1925,11 +2165,10 @@
         <p style="font-size:0.9rem;color:var(--text-mid);line-height:1.6;" id="modalDesc">Your order has been
           successfully recorded. We will contact you shortly to confirm the details and payment!</p>
       </div>
-      <div
-        style="background:var(--lavender);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1.25rem;font-size:0.85rem;color:var(--lavender-deep);">
-        <strong>Response time:</strong> Usually within 30 minutes ✨
-      </div>
-      <button class="btn-primary" style="width:100%;text-align:center;"
+
+      <button class="btn-primary" style="width:100%;text-align:center;margin-bottom:0.75rem;"
+        id="payNowBtn">💳 Pay Now (UPI/Bank)</button>
+      <button class="btn-secondary" style="width:100%;text-align:center;"
         onclick="closeModal();showPage('home');clearCart();">Continue Shopping 🧶</button>
     </div>
   </div>
@@ -1995,11 +2234,9 @@
     <!-- Instagram Section -->
     <div class="insta-section">
       <div class="section-tag">Follow Along</div>
-      <div class="section-title" style="font-size:1.8rem;font-weight:800;color:var(--text);">See Us on Instagram</div>
-      <p style="color:var(--text-mid);margin-top:0.5rem;">@_crochetbysha_</p>
-      <div class="insta-grid" id="instaGrid"></div>
-      <button class="insta-follow-btn" onclick="window.open('https://www.instagram.com/_crochetbysha_','_blank')">📸
-        Follow @_crochetbysha_</button>
+      <div class="section-title">See Us on Instagram</div>
+      <p style="color:var(--text-mid);margin-top:0.5rem;margin-bottom:1.5rem;">@_crochetbysha_</p>
+      <button class="insta-follow-btn" onclick="window.open('https://www.instagram.com/_crochetbysha_','_blank')">Follow @_crochetbysha_</button>
     </div>
 
     <!-- Footer -->
@@ -2031,12 +2268,13 @@
           <div class="footer-heading">Connect</div>
           <ul class="footer-links">
             <li><a onclick="window.open('https://www.instagram.com/_crochetbysha_','_blank')">Instagram ↗</a></li>
-            <li><a onclick="openWhatsApp()">WhatsApp Us</a></li>
           </ul>
         </div>
       </div>
-      <div class="footer-bottom">Made with 🧶 & love — Crochet by Sha © 2025 <span
-          style="opacity:0.2;cursor:pointer;margin-left:10px;" onclick="showPage('admin')">Admin</span></div>
+      <div class="footer-bottom">
+        Made with 🧶 & love — Crochet by Sha © 2025 
+        <span style="opacity:0.5;cursor:pointer;margin-left:10px;text-decoration:underline;" onclick="window.location.href='admin.html'">Admin Access</span>
+      </div>
     </footer>
   </div>
 
@@ -2124,8 +2362,8 @@
       </div>
       <div class="checkout-section">
         <h3>💳 Payment Method</h3>
-        <div class="payment-option active" id="pay-cod" onclick="selectPayment('cod')">
-          <input type="radio" name="payment" checked />
+        <div class="payment-option active" id="pay-cod" onclick="selectPayment('cod')" style="cursor:pointer;">
+          <input type="radio" name="payment" checked style="accent-color:var(--rose);" />
           <div>
             <div class="payment-label">Cash on Delivery (COD)</div>
             <div class="payment-sub">Pay when your order arrives</div>
@@ -2183,7 +2421,7 @@
             getting a piece of art made specifically for you.</p>
           <br />
           <p>Custom orders are always welcome! Want a specific color, size, or design? Just send me a message on
-            Instagram or WhatsApp.</p>
+            Instagram.</p>
         </div>
         <div class="about-img-box" style="background:linear-gradient(135deg,var(--beige-mid),var(--blush));">🤍</div>
       </div>
@@ -2238,61 +2476,130 @@
               <div style="font-size:0.75rem;color:var(--text-mid);">Instagram</div>
             </div>
           </div>
-          <div class="contact-item"><span class="contact-item-icon">💬</span>
-            <div>
-              <div class="contact-item-text">+91 9502283533</div>
-              <div style="font-size:0.75rem;color:var(--text-mid);">WhatsApp</div>
-            </div>
-          </div>
           <div class="contact-item"><span class="contact-item-icon">📍</span>
             <div>
               <div class="contact-item-text">India</div>
               <div style="font-size:0.75rem;color:var(--text-mid);">Ships Nationwide</div>
             </div>
           </div>
-          <div class="contact-item"><span class="contact-item-icon">⏰</span>
-            <div>
-              <div class="contact-item-text">Replies in ~30 min</div>
-              <div style="font-size:0.75rem;color:var(--text-mid);">Response Time</div>
-            </div>
-          </div>
           <button class="btn-primary" style="width:100%;margin-top:1rem;"
             onclick="window.open('https://www.instagram.com/_crochetbysha_','_blank')">📸 Open Instagram</button>
         </div>
-        <div class="contact-form-card">
-          <h3>Send a Message</h3>
-          <div style="display:flex;flex-direction:column;gap:1rem;">
-            <div class="form-group"><label>Your Name</label><input class="form-input" id="cname" placeholder="Ayesha" />
-            </div>
-            <div class="form-group"><label>Phone / Instagram</label><input class="form-input" id="cphone"
-                placeholder="+91 or @username" /></div>
-            <div class="form-group"><label>Message</label><textarea class="contact-textarea" id="cmessage"
-                placeholder="Hi Sha! I'd love a custom bag in dusty rose..."></textarea></div>
-            <button class="btn-primary" style="width:100%;" onclick="sendContactMessage()">💬 Send via WhatsApp</button>
-          </div>
+        <div class="contact-form-card" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+          <h3>DM for Custom Orders</h3>
+          <p style="color:var(--text-mid); margin-bottom:1.5rem;">Have a specific design in mind? Reach out on Instagram for custom requests and personalized designs!</p>
+          <button class="btn-primary" style="width:100%;"
+            onclick="window.open('https://www.instagram.com/_crochetbysha_','_blank')">📸 Message on Instagram</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ============ TRACK ORDER PAGE ============ -->
-  <div class="page" id="page-track">
+  <!-- ============ CUSTOMER PORTAL PAGE ============ -->
+  <div class="page" id="page-portal">
     <div style="background:linear-gradient(135deg,var(--lavender),var(--blush));padding:3rem 2rem;text-align:center;">
-      <div class="section-tag">Where is my order?</div>
-      <h2 style="font-size:2rem;font-weight:800;color:var(--text);margin-bottom:0.5rem;">Track Your Order 📦</h2>
-      <p style="color:var(--text-mid);">Enter your Order ID below</p>
+      <div class="section-tag">Manage Orders</div>
+      <h2 style="font-size:2rem;font-weight:800;color:var(--text);margin-bottom:0.5rem;">Customer Portal 🧶</h2>
+      <p style="color:var(--text-mid);">Track orders, view history, and manage your account</p>
     </div>
-    <div class="contact-container" style="max-width:500px;text-align:center;">
-      <div class="contact-form-card" style="margin-top:2rem;">
-        <div class="form-group" style="text-align:left;">
-          <label>Order ID (e.g. ORD123...)</label>
-          <input class="form-input" id="trackId" placeholder="Enter Order ID" style="margin-bottom:1rem;" />
-        </div>
-        <button class="btn-primary" id="trackBtn" style="width:100%;" onclick="trackOrder()">🔍 Track Order</button>
-        <div id="trackResult"
-          style="margin-top:1.5rem;text-align:left;display:none;background:var(--cream);padding:1.5rem;border-radius:var(--radius-sm);border:1px solid var(--border);">
+
+    <div class="portal-container">
+      <!-- LOGIN / REGISTER SCREEN -->
+      <div id="portal-login-view">
+        <div class="login-box">
+          <div class="login-tabs">
+            <button class="login-tab active" id="tab-btn-login" onclick="switchPortalTab('login')">Sign In</button>
+            <button class="login-tab" id="tab-btn-register" onclick="switchPortalTab('register')">New Account</button>
+          </div>
+
+          <!-- Sign In Panel -->
+          <div id="panel-login" class="tab-panel active">
+            <div class="portal-field-group">
+              <label>Email Address</label>
+              <input type="email" id="portal-email" placeholder="you@example.com">
+            </div>
+            <div class="portal-field-group">
+              <label>Password</label>
+              <input type="password" id="portal-pass" placeholder="••••••••">
+            </div>
+            <button class="btn-portal" onclick="portalSignIn()">Sign In</button>
+            <div id="login-err" class="err-msg">Invalid email or password</div>
+          </div>
+
+          <!-- Register Panel -->
+          <div id="panel-register" class="tab-panel">
+            <div class="portal-field-group">
+              <label>Full Name</label>
+              <input type="text" id="reg-name" placeholder="Esha">
+            </div>
+            <div class="portal-field-group">
+              <label>Email Address</label>
+              <input type="email" id="reg-email" placeholder="you@example.com">
+            </div>
+            <div class="portal-field-group">
+              <label>Password</label>
+              <input type="password" id="reg-pass" placeholder="••••••••">
+            </div>
+            <button class="btn-portal" onclick="portalRegister()">Create Account</button>
+            <div id="reg-err" class="err-msg">Email already registered</div>
+          </div>
+
+          <div class="portal-divider">OR</div>
+
+          <!-- Guest Lookup -->
+          <div class="portal-lookup">
+            <p style="font-size:0.8rem;color:var(--text-mid);margin-bottom:8px;"><strong>Guest Tracking:</strong> Just enter your Order ID</p>
+            <div class="lookup-row">
+              <input type="text" id="guest-order-id" placeholder="SHA-000000">
+              <button class="btn-portal" style="width:auto;padding:10px 18px;" onclick="portalGuestLookup()">Track</button>
+            </div>
+            <div id="guest-err" class="err-msg">Order ID not found</div>
+          </div>
         </div>
       </div>
+
+      <!-- LOGGED IN VIEW -->
+      <div id="portal-main-view" style="display:none;">
+        <div class="portal-welcome">
+          <div>
+            <h3 style="font-size:1.5rem;font-weight:800;">Welcome back, <span id="portal-user-name">User</span>! ✨</h3>
+            <p style="color:var(--text-mid);font-size:0.9rem;">Here's what's happening with your orders.</p>
+          </div>
+          <button class="btn-secondary" onclick="portalSignOut()" style="padding:8px 16px;font-size:0.8rem;">Sign Out</button>
+        </div>
+
+        <div class="portal-stats">
+          <div class="stat-pill">
+            <span class="icon">📦</span>
+            <div><span class="val" id="stat-total-orders">0</span><span class="lbl">Total Orders</span></div>
+          </div>
+          <div class="stat-pill">
+            <span class="icon">🚚</span>
+            <div><span class="val" id="stat-active-orders">0</span><span class="lbl">Active</span></div>
+          </div>
+          <div class="stat-pill">
+            <span class="icon">✨</span>
+            <div><span class="val" id="stat-completed-orders">0</span><span class="lbl">Completed</span></div>
+          </div>
+        </div>
+
+        <h4 style="margin-bottom:1rem;font-weight:700;">Order History</h4>
+        <div id="portal-orders-list">
+          <!-- filled by JS -->
+        </div>
+        <div id="portal-empty-orders" style="display:none;text-align:center;padding:3rem;color:var(--text-mid);">
+          <div style="font-size:3rem;margin-bottom:1rem;">🧶</div>
+          <p>No orders found. Start shopping to see them here!</p>
+          <button class="btn-primary" style="margin-top:1rem;" onclick="showPage('shop')">Browse Shop</button>
+        </div>
+      </div>
+
+      <!-- GUEST TRACKING RESULT VIEW -->
+      <div id="portal-guest-result" style="display:none;">
+        <button class="btn-secondary" onclick="backToPortalLogin()" style="margin-bottom:1rem;">← Back</button>
+        <div id="guest-result-content"></div>
+      </div>
+
     </div>
   </div>
 
@@ -2330,15 +2637,12 @@
   </div>
 
   <script>
-    const WA_NUMBER = '919502283533';
+
 
     // =====================================================================
-    // ✏️ EDIT YOUR PRODUCTS HERE — Add images, prices, names freely!
-    // For imageUrl: use a direct image link (Google Drive: share file > copy
-    // link, change /file/d/ID/view to https://lh3.googleusercontent.com/d/ID)
-    // Set imageUrl to '' to show an emoji icon instead.
+    // ✏️ INITIAL PRODUCTS — fall back here if localStorage is empty
     // =====================================================================
-    const PRODUCTS = [
+    const INITIAL_PRODUCTS = [
       {
         id: 1, name: 'Batman Keychain', desc: 'Handmade crochet Batman keychain. A perfect gift or bag charm!',
         short: 'Cute bag charm', price: 399, oldPrice: null, category: 'keychains',
@@ -2677,7 +2981,21 @@
       }
     ];
 
-    const CATEGORIES = ['All', 'bags', 'accessories', 'plushies', 'keychains', 'bouquets'];
+    let PRODUCTS = JSON.parse(localStorage.getItem('sha_products')) || [];
+    if (PRODUCTS.length === 0) {
+      PRODUCTS = INITIAL_PRODUCTS;
+      localStorage.setItem('sha_products', JSON.stringify(PRODUCTS));
+    }
+
+    // Storage listener for real-time sync with Admin Dashboard
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'sha_products') {
+        PRODUCTS = JSON.parse(e.newValue) || [];
+        if (typeof renderShop === 'function') renderShop();
+        if (typeof initHome === 'function') initHome();
+      }
+    });
+
     const TESTIMONIALS = [
       { text: "Ordered a tote bag and it arrived beautifully packaged. The quality is insane for the price. Already ordered two more as gifts!", name: "Zara A.", loc: "Mumbai", avatar: "ZA", color: "#7c6bbf" },
       { text: "The frog plushie is THE cutest thing I've ever received. My daughter won't put it down. Sha's work is absolutely impeccable.", name: "Sana M.", loc: "New Delhi", avatar: "SM", color: "#c97aa0" },
@@ -2699,7 +3017,6 @@
     // UPI QR Code (base64 embedded)
     function handleUpiClick(e) {
       // Try to open UPI app; works on Android/iOS with UPI apps installed
-      var upiUrl = 'upi://pay?pa=esha19691@okaxis&pn=Esha%20Satvase&cu=INR';
       window.location.href = upiUrl;
       e.preventDefault();
     }
@@ -2734,6 +3051,7 @@
       if (page === 'wishlist') renderWishlist();
       if (page === 'shop') renderShop();
       if (page === 'home') initHome();
+      if (page === 'portal') initPortal();
       if (page === 'checkout') renderCheckoutSummary();
       setupFadeIns();
     }
@@ -2758,30 +3076,29 @@
         <div><div class="t-name">${t.name}</div><div class="t-location">${t.loc}</div></div>
       </div>
     </div>`).join('');
-      document.getElementById('instaGrid').innerHTML = INSTA_TILES.map(e => `
-    <div class="insta-tile" style="background:linear-gradient(135deg,var(--lavender),var(--blush));font-size:2.8rem;" onclick="window.open('https://www.instagram.com/_crochetbysha_','_blank')">
-      ${e}<div class="insta-overlay">View ↗</div>
-    </div>`).join('');
     }
 
     function productCardHTML(p, extraClass = '') {
-      const inWish = wishlist.includes(p.id);
-      const inCart = cart.some(i => i.id === p.id);
-      // Use real image if imageUrl is set, otherwise show emoji
-      const imgContent = p.imageUrl
-        ? `<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><span style="font-size:4rem;display:none;">${p.img}</span>`
+      const inWish = wishlist.includes(String(p.id));
+      const inCart = cart.some(i => String(i.id) === String(p.id));
+      
+      // Check for multiple images first, then fallback to imageUrl
+      const firstImg = (p.images && p.images.length > 0) ? p.images[0] : (p.imageUrl || null);
+      
+      const imgContent = firstImg
+        ? `<img src="${firstImg}" style="width:100%;height:100%;object-fit:contain;background:rgba(255,255,255,0.5);" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><span style="font-size:4rem;display:none;">${p.img}</span>`
         : `<span style="font-size:4rem;">${p.img}</span>`;
-      return `<div class="product-card${extraClass}" onclick="openProduct(${p.id})">
+      return `<div class="product-card${extraClass}" onclick="openProduct('${p.id}')">
     <div class="product-img ${IMG_BG_CLASSES[p.imgBg]}">
       ${imgContent}
-      <button class="wish-btn${inWish ? ' active' : ''}" onclick="toggleWish(event,${p.id})">${inWish ? '❤️' : '🤍'}</button>
+      <button class="wish-btn${inWish ? ' active' : ''}" onclick="toggleWish(event,'${p.id}')">${inWish ? '❤️' : '🤍'}</button>
     </div>
     <div class="product-info">
       <div class="product-name">${p.name}</div>
       <div class="product-desc-short">${p.short}</div>
       <div class="product-footer">
         <div><span class="product-price">₹${p.price.toLocaleString()}</span>${p.oldPrice ? `<span class="product-old-price">₹${p.oldPrice.toLocaleString()}</span>` : ''}</div>
-        <button class="add-cart-btn${inCart ? ' added' : ''}" onclick="quickAddCart(event,${p.id})">${inCart ? '✓ Added' : '+ Cart'}</button>
+        <button class="add-cart-btn${inCart ? ' added' : ''}" onclick="quickAddCart(event,'${p.id}')">${inCart ? '✓ Added' : '+ Cart'}</button>
       </div>
     </div>
   </div>`;
@@ -2797,8 +3114,8 @@
 
     function quickAddCart(e, id) {
       e.stopPropagation();
-      const p = PRODUCTS.find(x => x.id === id);
-      const existing = cart.find(i => i.id === id);
+      const p = PRODUCTS.find(x => String(x.id) === String(id));
+      const existing = cart.find(i => String(i.id) === String(id));
       if (existing) { existing.qty++; showToast('Quantity updated 🛒'); }
       else {
         const imgHTML = p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />` : p.img;
@@ -2817,8 +3134,25 @@
     }
 
     function renderFilterChips() {
-      document.getElementById('filterChips').innerHTML = CATEGORIES.map(c => `
-    <span class="chip${activeCategory === c ? ' active' : ''}" onclick="filterCategory('${c}')">${c === 'All' ? '🧶 All' : c === 'bags' ? '👜 Bags' : c === 'accessories' ? '🎀 Accessories' : c === 'keychains' ? '🔑 Keychains' : c === 'bouquets' ? '💐 Bouquets' : '🧸 Plushies'}</span>`).join('');
+      // Get all unique categories currently in the product list
+      const cats = Array.from(new Set(PRODUCTS.map(p => p.category).filter(Boolean))).sort();
+      const dynamicCategories = ['All', ...cats];
+      
+      const icons = {
+        'All': '🧶',
+        'bags': '👜',
+        'accessories': '🎀',
+        'keychains': '🔑',
+        'bouquets': '💐',
+        'plushies': '🧸',
+        'other': '✨'
+      };
+
+      document.getElementById('filterChips').innerHTML = dynamicCategories.map(c => {
+        const icon = icons[c] || '✨';
+        const label = c === 'All' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1);
+        return `<span class="chip${activeCategory === c ? ' active' : ''}" onclick="filterCategory('${c}')">${icon} ${label}</span>`;
+      }).join('');
     }
 
     function filterCategory(cat) {
@@ -2845,17 +3179,34 @@
     // PRODUCT DETAIL
     function openProduct(id) {
       prevPage = document.querySelector('.page.active')?.id?.replace('page-', '') || 'shop';
-      currentProduct = PRODUCTS.find(p => p.id === id);
+      currentProduct = PRODUCTS.find(p => String(p.id) === String(id));
       const p = currentProduct;
-      const inWish = wishlist.includes(p.id);
+      const inWish = wishlist.includes(String(p.id));
+      
+      const allImages = p.images && p.images.length > 0 ? p.images : (p.imageUrl ? [p.imageUrl] : []);
+      currentSlide = 0; // Reset slider position
+
       document.getElementById('pdLayout').innerHTML = `
     <div>
-      <div class="pd-image ${IMG_BG_CLASSES[p.imgBg]}">
-        ${p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" /><span id="pdEmoji" style="font-size:7rem;display:none;">${p.img}</span>` : `<span id="pdEmoji" style="font-size:7rem;">${p.img}</span>`}
+      <div class="pd-image-container ${IMG_BG_CLASSES[p.imgBg]}">
+        <div class="pd-image-slider" id="pdSlider">
+          ${allImages.length > 0 
+            ? allImages.map(src => `<div class="pd-slide"><img src="${src}" style="object-fit:contain;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/><div style="display:none;align-items:center;justify-content:center;height:100%;font-size:7rem;">${p.img}</div></div>`).join('')
+            : `<div class="pd-slide"><span id="pdEmoji" style="font-size:7rem;">${p.img}</span></div>`
+          }
+        </div>
         ${p.badge ? `<span class="badge badge-${p.badge} pd-badge">${p.badge === 'new' ? '✨ New Drop' : p.badge === 'hot' ? '🔥 Hot' : '🏷️ Sale'}</span>` : ''}
+        
+        ${allImages.length > 1 ? `
+          <button class="slider-nav prev" onclick="moveSlider(-1)">❮</button>
+          <button class="slider-nav next" onclick="moveSlider(1)">❯</button>
+        ` : ''}
       </div>
       <div class="pd-thumbnails">
-        ${p.imageUrl ? `<div class="pd-thumb active"><img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" /></div>` : p.emojis.map((e, i) => `<div class="pd-thumb ${i === 0 ? 'active' : ''} ${IMG_BG_CLASSES[p.imgBg]}" onclick="changePdEmoji('${e}',this)">${e}</div>`).join('')}
+        ${allImages.length > 0 
+          ? allImages.map((src, i) => `<div class="pd-thumb ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i},this)"><img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" /></div>`).join('')
+          : p.emojis.map((e, i) => `<div class="pd-thumb ${i === 0 ? 'active' : ''} ${IMG_BG_CLASSES[p.imgBg]}" onclick="changePdEmoji('${e}',this)">${e}</div>`).join('')
+        }
       </div>
     </div>
     <div>
@@ -2898,7 +3249,40 @@
 
     let pdQty = 1;
     function changeQty(d) { pdQty = Math.max(1, pdQty + d); document.getElementById('pdQty').textContent = pdQty; }
-    function changePdEmoji(e, el) { document.getElementById('pdEmoji').textContent = e; document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active')); el.classList.add('active'); }
+
+    let currentSlide = 0;
+    function moveSlider(dir) {
+      const slider = document.getElementById('pdSlider');
+      if (!slider) return;
+      const total = slider.children.length;
+      currentSlide = (currentSlide + dir + total) % total;
+      updateSlider();
+    }
+
+    function goToSlide(idx, thumb) {
+      currentSlide = idx;
+      updateSlider();
+    }
+
+    function updateSlider() {
+      const slider = document.getElementById('pdSlider');
+      if (slider) {
+        slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+      }
+      document.querySelectorAll('.pd-thumb').forEach((t, i) => {
+        t.classList.toggle('active', i === currentSlide);
+      });
+    }
+
+    function changePdEmoji(e, thumb) {
+      const emoji = document.getElementById('pdEmoji');
+      if (emoji) {
+        emoji.textContent = e;
+        emoji.style.display = 'inline';
+      }
+      document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+    }
     function selectColor(el) { document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active')); el.classList.add('active'); }
     function addToCartFromDetail() {
       const p = currentProduct;
@@ -2912,14 +3296,14 @@
       if (existing) { existing.qty += pdQty; }
       else {
         const imgHTML = p.imageUrl ? `<img src="${p.imageUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" />` : p.img;
-        cart.push({ id: p.id, name: p.name, price: p.price, img: imgHTML, imgBg: p.imgBg, qty: pdQty, color: colorName });
+        cart.push({ id: String(p.id), name: p.name, price: p.price, img: imgHTML, imgBg: p.imgBg, qty: pdQty, color: colorName });
       }
       saveCart(); showToast(`${p.name} added to cart 🛒`);
     }
     function toggleWishDetail(id) {
       const btn = document.getElementById('pdWishBtn');
-      if (wishlist.includes(id)) { wishlist = wishlist.filter(i => i !== id); btn.textContent = '🤍'; btn.classList.remove('active'); showToast('Removed from wishlist'); }
-      else { wishlist.push(id); btn.textContent = '❤️'; btn.classList.add('active'); showToast('Added to wishlist ❤️'); }
+      if (wishlist.includes(String(id))) { wishlist = wishlist.filter(i => String(i) !== String(id)); btn.textContent = '🤍'; btn.classList.remove('active'); showToast('Removed from wishlist'); }
+      else { wishlist.push(String(id)); btn.textContent = '❤️'; btn.classList.add('active'); showToast('Added to wishlist ❤️'); }
       saveWish();
     }
 
@@ -2965,13 +3349,13 @@
     }
 
     function updateCartQty(id, d) {
-      const item = cart.find(i => i.id === id);
+      const item = cart.find(i => String(i.id) === String(id));
       if (!item) return;
       item.qty += d;
-      if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+      if (item.qty <= 0) cart = cart.filter(i => String(i.id) !== String(id));
       saveCart(); renderCart();
     }
-    function removeFromCart(id) { cart = cart.filter(i => i.id !== id); saveCart(); renderCart(); showToast('Item removed'); }
+    function removeFromCart(id) { cart = cart.filter(i => String(i.id) !== String(id)); saveCart(); renderCart(); showToast('Item removed'); }
     function clearCart() { cart = []; saveCart(); }
 
     function renderWishlist() {
@@ -2979,7 +3363,7 @@
         document.getElementById('wishlistContent').innerHTML = `<div class="empty-cart"><span class="empty-cart-emoji">❤️</span><h3 style="font-weight:800;color:var(--text);margin-bottom:0.5rem;">Your wishlist is empty</h3><p style="color:var(--text-mid);margin-bottom:1.5rem;">Save items you love here!</p><button class="btn-primary" onclick="showPage('shop')">Browse Products</button></div>`;
         return;
       }
-      const wishItems = PRODUCTS.filter(p => wishlist.includes(p.id));
+      const wishItems = PRODUCTS.filter(p => wishlist.includes(String(p.id)));
       document.getElementById('wishlistContent').innerHTML = `
     <div class="product-grid">
       ${wishItems.map(p => productCardHTML(p)).join('')}
@@ -3005,7 +3389,9 @@
         <span style="font-weight:700;">₹${(i.price * i.qty).toLocaleString()}</span>
       </div>
     `).join('')}
-    <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:800;padding-top:0.75rem;color:var(--lavender-deep);"><span>Total</span><span>₹${total.toLocaleString()}</span></div>`;
+    <div style="display:flex;justify-content:space-between;font-size:0.9rem;padding-top:0.75rem;color:var(--text-mid);"><span>Subtotal</span><span>₹${subtotal.toLocaleString()}</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:0.9rem;padding-top:0.25rem;color:var(--text-mid);"><span>Shipping</span><span>${shipping === 0 ? 'Free' : '₹' + shipping.toLocaleString()}</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:1.1rem;font-weight:800;padding-top:0.5rem;margin-top:0.5rem;border-top:1px dashed var(--border);color:var(--lavender-deep);"><span>Total</span><span>₹${total.toLocaleString()}</span></div>`;
     }
 
     function selectPayment(type) {
@@ -3057,8 +3443,26 @@
 
         const data = await response.json();
         if (data.status === "success") {
-          document.getElementById('orderModal').classList.add('open');
-          showToast('Order placed successfully 🧶💖');
+          // Save to local orders for portal
+          const localOrders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
+          const newId = data.orderId || ('SHA-' + Math.floor(100000 + Math.random() * 900000));
+          const newOrder = {
+            id: newId,
+            customerId: portalUser ? portalUser.email : (fn + ' ' + ln), // using name as id if not logged in
+            date: new Date().toISOString().split('T')[0],
+            items: cart.map(i => ({ name: i.name, qty: i.qty, price: i.price })),
+            status: 'pending',
+            paymentStatus: 'pending',
+            paymentRef: '',
+            trackingNo: '',
+            shipping: { name: fn + ' ' + ln, address: addr, city: city, state: '', pin: '', phone: ph }
+          };
+          localOrders.push(newOrder);
+          localStorage.setItem('cbs_orders', JSON.stringify(localOrders));
+          
+          showToast('Order placed! Redirecting... 🧶');
+          window.location.href = `payment.html?amount=${total}&note=${encodeURIComponent(newId)}`;
+          return;
         } else {
           showToast('⚠️ Error: ' + (data.message || 'Could not place order.'));
         }
@@ -3072,62 +3476,164 @@
     }
 
     function closeModal() { document.getElementById('orderModal').classList.remove('open'); }
-    function openWhatsApp() { window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent('Hi Sha! I found your shop and wanted to ask...')}`); }
 
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEMxXp66GUj2biODCvesLs43p6dM1yk4oOs4aTtpNidp6vPQnyZtxcQPpU5BsoevH1FA/exec";
 
-    async function trackOrder() {
-      const id = document.getElementById('trackId').value.trim();
-      if (!id) { showToast('Please enter an Order ID'); return; }
-      const btn = document.getElementById('trackBtn');
-      const resDiv = document.getElementById('trackResult');
-      btn.innerHTML = '⏳ Searching...'; btn.disabled = true; resDiv.style.display = 'none';
+/* =====================================================================
+   📦 CUSTOMER PORTAL LOGIC (Integrated from customer-portal.html)
+   ===================================================================== */
+let portalUser = null;
+const PORTAL_STATUS_STEPS = ['pending', 'confirmed', 'shipped', 'delivered'];
+const PORTAL_STEP_NAMES = ['Ordered', 'Confirmed', 'Shipped', 'Delivered'];
 
-      function showMockResult(orderId) {
-        resDiv.style.display = 'block';
-        if (orderId.toUpperCase() === 'ORD123') {
-          resDiv.innerHTML = `
-        <div style="font-size:0.85rem;color:var(--text-mid);margin-bottom:0.5rem;">Order <strong>ORD123</strong></div>
-        <div style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;color:var(--text);">Current Status: <span class="status-badge status-Shipped">Shipped</span></div>
-        <div style="font-size:0.9rem;margin-bottom:0.4rem;"><strong>Product:</strong> Camera Keychain x 1</div>
-        <div style="font-size:0.9rem;"><strong>Total:</strong> ₹250</div>
-      `;
-        } else if (orderId.toUpperCase() === 'ORD124') {
-          resDiv.innerHTML = `
-        <div style="font-size:0.85rem;color:var(--text-mid);margin-bottom:0.5rem;">Order <strong>ORD124</strong></div>
-        <div style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;color:var(--text);">Current Status: <span class="status-badge status-Pending">Pending</span></div>
-        <div style="font-size:0.9rem;margin-bottom:0.4rem;"><strong>Product:</strong> Boho Tote Bag x 1</div>
-        <div style="font-size:0.9rem;"><strong>Total:</strong> ₹2800</div>
-      `;
-        } else {
-          resDiv.innerHTML = `<div style="color:#d32f2f;font-weight:600;">⚠️ Order not found. Please check your Order ID and try again.</div>`;
-        }
-      }
+function initPortal() {
+  if (portalUser) {
+    document.getElementById('portal-login-view').style.display = 'none';
+    document.getElementById('portal-guest-result').style.display = 'none';
+    document.getElementById('portal-main-view').style.display = 'block';
+    renderPortalDashboard();
+  } else {
+    document.getElementById('portal-main-view').style.display = 'none';
+    document.getElementById('portal-guest-result').style.display = 'none';
+    document.getElementById('portal-login-view').style.display = 'block';
+  }
+}
 
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=track&orderId=${encodeURIComponent(id)}`);
-        const text = await res.text();
-        let data;
-        try { data = JSON.parse(text); } catch (e) {
-          showMockResult(id); return;
-        }
-        resDiv.style.display = 'block';
-        if (data.status === 'success') {
-          resDiv.innerHTML = `
-        <div style="font-size:0.85rem;color:var(--text-mid);margin-bottom:0.5rem;">Order <strong>${data.order.id}</strong></div>
-        <div style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;color:var(--text);">Current Status: <span class="status-badge status-${data.order.status || 'Pending'}">${data.order.status || 'Pending'}</span></div>
-        <div style="font-size:0.9rem;margin-bottom:0.4rem;"><strong>Product:</strong> ${data.order.product}</div>
-        <div style="font-size:0.9rem;"><strong>Total:</strong> ₹${Number(data.order.price).toLocaleString()}</div>
-      `;
-        } else {
-          resDiv.innerHTML = `<div style="color:#d32f2f;font-weight:600;">⚠️ ${data.message || 'Order not found.'}</div>`;
-        }
-      } catch (e) {
-        // fetch itself failed (file:// CORS block or no internet) — use mock
-        showMockResult(id);
-      }
-      finally { btn.innerHTML = '🔍 Track Order'; btn.disabled = false; }
-    }
+function switchPortalTab(tab) {
+  document.getElementById('tab-btn-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-btn-register').classList.toggle('active', tab === 'register');
+  document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+  document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+}
+
+function portalSignIn() {
+  const email = document.getElementById('portal-email').value.trim().toLowerCase();
+  const pass = document.getElementById('portal-pass').value;
+  const customers = JSON.parse(localStorage.getItem('cbs_customers') || '[]');
+  const user = customers.find(u => u.email === email && u.password === pass);
+
+  if (user) {
+    portalUser = user;
+    document.getElementById('login-err').style.display = 'none';
+    initPortal();
+    showToast(`Welcome back, ${user.name}! 👋`);
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+function portalRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const pass = document.getElementById('reg-pass').value;
+
+  if (!name || !email || !pass) { showToast('Please fill all fields'); return; }
+
+  const customers = JSON.parse(localStorage.getItem('cbs_customers') || '[]');
+  if (customers.find(u => u.email === email)) {
+    document.getElementById('reg-err').style.display = 'block';
+    return;
+  }
+
+  const newUser = { name, email, password: pass };
+  customers.push(newUser);
+  localStorage.setItem('cbs_customers', JSON.stringify(customers));
+  portalUser = newUser;
+  document.getElementById('reg-err').style.display = 'none';
+  initPortal();
+  showToast('Account created successfully! 🎉');
+}
+
+function portalSignOut() {
+  portalUser = null;
+  initPortal();
+}
+
+function renderPortalDashboard() {
+  const orders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
+  const userOrders = orders.filter(o => o.customerId === portalUser.email);
+  
+  document.getElementById('portal-user-name').textContent = portalUser.name.split(' ')[0];
+  document.getElementById('stat-total-orders').textContent = userOrders.length;
+  document.getElementById('stat-active-orders').textContent = userOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
+  document.getElementById('stat-completed-orders').textContent = userOrders.filter(o => o.status === 'delivered').length;
+
+  const list = document.getElementById('portal-orders-list');
+  const empty = document.getElementById('portal-empty-orders');
+
+  if (userOrders.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    list.innerHTML = userOrders.slice().reverse().map(o => renderOrderCard(o)).join('');
+  }
+}
+
+function portalGuestLookup() {
+  const id = document.getElementById('guest-order-id').value.trim().toUpperCase();
+  const orders = JSON.parse(localStorage.getItem('cbs_orders') || '[]');
+  const order = orders.find(o => o.id.toUpperCase() === id);
+
+  if (order) {
+    document.getElementById('guest-err').style.display = 'none';
+    document.getElementById('portal-login-view').style.display = 'none';
+    document.getElementById('portal-guest-result').style.display = 'block';
+    document.getElementById('guest-result-content').innerHTML = renderOrderCard(order, true);
+  } else {
+    document.getElementById('guest-err').style.display = 'block';
+  }
+}
+
+function backToPortalLogin() {
+  document.getElementById('portal-guest-result').style.display = 'none';
+  document.getElementById('portal-login-view').style.display = 'block';
+}
+
+function renderOrderCard(o, isGuest = false) {
+  const total = o.items.reduce((s, it) => s + (it.price * it.qty), 0);
+  const stepIdx = PORTAL_STATUS_STEPS.indexOf(o.status);
+  
+  let stepsHtml = '';
+  if (o.status !== 'cancelled') {
+    stepsHtml = `
+      <div class="track-steps">
+        ${PORTAL_STEP_NAMES.map((name, i) => `
+          <div class="track-step ${i <= stepIdx ? 'done' : ''}">
+            <div class="step-dot">${i < stepIdx ? '✓' : i + 1}</div>
+            <div class="step-label">${name}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="order-card">
+      <div class="order-card-header">
+        <span style="font-family:'DM Mono',monospace; font-weight:600;">${o.id}</span>
+        <span class="status-badge s-${o.status}">${o.status}</span>
+      </div>
+      <div class="order-card-body">
+        <div style="font-size:0.85rem; color:var(--text-mid); margin-bottom:10px;">Ordered on ${o.date}</div>
+        <div style="margin-bottom:12px;">
+          ${o.items.map(it => `<div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:4px;">
+            <span>${it.name} x ${it.qty}</span>
+            <span style="font-weight:600;">₹${(it.price * it.qty).toLocaleString()}</span>
+          </div>`).join('')}
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:10px;">
+          <span style="font-weight:700;">Total</span>
+          <span style="font-weight:800; color:var(--lavender-deep); font-size:1.1rem;">₹${total.toLocaleString()}</span>
+        </div>
+        ${stepsHtml}
+        ${o.trackingNo ? `<div style="margin-top:10px; font-size:0.8rem; background:var(--cream); padding:8px; border-radius:8px;">
+          🚚 <strong>Tracking:</strong> ${o.trackingNo}
+        </div>` : ''}
+      </div>
+    </div>
+  `;
+}
 
     async function loginAdmin() {
       const pin = document.getElementById('adminPin').value.trim();
@@ -3211,15 +3717,7 @@
       finally { btn.innerHTML = '🔄 Refresh'; btn.disabled = false; }
     }
 
-    function sendContactMessage() {
-      const name = document.getElementById('cname').value.trim();
-      const phone = document.getElementById('cphone').value.trim();
-      const msg = document.getElementById('cmessage').value.trim();
-      if (!name || !msg) { showToast('⚠️ Please fill in your name and message'); return; }
-      const waMsg = `Hi Sha!\n\n👤 Name: ${name}\n📞 Contact: ${phone || 'Not provided'}\n\n💬 Message:\n${msg}`;
-      window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(waMsg)}`, '_blank');
-      showToast('Opening WhatsApp... 💬');
-    }
+
 
     // FADE IN
     function setupFadeIns() {
